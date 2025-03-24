@@ -1640,7 +1640,7 @@ def LTLListfromCourse(code):
     return found
 
 
-def createSchedules():
+def generateSchedules():
     inp = input("Number of Individual classes (usually ~10): ")
     set_of_all_options = []
     if inp != "":
@@ -2011,7 +2011,7 @@ def makedatas():
     print(set_of_all_options)
 
 
-def generateSchedules():
+def manualSchedule():
     global savedschedulesJSON
     readSchedules()
     inp = input("input all crns for schedule ('stop' to stop): ")
@@ -2124,13 +2124,16 @@ def fieldSearch():
 
 
 def schedulemenu():
+    readSchedules()
     while True:
         print("\n\n")
         print("1. Read schedules from file")
-        print("2. Create new schedule")
+        print("2. Build new schedule")
         print("3. Display schedule")
         print("4. List schedules")
-        print("5. Back")
+        print("5. Output possible crns list")
+        print("6. Generate Schedules")
+        print("7. Back")
         inp = input("Make a Selection: ")
         if not inp.isnumeric():
             print("input must be a number")
@@ -2141,7 +2144,7 @@ def schedulemenu():
             case 1:
                 readSchedules()
             case 2:
-                generateSchedules()
+                manualSchedule()
             case 3:
                 for key in savedschedules:
                     print(savedschedules[key])
@@ -2157,6 +2160,10 @@ def schedulemenu():
                 for key in savedschedules:
                     print(savedschedules[key])
             case 5:
+                makedatas()
+            case 6:
+                generateSchedules()
+            case 7:
                 break
             case _:
                 print("invalid choice")
@@ -2166,7 +2173,7 @@ def mapmenu():
     while True:
         print("\n\n")
         print("1. Show a Course location on a map")
-        print("2. cycle through several courses on the map")
+        print("2. Cycle through several courses on the map")
         print("3. Show all Courses currently running")
         print("4. Back")
         inp = inp = input("Make a Selection: ")
@@ -2228,7 +2235,8 @@ def searchmenu():
         print("\n\n")
         print("1. Lookup course by crn")
         print("2. Search by field")
-        print("3. Exit")
+        print("3. List all Courses")
+        print("4. Exit")
         inp = input("Make a Selection: ")
         if not inp.isnumeric():
             print("input must be a number")
@@ -2241,6 +2249,36 @@ def searchmenu():
             case 2:
                 fieldSearch()
             case 3:
+                for key in allCourses:
+                    print(allCourses[key])
+                print(len(allCourses) + " courses")
+            case 4:
+                break
+            case _:
+                print("invalid choice")
+
+
+def courseAddingMenu():
+    while True:
+        print("\n\n")
+        print("1. Add courses manually (input each field)")
+        print("2. Add courses by page")
+        print("3. Exit")
+        inp = input("Make a Selection: ")
+        if inp[-23:] == "Ontario Tech University":
+            fastestAddCourses(True)
+            continue
+        if not inp.isnumeric():
+            print("input must be a number")
+            continue
+        else:
+            inp = int(inp)
+        match inp:
+            case 1:
+                addCourses()
+            case 2:
+                fastestAddCourses()
+            case 3:
                 break
             case _:
                 print("invalid choice")
@@ -2251,20 +2289,12 @@ readRooms()
 readSchedules()
 while True:
     print("\n\n")
-    print("1. Read courses from file")
-    print("2. Add courses manually")
-    print("3. Generate Course Options List")
-    print("4. Map")
-    print("5. Add courses by page")
-    print("6. Print list of courses")
-    print("7. Make me schedules")
-    print("8. Timetables")
-    print("9. Search courses")
-    print("10. Exit")
+    print("1. Add Courses")
+    print("2. Maps")
+    print("3. Schedules")
+    print("4. Search courses")
+    print("5. Exit")
     inp = input("Make a Selection: ")
-    if inp[-23:] == "Ontario Tech University":
-        fastestAddCourses(True)
-        continue
     if not inp.isnumeric():
         print("input must be a number")
         continue
@@ -2272,28 +2302,16 @@ while True:
         inp = int(inp)
     match inp:
         case 1:
-            readCourses()
+            courseAddingMenu()
         case 2:
-            addCourses()
-        case 3:
-            makedatas()
-        case 4:
             mapmenu()
-        case 5:
-            fastestAddCourses()
-        case 6:
-            for key in allCourses:
-                print(allCourses[key])
-            print(allCourses.__len__())
-        case 7:
-            createSchedules()
-        case 8:
+        case 3:
             schedulemenu()
-        case 9:
+        case 4:
             searchmenu()
-        case 10:
+        case 5:
             break
-        case 11:
+        case 6:
             removeDupes()
         case _:
             print("invalid choice")
