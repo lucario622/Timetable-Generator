@@ -1,0 +1,998 @@
+[
+    {
+        "crn": 70001,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "MacKay, Sarah",
+            "Stamatiou, George"
+        ],
+        "maxpop": 190,
+        "curpop": 117,
+        "code": "BIOL1020U",
+        "title": "Biology II",
+        "room": "SIR2060",
+        "times": {
+            "days": [
+                "T",
+                "F"
+            ],
+            "time": 1540,
+            "length": 80,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70002,
+        "type": "Lecture",
+        "section": 2,
+        "instructor": [
+            "MacKay, Sarah",
+            "Stamatiou, George"
+        ],
+        "maxpop": 190,
+        "curpop": 165,
+        "code": "BIOL1020U",
+        "title": "Biology II",
+        "room": "BIT2080",
+        "times": {
+            "days": [
+                "M",
+                "W"
+            ],
+            "time": 1240,
+            "length": 80,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70003,
+        "type": "Laboratory",
+        "section": 3,
+        "instructor": [],
+        "maxpop": 24,
+        "curpop": 23,
+        "code": "BIOL1020U",
+        "title": "Biology II",
+        "room": "BIT4095",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 810,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70004,
+        "type": "Laboratory",
+        "section": 4,
+        "instructor": [],
+        "maxpop": 24,
+        "curpop": 22,
+        "code": "BIOL1020U",
+        "title": "Biology II",
+        "room": "BIT4095",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 810,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70005,
+        "type": "Laboratory",
+        "section": 5,
+        "instructor": [],
+        "maxpop": 24,
+        "curpop": 24,
+        "code": "BIOL1020U",
+        "title": "Biology II",
+        "room": "BIT4095",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 1240,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70006,
+        "type": "Laboratory",
+        "section": 6,
+        "instructor": [],
+        "maxpop": 24,
+        "curpop": 19,
+        "code": "BIOL1020U",
+        "title": "Biology II",
+        "room": "BIT4095",
+        "times": {
+            "days": [
+                "W"
+            ],
+            "time": 810,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70007,
+        "type": "Laboratory",
+        "section": 7,
+        "instructor": [],
+        "maxpop": 24,
+        "curpop": 24,
+        "code": "BIOL1020U",
+        "title": "Biology II",
+        "room": "BIT4095",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 1240,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70008,
+        "type": "Laboratory",
+        "section": 8,
+        "instructor": [],
+        "maxpop": 24,
+        "curpop": 24,
+        "code": "BIOL1020U",
+        "title": "Biology II",
+        "room": "BIT4095",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 1240,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70009,
+        "type": "Laboratory",
+        "section": 9,
+        "instructor": [],
+        "maxpop": 24,
+        "curpop": 15,
+        "code": "BIOL1020U",
+        "title": "Biology II",
+        "room": "BIT4095",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 810,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70021,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "Bonetta, Dario",
+            "Stamatiou, George"
+        ],
+        "maxpop": 138,
+        "curpop": 120,
+        "code": "BIOL2020U",
+        "title": "Genetics & Molecular Biology",
+        "room": "UA1120",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 1710,
+            "length": 170,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70022,
+        "type": "Laboratory",
+        "section": 2,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 23,
+        "code": "BIOL2020U",
+        "title": "Genetics & Molecular Biology",
+        "room": "BIT4050",
+        "times": {
+            "days": [
+                "M"
+            ],
+            "time": 1240,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70023,
+        "type": "Laboratory",
+        "section": 3,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 22,
+        "code": "BIOL2020U",
+        "title": "Genetics & Molecular Biology",
+        "room": "BIT4050",
+        "times": {
+            "days": [
+                "M"
+            ],
+            "time": 1240,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70034,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "Salim, Lidya",
+            "Stamatiou, George"
+        ],
+        "maxpop": 132,
+        "curpop": 89,
+        "code": "BIOL2050U",
+        "title": "Human Anatomy",
+        "room": "UA1120",
+        "times": {
+            "days": [
+                "M",
+                "W"
+            ],
+            "time": 1840,
+            "length": 80,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70035,
+        "type": "Laboratory",
+        "section": 2,
+        "instructor": [],
+        "maxpop": 22,
+        "curpop": 7,
+        "code": "BIOL2050U",
+        "title": "Human Anatomy",
+        "room": "BIT4050",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 810,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70036,
+        "type": "Laboratory",
+        "section": 3,
+        "instructor": [],
+        "maxpop": 22,
+        "curpop": 4,
+        "code": "BIOL2050U",
+        "title": "Human Anatomy",
+        "room": "BIT4050",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 810,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70037,
+        "type": "Laboratory",
+        "section": 4,
+        "instructor": [],
+        "maxpop": 22,
+        "curpop": 22,
+        "code": "BIOL2050U",
+        "title": "Human Anatomy",
+        "room": "BIT4050",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 1240,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70040,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "Stamatiou, George",
+            "Murugathasan, Mayo"
+        ],
+        "maxpop": 80,
+        "curpop": 44,
+        "code": "BIOL3040U",
+        "title": "Animal Physiology",
+        "room": "SHA133",
+        "times": {
+            "days": [
+                "M",
+                "W"
+            ],
+            "time": 1840,
+            "length": 80,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70041,
+        "type": "Laboratory",
+        "section": 2,
+        "instructor": [],
+        "maxpop": 20,
+        "curpop": 12,
+        "code": "BIOL3040U",
+        "title": "Animal Physiology",
+        "room": "BIT4085",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 810,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70042,
+        "type": "Laboratory",
+        "section": 3,
+        "instructor": [],
+        "maxpop": 20,
+        "curpop": 18,
+        "code": "BIOL3040U",
+        "title": "Animal Physiology",
+        "room": "BIT4085",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 1240,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70043,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "Kirkwood, Andrea"
+        ],
+        "maxpop": 60,
+        "curpop": 52,
+        "code": "BIOL3620U",
+        "title": "Conservation Biology",
+        "room": "UA3140",
+        "times": {
+            "days": [
+                "M"
+            ],
+            "time": 940,
+            "length": 80,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70045,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "Bardin, Sylvie"
+        ],
+        "maxpop": 120,
+        "curpop": 64,
+        "code": "BIOL3650U",
+        "title": "Fundamentals Of Nutrition",
+        "room": "SIR2020",
+        "times": {
+            "days": [
+                "M",
+                "R"
+            ],
+            "time": 1110,
+            "length": 80,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70047,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "Gallant, Sabrina"
+        ],
+        "maxpop": 75,
+        "curpop": 14,
+        "code": "BIOL4050U",
+        "title": "Adv. Topics in Pharm. Biotech.",
+        "room": "UA1240",
+        "times": {
+            "days": [
+                "M"
+            ],
+            "time": 1110,
+            "length": 170,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70048,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "Strap, Janice"
+        ],
+        "maxpop": 35,
+        "curpop": 4,
+        "code": "BIOL4060U",
+        "title": "Funct. Genomic & Proteomics",
+        "room": "UA3230",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 1110,
+            "length": 170,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70049,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "Olaveson, Mary"
+        ],
+        "maxpop": 100,
+        "curpop": 91,
+        "code": "BIOL4080U",
+        "title": "Bioethics",
+        "room": "UP1502",
+        "times": {
+            "days": [
+                "T",
+                "F"
+            ],
+            "time": 810,
+            "length": 80,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70050,
+        "type": "Thesis/Project",
+        "section": 1,
+        "instructor": [
+            "Bailey, Robert"
+        ],
+        "maxpop": 20,
+        "curpop": 13,
+        "code": "BIOL4420U",
+        "title": "Biology Thesis Project II",
+        "room": "None",
+        "times": {
+            "days": [],
+            "time": 0,
+            "length": 0,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70052,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "Hucaluk, Cristen"
+        ],
+        "maxpop": 150,
+        "curpop": 74,
+        "code": "CHEM1020U",
+        "title": "Chemistry II",
+        "room": "UA1120",
+        "times": {
+            "days": [
+                "M",
+                "W"
+            ],
+            "time": 810,
+            "length": 80,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70053,
+        "type": "Lecture",
+        "section": 2,
+        "instructor": [
+            "Hucaluk, Cristen"
+        ],
+        "maxpop": 225,
+        "curpop": 202,
+        "code": "CHEM1020U",
+        "title": "Chemistry II",
+        "room": "BIT2080",
+        "times": {
+            "days": [
+                "M",
+                "R"
+            ],
+            "time": 1540,
+            "length": 80,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70054,
+        "type": "Laboratory",
+        "section": 3,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 18,
+        "code": "CHEM1020U",
+        "title": "Chemistry II",
+        "room": "UA3680",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 810,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70055,
+        "type": "Laboratory",
+        "section": 4,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 16,
+        "code": "CHEM1020U",
+        "title": "Chemistry II",
+        "room": "UA3680",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 1240,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70057,
+        "type": "Laboratory",
+        "section": 6,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 11,
+        "code": "CHEM1020U",
+        "title": "Chemistry II",
+        "room": "UA3680",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 810,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70058,
+        "type": "Laboratory",
+        "section": 7,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 15,
+        "code": "CHEM1020U",
+        "title": "Chemistry II",
+        "room": "UA3680",
+        "times": {
+            "days": [
+                "W"
+            ],
+            "time": 810,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70059,
+        "type": "Laboratory",
+        "section": 8,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 19,
+        "code": "CHEM1020U",
+        "title": "Chemistry II",
+        "room": "UA3680",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 1240,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70060,
+        "type": "Laboratory",
+        "section": 9,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 23,
+        "code": "CHEM1020U",
+        "title": "Chemistry II",
+        "room": "UA3680",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 1240,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70061,
+        "type": "Laboratory",
+        "section": 10,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 22,
+        "code": "CHEM1020U",
+        "title": "Chemistry II",
+        "room": "UA3680",
+        "times": {
+            "days": [
+                "W"
+            ],
+            "time": 1240,
+            "length": 170,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70066,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "Mavilla, Stephanie"
+        ],
+        "maxpop": 250,
+        "curpop": 250,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "BIT2080",
+        "times": {
+            "days": [
+                "W",
+                "F"
+            ],
+            "time": 1540,
+            "length": 80,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70067,
+        "type": "Lecture",
+        "section": 2,
+        "instructor": [
+            "Mavilla, Stephanie"
+        ],
+        "maxpop": 250,
+        "curpop": 248,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "UA1350",
+        "times": {
+            "days": [
+                "M",
+                "R"
+            ],
+            "time": 1540,
+            "length": 80,
+            "biweekly": 0
+        }
+    },
+    {
+        "crn": 70068,
+        "type": "Laboratory",
+        "section": 3,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 23,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "UA3480",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 1110,
+            "length": 110,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70069,
+        "type": "Laboratory",
+        "section": 4,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 23,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "UA3480",
+        "times": {
+            "days": [
+                "W"
+            ],
+            "time": 1410,
+            "length": 110,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70070,
+        "type": "Laboratory",
+        "section": 5,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 22,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "UA3480",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 1410,
+            "length": 110,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70071,
+        "type": "Laboratory",
+        "section": 6,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 23,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "UA3480",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 1410,
+            "length": 110,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70072,
+        "type": "Laboratory",
+        "section": 7,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 23,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "UA3480",
+        "times": {
+            "days": [
+                "W"
+            ],
+            "time": 1110,
+            "length": 110,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70073,
+        "type": "Laboratory",
+        "section": 8,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 21,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "UA3480",
+        "times": {
+            "days": [
+                "M"
+            ],
+            "time": 810,
+            "length": 110,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70074,
+        "type": "Laboratory",
+        "section": 9,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 23,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "UA3480",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 810,
+            "length": 110,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70075,
+        "type": "Laboratory",
+        "section": 10,
+        "instructor": [],
+        "maxpop": 23,
+        "curpop": 23,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "UA3480",
+        "times": {
+            "days": [
+                "M"
+            ],
+            "time": 810,
+            "length": 110,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70076,
+        "type": "Tutorial",
+        "section": 11,
+        "instructor": [],
+        "maxpop": 36,
+        "curpop": 36,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "SHA249",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 1410,
+            "length": 80,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70077,
+        "type": "Tutorial",
+        "section": 12,
+        "instructor": [],
+        "maxpop": 36,
+        "curpop": 35,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "SHA249",
+        "times": {
+            "days": [
+                "R"
+            ],
+            "time": 1410,
+            "length": 80,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70078,
+        "type": "Tutorial",
+        "section": 13,
+        "instructor": [],
+        "maxpop": 36,
+        "curpop": 34,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "UA3230",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 1540,
+            "length": 80,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70079,
+        "type": "Tutorial",
+        "section": 14,
+        "instructor": [],
+        "maxpop": 36,
+        "curpop": 35,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "UA3230",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 1540,
+            "length": 80,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70080,
+        "type": "Tutorial",
+        "section": 15,
+        "instructor": [],
+        "maxpop": 36,
+        "curpop": 34,
+        "code": "CHEM1800U",
+        "title": "Chemistry for Engineers",
+        "room": "SHA356",
+        "times": {
+            "days": [
+                "T"
+            ],
+            "time": 940,
+            "length": 80,
+            "biweekly": 1
+        }
+    },
+    {
+        "crn": 70081,
+        "type": "Lecture",
+        "section": 1,
+        "instructor": [
+            "Trevani, Liliana"
+        ],
+        "maxpop": 30,
+        "curpop": 20,
+        "code": "CHEM2040U",
+        "title": "Thermodynamics and Kinetics",
+        "room": "SHA249",
+        "times": {
+            "days": [
+                "T",
+                "R"
+            ],
+            "time": 1110,
+            "length": 80,
+            "biweekly": 0
+        }
+    }
+]

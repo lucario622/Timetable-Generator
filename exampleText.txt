@@ -1,0 +1,2186 @@
+Ontario Tech University
+Fischer, Lucas
+StudentRegistrationSelect a TermBrowse Classes
+Browse Classes
+Search Results 1853 Classes
+Term: Winter 
+Search Again
+Subject	Course Number	Title	Schedule Type	Section	CRN	Meeting Times	Linked Sections	
+BIOL	1020U	Biology II	Lecture	001	70001	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Software and Informatics Resea Room: 2060 Start Date: 01/06/ End Date: 04/04/
+Friday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Software and Informatics Resea Room: 2060 Start Date: 01/06/ End Date: 04/04/
+View Linked
+BIOL	1020U	Biology II	Lecture	002	70002	
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 02:00 PM Type: Class Building: Business and IT Building (UB) Room: UB2080 Start Date: 01/06/ End Date: 04/04/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 02:00 PM Type: Class Building: Business and IT Building (UB) Room: UB2080 Start Date: 01/06/ End Date: 04/04/
+View Linked
+BIOL	1020U	Biology II	Laboratory	003	70003	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/28/ End Date: 01/28/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 02/11/ End Date: 02/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/14/ End Date: 01/14/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/04/ End Date: 03/04/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/18/ End Date: 03/18/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 04/01/ End Date: 04/01/
+View Linked
+BIOL	1020U	Biology II	Laboratory	004	70004	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/20/ End Date: 03/20/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/06/ End Date: 03/06/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 04/03/ End Date: 04/03/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/16/ End Date: 01/16/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/30/ End Date: 01/30/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 02/13/ End Date: 02/13/
+View Linked
+BIOL	1020U	Biology II	Laboratory	005	70005	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 02/11/ End Date: 02/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/04/ End Date: 03/04/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/18/ End Date: 03/18/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 04/01/ End Date: 04/01/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/14/ End Date: 01/14/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/28/ End Date: 01/28/
+View Linked
+BIOL	1020U	Biology II	Laboratory	006	70006	
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 02/05/ End Date: 02/05/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 02/26/ End Date: 02/26/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/12/ End Date: 03/12/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/26/ End Date: 03/26/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/22/ End Date: 01/22/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/08/ End Date: 01/08/
+View Linked
+BIOL	1020U	Biology II	Laboratory	007	70007	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 02/06/ End Date: 02/06/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/27/ End Date: 03/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 02/27/ End Date: 02/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/13/ End Date: 03/13/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/23/ End Date: 01/23/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/09/ End Date: 01/09/
+View Linked
+BIOL	1020U	Biology II	Laboratory	008	70008	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 02/13/ End Date: 02/13/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/30/ End Date: 01/30/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/16/ End Date: 01/16/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/20/ End Date: 03/20/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/06/ End Date: 03/06/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 04/03/ End Date: 04/03/
+View Linked
+BIOL	1020U	Biology II	Laboratory	009	70009	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/11/ End Date: 03/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/07/ End Date: 01/07/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 02/04/ End Date: 02/04/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 03/25/ End Date: 03/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 01/21/ End Date: 01/21/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4095 Start Date: 02/25/ End Date: 02/25/
+View Linked
+BIOL	2020U	Genetics & Molecular Biology	Lecture	001	70021	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+05:10 PM - 08:00 PM Type: Class Building: Science Building (UA) Room: UA1120 Start Date: 01/06/ End Date: 04/04/
+View Linked
+BIOL	2020U	Genetics & Molecular Biology	Laboratory	002	70022	
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 02/24/ End Date: 02/24/
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 01/06/ End Date: 01/06/
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 03/10/ End Date: 03/10/
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 01/20/ End Date: 01/20/
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 03/24/ End Date: 03/24/
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 02/03/ End Date: 02/03/
+View Linked
+BIOL	2020U	Genetics & Molecular Biology	Laboratory	003	70023	
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 01/27/ End Date: 01/27/
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 02/10/ End Date: 02/10/
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 03/31/ End Date: 03/31/
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 03/17/ End Date: 03/17/
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 03/03/ End Date: 03/03/
+Monday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 01/13/ End Date: 01/13/
+View Linked
+BIOL	2050U	Human Anatomy	Lecture	001	70034	
+Monday
+S
+M
+T
+W
+T
+F
+S
+06:40 PM - 08:00 PM Type: Class Building: Science Building (UA) Room: UA1120 Start Date: 01/06/ End Date: 04/04/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+06:40 PM - 08:00 PM Type: Class Building: Science Building (UA) Room: UA1120 Start Date: 01/06/ End Date: 04/04/
+View Linked
+BIOL	2050U	Human Anatomy	Laboratory	002	70035	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 01/23/ End Date: 01/23/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 03/27/ End Date: 03/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 02/27/ End Date: 02/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 03/13/ End Date: 03/13/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 01/09/ End Date: 01/09/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 02/06/ End Date: 02/06/
+View Linked
+BIOL	2050U	Human Anatomy	Laboratory	003	70036	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 01/16/ End Date: 01/16/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 04/03/ End Date: 04/03/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 03/06/ End Date: 03/06/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 02/13/ End Date: 02/13/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 03/20/ End Date: 03/20/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 01/30/ End Date: 01/30/
+View Linked
+BIOL	2050U	Human Anatomy	Laboratory	004	70037	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 01/30/ End Date: 01/30/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 03/20/ End Date: 03/20/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 03/06/ End Date: 03/06/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 02/13/ End Date: 02/13/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 01/16/ End Date: 01/16/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4050 Start Date: 04/03/ End Date: 04/03/
+View Linked
+BIOL	3040U	Animal Physiology	Lecture	001	70040	
+Monday
+S
+M
+T
+W
+T
+F
+S
+06:40 PM - 08:00 PM Type: Class Building: Shawenjigewining Hall Room: 133 Start Date: 01/06/ End Date: 04/04/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+06:40 PM - 08:00 PM Type: Class Building: Shawenjigewining Hall Room: 133 Start Date: 01/06/ End Date: 04/04/
+View Linked
+BIOL	3040U	Animal Physiology	Laboratory	002	70041	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 01/09/ End Date: 01/09/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 03/27/ End Date: 03/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 01/23/ End Date: 01/23/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 02/27/ End Date: 02/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 02/06/ End Date: 02/06/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 03/13/ End Date: 03/13/
+View Linked
+BIOL	3040U	Animal Physiology	Laboratory	003	70042	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 01/09/ End Date: 01/09/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 02/27/ End Date: 02/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 03/13/ End Date: 03/13/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 03/27/ End Date: 03/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 02/06/ End Date: 02/06/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Business and IT Building (UB) Room: UB4085 Start Date: 01/23/ End Date: 01/23/
+View Linked
+BIOL	3620U	Conservation Biology	Lecture	001	70043	
+Monday
+S
+M
+T
+W
+T
+F
+S
+09:40 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3140 Start Date: 01/06/ End Date: 04/04/
+BIOL	3650U	Fundamentals Of Nutrition	Lecture	001	70045	
+Monday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 12:30 PM Type: Class Building: Software and Informatics Resea Room: 2020 Start Date: 01/06/ End Date: 04/04/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 12:30 PM Type: Class Building: Software and Informatics Resea Room: 2020 Start Date: 01/06/ End Date: 04/04/
+BIOL	4050U	Adv. Topics in Pharm. Biotech.	Lecture	001	70047	
+Monday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 02:00 PM Type: Class Building: Science Building (UA) Room: UA1240 Start Date: 01/06/ End Date: 04/04/
+BIOL	4060U	Funct. Genomic & Proteomics	Lecture	001	70048	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 02:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 01/06/ End Date: 04/04/
+BIOL	4080U	Bioethics	Lecture	001	70049	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 09:30 AM Type: Class Building: University Pavilion Room: UP1502 Start Date: 01/06/ End Date: 04/04/
+Friday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 09:30 AM Type: Class Building: University Pavilion Room: UP1502 Start Date: 01/06/ End Date: 04/04/
+BIOL	4420U	Biology Thesis Project II	Thesis/Project	001	70050	
+None
+S
+M
+T
+W
+T
+F
+S
+ - Type: Class Building: None Room: None Start Date: 01/06/ End Date: 04/04/
+CHEM	1020U	Chemistry II	Lecture	001	70052	
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 09:30 AM Type: Class Building: Science Building (UA) Room: UA1120 Start Date: 01/06/ End Date: 04/04/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 09:30 AM Type: Class Building: Science Building (UA) Room: UA1120 Start Date: 01/06/ End Date: 04/04/
+View Linked
+CHEM	1020U	Chemistry II	Lecture	002	70053	
+Monday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Business and IT Building (UB) Room: UB2080 Start Date: 01/06/ End Date: 04/04/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Business and IT Building (UB) Room: UB2080 Start Date: 01/06/ End Date: 04/04/
+View Linked
+CHEM	1020U	Chemistry II	Laboratory	003	70054	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/07/ End Date: 01/07/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/25/ End Date: 03/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/11/ End Date: 03/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 02/04/ End Date: 02/04/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 02/25/ End Date: 02/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/21/ End Date: 01/21/
+View Linked
+CHEM	1020U	Chemistry II	Laboratory	004	70055	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 02/25/ End Date: 02/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/07/ End Date: 01/07/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/21/ End Date: 01/21/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/25/ End Date: 03/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/11/ End Date: 03/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 02/04/ End Date: 02/04/
+View Linked
+CHEM	1020U	Chemistry II	Laboratory	006	70057	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/28/ End Date: 01/28/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 04/01/ End Date: 04/01/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 02/11/ End Date: 02/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/18/ End Date: 03/18/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/14/ End Date: 01/14/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/04/ End Date: 03/04/
+View Linked
+CHEM	1020U	Chemistry II	Laboratory	007	70058	
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/12/ End Date: 03/12/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 02/05/ End Date: 02/05/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/26/ End Date: 03/26/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 02/26/ End Date: 02/26/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/22/ End Date: 01/22/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 11:00 AM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/08/ End Date: 01/08/
+View Linked
+CHEM	1020U	Chemistry II	Laboratory	008	70059	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/28/ End Date: 01/28/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 02/11/ End Date: 02/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/18/ End Date: 03/18/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 04/01/ End Date: 04/01/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/04/ End Date: 03/04/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/14/ End Date: 01/14/
+View Linked
+CHEM	1020U	Chemistry II	Laboratory	009	70060	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/23/ End Date: 01/23/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/27/ End Date: 03/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 02/27/ End Date: 02/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/13/ End Date: 03/13/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/09/ End Date: 01/09/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 02/06/ End Date: 02/06/
+View Linked
+CHEM	1020U	Chemistry II	Laboratory	010	70061	
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/15/ End Date: 01/15/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 02/12/ End Date: 02/12/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 04/02/ End Date: 04/02/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 01/29/ End Date: 01/29/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/05/ End Date: 03/05/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+12:40 PM - 03:30 PM Type: Class Building: Science Building (UA) Room: UA3680 Start Date: 03/19/ End Date: 03/19/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Lecture	001	70066	
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Business and IT Building (UB) Room: UB2080 Start Date: 01/06/ End Date: 04/04/
+Friday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Business and IT Building (UB) Room: UB2080 Start Date: 01/06/ End Date: 04/04/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Lecture	002	70067	
+Monday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA1350 Start Date: 01/06/ End Date: 04/04/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA1350 Start Date: 01/06/ End Date: 04/04/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Laboratory	003	70068	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/25/ End Date: 02/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/25/ End Date: 03/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/21/ End Date: 01/21/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/11/ End Date: 03/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/04/ End Date: 02/04/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/07/ End Date: 01/07/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Laboratory	004	70069	
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/26/ End Date: 03/26/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/08/ End Date: 01/08/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/26/ End Date: 02/26/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/12/ End Date: 03/12/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/22/ End Date: 01/22/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/05/ End Date: 02/05/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Laboratory	005	70070	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/13/ End Date: 02/13/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 04/03/ End Date: 04/03/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/16/ End Date: 01/16/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/20/ End Date: 03/20/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/06/ End Date: 03/06/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/30/ End Date: 01/30/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Laboratory	006	70071	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/25/ End Date: 02/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/21/ End Date: 01/21/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/07/ End Date: 01/07/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/25/ End Date: 03/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/11/ End Date: 03/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 04:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/04/ End Date: 02/04/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Laboratory	007	70072	
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/12/ End Date: 02/12/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/05/ End Date: 03/05/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/15/ End Date: 01/15/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 04/02/ End Date: 04/02/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/19/ End Date: 03/19/
+Wednesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 01:00 PM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/29/ End Date: 01/29/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Laboratory	008	70073	
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/13/ End Date: 01/13/
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/03/ End Date: 03/03/
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/27/ End Date: 01/27/
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/31/ End Date: 03/31/
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/17/ End Date: 03/17/
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/10/ End Date: 02/10/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Laboratory	009	70074	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/09/ End Date: 01/09/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/27/ End Date: 03/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/06/ End Date: 02/06/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/13/ End Date: 03/13/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/23/ End Date: 01/23/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/27/ End Date: 02/27/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Laboratory	010	70075	
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/20/ End Date: 01/20/
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/10/ End Date: 03/10/
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/24/ End Date: 02/24/
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 03/24/ End Date: 03/24/
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 02/03/ End Date: 02/03/
+Monday
+S
+M
+T
+W
+T
+F
+S
+08:10 AM - 10:00 AM Type: Class Building: Science Building (UA) Room: UA3480 Start Date: 01/06/ End Date: 01/06/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Tutorial	011	70076	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 02/13/ End Date: 02/13/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 03/20/ End Date: 03/20/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 03/06/ End Date: 03/06/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 04/03/ End Date: 04/03/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 01/30/ End Date: 01/30/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 01/16/ End Date: 01/16/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Tutorial	012	70077	
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 02/06/ End Date: 02/06/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 01/09/ End Date: 01/09/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 01/23/ End Date: 01/23/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 02/27/ End Date: 02/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 03/27/ End Date: 03/27/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+02:10 PM - 03:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 03/13/ End Date: 03/13/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Tutorial	013	70078	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 03/25/ End Date: 03/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 03/11/ End Date: 03/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 02/04/ End Date: 02/04/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 01/07/ End Date: 01/07/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 01/21/ End Date: 01/21/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 02/25/ End Date: 02/25/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Tutorial	014	70079	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 04/01/ End Date: 04/01/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 02/11/ End Date: 02/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 03/04/ End Date: 03/04/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 03/18/ End Date: 03/18/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 01/28/ End Date: 01/28/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+03:40 PM - 05:00 PM Type: Class Building: Science Building (UA) Room: UA3230 Start Date: 01/14/ End Date: 01/14/
+View Linked
+CHEM	1800U	Chemistry for Engineers	Tutorial	015	70080	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+09:40 AM - 11:00 AM Type: Class Building: Shawenjigewining Hall Room: 356 Start Date: 01/07/ End Date: 01/07/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+09:40 AM - 11:00 AM Type: Class Building: Shawenjigewining Hall Room: 356 Start Date: 03/11/ End Date: 03/11/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+09:40 AM - 11:00 AM Type: Class Building: Shawenjigewining Hall Room: 356 Start Date: 02/04/ End Date: 02/04/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+09:40 AM - 11:00 AM Type: Class Building: Shawenjigewining Hall Room: 356 Start Date: 03/25/ End Date: 03/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+09:40 AM - 11:00 AM Type: Class Building: Shawenjigewining Hall Room: 356 Start Date: 02/25/ End Date: 02/25/
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+09:40 AM - 11:00 AM Type: Class Building: Shawenjigewining Hall Room: 356 Start Date: 01/21/ End Date: 01/21/
+View Linked
+CHEM	2040U	Thermodynamics and Kinetics	Lecture	001	70081	
+Tuesday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 12:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 01/06/ End Date: 04/04/
+Thursday
+S
+M
+T
+W
+T
+F
+S
+11:10 AM - 12:30 PM Type: Class Building: Shawenjigewining Hall Room: 249 Start Date: 01/06/ End Date: 04/04/
+View Linked
+Page
+1
+of38Per Page
+50
+Records: 1853
