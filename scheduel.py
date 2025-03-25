@@ -671,15 +671,24 @@ class Schedule:
                     print("\t", course)
 
 
-def minutes2hours(minutes):
+def minutes2hours(minutes:int):
+    """
+    Takes number of minutes and returns int with last 2 digits as minutes and all other digits as hours (e.g. 150->230 (2 hours 30 minutes))
+    """
     return ((minutes // 60) * 100) + (minutes % 60)
 
 
 def getTime(course):
+    """
+    extract time from course, used to sort by time
+    """
     return course.times.time
 
 
 def miltoreadable(time: int):
+    """
+    Takes 24h time as integer and returns 12h time with colon (e.g. 1540->3:40)
+    """
     if time % 100 == 60:
         time += 40
     if time >= 1300:
@@ -689,7 +698,13 @@ def miltoreadable(time: int):
 
 
 def makeText(
-    window: object, text: str, color: str, x: int, y: int, size: int = 15, rot: int = 0
+    window: pygame.Surface,
+    text: str,
+    color: str,
+    x: int,
+    y: int,
+    size: int = 15,
+    rot: int = 0,
 ):
     if size == 15:
         txt = text_font.render(text, True, color)
@@ -704,7 +719,13 @@ def makeText(
 
 
 def makeTextCent(
-    window: object, text: str, color: str, x: int, y: int, size: int = 15, rot: int = 0
+    window: pygame.Surface,
+    text: str,
+    color: str,
+    x: int,
+    y: int,
+    size: int = 15,
+    rot: int = 0,
 ):
     if size == 15:
         txt = text_font.render(text, True, color)
@@ -719,7 +740,7 @@ def makeTextCent(
 
 
 def makeArcText(
-    window: object,
+    window: pygame.Surface,
     text: str,
     color: str,
     x: int,
@@ -764,7 +785,7 @@ campusmap = CampusMap(rooms)
 
 def readRooms():
     """
-    Reads dictionary of rooms and coordinates
+    Reads dictionary of rooms and coordinates from "rooms.json"
     """
     global campusmap
     global roomsJSON
@@ -780,7 +801,7 @@ allCoursesJSON = []
 
 def readCourses():
     """
-    Reads list of objects from file into dictionary of objects
+    Reads list of courses from course file into dictionary of courses
     """
     global allCoursesJSON
     global allCourses
@@ -813,6 +834,9 @@ def readCourses():
 
 
 def removeDupes():
+    """
+    Removes duplicate crns from allCourses list
+    """
     global allCoursesJSON
     global allCourses
     allCoursesJSON = []
@@ -840,7 +864,10 @@ def removeDupes():
         json.dump(allCoursesJSON, f)
 
 
-def longtoshortday(longday):
+def longtoshortday(longday: str):
+    """
+    Takes full name of day of week and returns the letter code (first letter of day except thursday is R)
+    """
     days = [
         ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
         ["M", "T", "W", "R", "F"],
@@ -857,7 +884,10 @@ def lastIndexOf(str: str, target: str):
     return len(str) - str[::-1].index(target[::-1]) - len(target)
 
 
-def timerangetotimeandlength(timerange):
+def timerangetotimeandlength(timerange: str):
+    """
+    Takes a string of format '03:40 PM - 05:00 PM' and returns the start time and minute length (1540,80)
+    """
     time = 0
     length = 0
     if len(timerange) < 10:
@@ -884,6 +914,9 @@ def timerangetotimeandlength(timerange):
 
 
 def fastestAddCourses(skip=False):
+    """
+    Allows you to continuously paste pages into the console without waiting for the previous to finish
+    """
     line = " "
     content = []
     if skip:
@@ -1072,6 +1105,10 @@ def fastestAddCourses(skip=False):
 
 
 def fastAddCourses():
+    """
+    Takes a page of courses into the saved courses
+    (No longer used)
+    """
     while True:
         line = " "
         content = []
@@ -1231,6 +1268,9 @@ savedschedulesJSON = []
 
 
 def readSchedules():
+    """
+    Fills savedschedulesJSON and savedschedules with content from Schedules.json
+    """
     global savedschedulesJSON
     with open("Schedules.json", "r") as f:
         savedschedulesJSON = json.load(f)
@@ -1782,7 +1822,7 @@ class date:
 all_valid_schedules_json = []
 
 
-def optionstoschedules(set_of_options:list[list[str]]):
+def optionstoschedules(set_of_options: list[list[str]]):
     """
     Terrible function that looks like it was made by a highschool computer science student who has something against recursion (it was :3)
 
@@ -1951,7 +1991,9 @@ def optionstoschedules(set_of_options:list[list[str]]):
                                             for i in range(len(crnlist)):
                                                 crnlist[i] = allCourses[crnlist[i]]
                                             schedule = Schedule(crnlist)
-                                            if (schedule.checkValid()):  # and schedule.lunchBreaks() == 5:
+                                            if (
+                                                schedule.checkValid()
+                                            ):  # and schedule.lunchBreaks() == 5:
                                                 validcount += 1
                                                 all_valid_schedules.append(schedule)
                                                 all_valid_schedules_json.append(
@@ -1959,28 +2001,46 @@ def optionstoschedules(set_of_options:list[list[str]]):
                                                 )
                                             scale = 10
                                             if (
-                                                completed % math.ceil(total / scale) == 0
-                                                or progress + 1 < completed * scale / total
+                                                completed % math.ceil(total / scale)
+                                                == 0
+                                                or progress + 1
+                                                < completed * scale / total
                                             ):
-                                                progress = (math.ceil(completed * scale / total) - 1)
+                                                progress = (
+                                                    math.ceil(completed * scale / total)
+                                                    - 1
+                                                )
                                                 if validcount > lastbatch:
                                                     try:
-                                                        with open("outputfile.json", "w") as f:
-                                                            json.dump(all_valid_schedules_json,f)
+                                                        with open(
+                                                            "outputfile.json", "w"
+                                                        ) as f:
+                                                            json.dump(
+                                                                all_valid_schedules_json,
+                                                                f,
+                                                            )
                                                     except:
                                                         pass
                                                     lastbatch = validcount
-                                                updt(completed,total,validcount,absstarttime)
+                                                updt(
+                                                    completed,
+                                                    total,
+                                                    validcount,
+                                                    absstarttime,
+                                                )
     with open("outputfile.json", "w") as f:
         json.dump(all_valid_schedules_json, f)
     print(len(all_valid_schedules) + " valid schedules")
     scored_list = []
-    for i in range(len(all_valid_schedules)): # score all schedules (might be time consuming if calcscore has O(n^2+) efficiency)
+    for i in range(
+        len(all_valid_schedules)
+    ):  # score all schedules (might be time consuming if calcscore has O(n^2+) efficiency)
         all_valid_schedules[i].calcscore()
         scored_list.append(all_valid_schedules[i])
-    scored_list = sorted(scored_list, key=getscore, reverse=True) # Sort by score
+    scored_list = sorted(scored_list, key=getscore, reverse=True)  # Sort by score
     presentSchedules(scored_list)
-    return 
+    return
+
 
 def presentSchedules(scored_list: list[Schedule]):
     """
@@ -1997,14 +2057,15 @@ def presentSchedules(scored_list: list[Schedule]):
         else:
             print("number 1-6 pls")
 
-def getscore(x:Schedule):
+
+def getscore(x: Schedule):
     """
     Used to sort scored_list in optionstoschedules()
     """
     return x.score
 
 
-def updt(completed:int, total:int, validcount:int, absstarttime:int):
+def updt(completed: int, total: int, validcount: int, absstarttime: int):
     """
     Print the progress through generating all very many schedules (realistically 10 billion at most)
     """
@@ -2102,7 +2163,7 @@ def lookupCourse():
         break
 
 
-def functionalSearch(field:str, target):
+def functionalSearch(field: str, target):
     """
     Returns a list of all courses whose 'field' match 'target'
     """
