@@ -307,6 +307,7 @@ class Schedule:
             crns.append(course.crn)
         self.crns = crns
         self.name = name
+        self.fullClasses = 0
         self.score = 0
 
     def checkValid(self):
@@ -317,8 +318,18 @@ class Schedule:
                 if course.overlap(course_):
                     return False
         return True
+    
+    def checkFull(self):
+        self.fullClasses = 0
+        for course in self.courses:
+            if course.curpop >= course.maxpop:
+                self.fullClasses+=1
+        return self.fullClasses > 0
 
     def calcscore(self):
+        self.checkFull()
+        
+        # Check which days have classes and which don't
         self.daycount = 0
         counteddays = [0, 0, 0, 0, 0]
         days = ["M", "T", "W", "R", "F"]
@@ -328,6 +339,7 @@ class Schedule:
                     counteddays[days.index(day)] = 1
         self.daycount = sum(counteddays)
 
+        # add up time spent in class, in school, and in breaks
         classtime = 0
         schooltime = 0
         timeranges = []
