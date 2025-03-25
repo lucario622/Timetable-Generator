@@ -277,6 +277,8 @@ class Course:
                 return self.type
             case "code":
                 return self.code
+            case "times":
+                return self.times
             case "days":
                 return self.times.days
             case "time":
@@ -1632,6 +1634,13 @@ elif coursefile == "Winter2025.json":
 
 
 def LTLListfromCourse(code):
+    """
+    Takes a course code (e.g. CSCI2020U), and returns which section types it has as a list.
+
+    e.g. [Lecture, Tutorial] or [Lecture] or [Lecture, Laboratory] etc...
+    """
+    # No clue what LTL stands for (love that list? left to left?) oh its probably lecture tutorial lab oh wait that means this function doesn't do what I thought.
+    # I guess narrowSearch(functionalSearch("code",code)) does that other thing
     found = []
     for key in allCourses:
         c = allCourses[key]
@@ -1641,6 +1650,9 @@ def LTLListfromCourse(code):
 
 
 def generateSchedules():
+    """
+    Starts the process of generating schedules, first asking for course codes
+    """
     inp = input("Number of Individual classes (usually ~10): ")
     set_of_all_options = []
     if inp != "":
@@ -1660,6 +1672,9 @@ def generateSchedules():
 
 
 def trimOptions(options):
+    """
+    Removes course sections outside of preferred time range, input as part of the function
+    """
     newoptions = []
     firsttime = 0
     lasttime = 2400
@@ -1682,13 +1697,46 @@ def trimOptions(options):
             eachcrn = eachclass[j]
             course: Course = allCourses[eachcrn]
             if (
-                (course.times.time < firsttime or course.times.time > lasttime)
-                and course.code != "SCCO0999U"
-                and course.times.time != 0
+                (
+                    course.times.time < firsttime or course.times.time > lasttime
+                )  # course is outside of time range
+                and course.code != "SCCO0999U"  # dont reject co-op success course
+                and course.times.time
+                != 0  # dont reject courses with time 0 (they're not actually at midnight)
             ):
+                #### Conditions in which to reject course section
                 continue
             else:
-                newoptions[i].append(eachcrn)
+                newoptions[i].append(eachcrn)  # accept course otherwise
+    return newoptions
+
+
+def trimoptions(options, min, max):
+    """
+    Removes course sections outside of preferred time range min-max
+    """
+    newoptions = []
+    firsttime = min
+    lasttime = max
+
+    for i in range(len(options)):
+        eachclass = options[i]
+        newoptions.append([])
+        for j in range(len(eachclass)):
+            eachcrn = eachclass[j]
+            course: Course = allCourses[eachcrn]
+            if (
+                (
+                    course.times.time < firsttime or course.times.time > lasttime
+                )  # course is outside of time range
+                and course.code != "SCCO0999U"  # dont reject co-op success course
+                and course.times.time
+                != 0  # dont reject courses with time 0 (they're not actually at midnight)
+            ):
+                #### Conditions in which to reject course section
+                continue
+            else:
+                newoptions[i].append(eachcrn)  # accept course otherwise
     return newoptions
 
 
@@ -1734,7 +1782,18 @@ class date:
 all_valid_schedules_json = []
 
 
-def optionstoschedules(set_of_options):
+def optionstoschedules(set_of_options:list[list[str]]):
+    """
+    Terrible function that looks like it was made by a highschool computer science student who has something against recursion (it was :3)
+
+    Takes an array of arrays of course sections, all of which are potential courses for the generated schedule
+
+    Uses ~10 nested for loops, and if you want more/less classes than that, you have to go into the code and manually add/remove nested for loops.
+
+    We _might_ want to use recursion for this one.
+
+    Returns a list of schedule-score pairs, sorted by score-descending.
+    """
     set_of_options = trimOptions(set_of_options)
     all_valid_schedules = []
     crnlist = []
@@ -1892,9 +1951,7 @@ def optionstoschedules(set_of_options):
                                             for i in range(len(crnlist)):
                                                 crnlist[i] = allCourses[crnlist[i]]
                                             schedule = Schedule(crnlist)
-                                            if (
-                                                schedule.checkValid()
-                                            ):  # and schedule.lunchBreaks() == 5:
+                                            if (schedule.checkValid()):  # and schedule.lunchBreaks() == 5:
                                                 validcount += 1
                                                 all_valid_schedules.append(schedule)
                                                 all_valid_schedules_json.append(
@@ -1902,79 +1959,55 @@ def optionstoschedules(set_of_options):
                                                 )
                                             scale = 10
                                             if (
-                                                completed % math.ceil(total / scale)
-                                                == 0
-                                                or progress + 1
-                                                < completed * scale / total
+                                                completed % math.ceil(total / scale) == 0
+                                                or progress + 1 < completed * scale / total
                                             ):
-                                                progress = (
-                                                    math.ceil(completed * scale / total)
-                                                    - 1
-                                                )
-                                                elapsedtime = (
-                                                    (time.time() * 1000) // 1
-                                                ) - absstarttime
+                                                progress = (math.ceil(completed * scale / total) - 1)
                                                 if validcount > lastbatch:
                                                     try:
-                                                        with open(
-                                                            "outputfile.json", "w"
-                                                        ) as f:
-                                                            json.dump(
-                                                                all_valid_schedules_json,
-                                                                f,
-                                                            )
+                                                        with open("outputfile.json", "w") as f:
+                                                            json.dump(all_valid_schedules_json,f)
                                                     except:
                                                         pass
                                                     lastbatch = validcount
-                                                remainingschedules = total - completed
-                                                remainingTime = timeAmount(
-                                                    elapsedtime * total / completed
-                                                    - elapsedtime
-                                                )
-                                                eta = date(
-                                                    time.time()
-                                                    + remainingTime.totalSeconds
-                                                )
-                                                print(
-                                                    f"{math.ceil((completed*100)/total)}% done, {remainingschedules} schedules left! (estimated {remainingTime} remaining), Completed by {eta}"
-                                                )
-                                                print(
-                                                    ((completed * 100 * scale) // total)
-                                                    / scale,
-                                                    "% done with ",
-                                                    validcount,
-                                                    " valid and ",
-                                                    (completed - validcount),
-                                                    " invalid (",
-                                                    (validcount * 100 / completed),
-                                                    "% pass rate)\n",
-                                                    sep="",
-                                                )
+                                                updt(completed,total,validcount,absstarttime)
     with open("outputfile.json", "w") as f:
         json.dump(all_valid_schedules_json, f)
-    print(len(all_valid_schedules))
+    print(len(all_valid_schedules) + " valid schedules")
     scored_list = []
-    for i in range(len(all_valid_schedules)):
+    for i in range(len(all_valid_schedules)): # score all schedules (might be time consuming if calcscore has O(n^2+) efficiency)
         all_valid_schedules[i].calcscore()
-        scored_list.append([all_valid_schedules[i], all_valid_schedules[i].score])
-    scored_list = sorted(scored_list, key=getscore, reverse=True)
+        scored_list.append(all_valid_schedules[i])
+    scored_list = sorted(scored_list, key=getscore, reverse=True) # Sort by score
+    presentSchedules(scored_list)
+    return 
+
+def presentSchedules(scored_list: list[Schedule]):
+    """
+    Presents a list of schedules in the console, allowing the user to view only the first 6
+    """
     for scored in scored_list[:6]:
-        print(scored[0].display("timetable"))
+        print(scored.display("timetable"))
     while True:
         inp = input("Enter a number (1-6) for details on that schedule: ")
         if inp.isnumeric() and (1 <= int(inp) <= 6):
-            scored_list[int(inp) - 1][0].display("")
+            scored_list[int(inp) - 1].display("")
         elif inp == "":
             break
         else:
             print("number 1-6 pls")
 
+def getscore(x:Schedule):
+    """
+    Used to sort scored_list in optionstoschedules()
+    """
+    return x.score
 
-def getscore(x):
-    return x[0].score
 
-
-def updt(completed, total, validcount, absstarttime):
+def updt(completed:int, total:int, validcount:int, absstarttime:int):
+    """
+    Print the progress through generating all very many schedules (realistically 10 billion at most)
+    """
     if completed % (total // 100) == 0:
         elapsedtime = ((time.time() * 1000) // 1) - absstarttime
         remainingschedules = total - completed
@@ -1997,6 +2030,9 @@ def updt(completed, total, validcount, absstarttime):
 
 
 def makedatas():
+    """
+    Get list of needed courses from user in console, print list of course sections to the console.
+    """
     inp = input("Number of Individual classes (usually ~10): ")
     set_of_all_options = []
     for i in range(int(inp)):
@@ -2012,6 +2048,11 @@ def makedatas():
 
 
 def manualSchedule():
+    """
+    Asks user for individual crns to construct a schedule, no optimizing, no generating, no verifying.
+
+    Saves the schedule to the schedule json file
+    """
     global savedschedulesJSON
     readSchedules()
     inp = input("input all crns for schedule ('stop' to stop): ")
@@ -2040,6 +2081,9 @@ def manualSchedule():
 
 
 def lookupCourse():
+    """
+    Search for a singular class by crn, output all details for this class
+    """
     while True:
         inp = input("Enter CRN (ex: 41935): ")
         if not inp.isnumeric():
@@ -2049,11 +2093,19 @@ def lookupCourse():
         if not inp in allCourses:
             print("crn " + str(inp) + " not found")
             continue
-        print(allCourses[inp].fullDetail())
+        for field in allCourses[inp].__dict__.keys():
+            print("\t" + field + ": " + str(allCourses[inp].get(field)))
+            if field == "times":
+                for ffield in allCourses[inp].get(field).__dict__.keys():
+                    print("\t\t" + ffield + ": " + str(allCourses[inp].get(ffield)))
+        # print(allCourses[inp].fullDetail())
         break
 
 
-def functionalSearch(field, target):
+def functionalSearch(field:str, target):
+    """
+    Returns a list of all courses whose 'field' match 'target'
+    """
     results = []
     resultcount = 0
     for key in allCourses:
@@ -2066,11 +2118,15 @@ def functionalSearch(field, target):
             results.append(course.crn)
     if resultcount == 0:
         print("No matches :(")
+        return []
     else:
         return results
 
 
 def narrowSearch(crns, field, target):
+    """
+    Filters a list of crns to those whose 'field' match 'target'
+    """
     results = []
     resultcount = 0
     for crn in crns:
