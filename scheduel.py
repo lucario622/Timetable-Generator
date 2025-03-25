@@ -2120,6 +2120,9 @@ def makedatas():
     print(set_of_all_options)
 
 
+def launchDemo():
+    print("Demo Launched")
+
 def manualSchedule():
     """
     Asks user for individual crns to construct a schedule, no optimizing, no generating, no verifying.
@@ -2422,7 +2425,8 @@ while True:
     print("2. Maps")
     print("3. Schedules")
     print("4. Search courses")
-    print("5. Exit")
+    print("5. Launch demo")
+    print("6. Exit")
     inp = input("Make a Selection: ")
     if not inp.isnumeric():
         print("input must be a number")
@@ -2439,8 +2443,10 @@ while True:
         case 4:
             searchmenu()
         case 5:
-            break
+            launchDemo()
         case 6:
+            break
+        case 7:
             removeDupes()
         case _:
             print("invalid choice")
