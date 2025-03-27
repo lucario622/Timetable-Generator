@@ -1,5 +1,6 @@
 import json
 import math
+import random
 import sys
 import ctypes
 from typing import Iterable
@@ -136,6 +137,7 @@ class Course:
             case _:
                 return ""
 
+courseColours = [(255,255,255)]
 
 class Schedule:
     def __init__(self, courses: list[Course], name: str = "Untitled Schedule"):
@@ -283,8 +285,10 @@ class Schedule:
             if i % 100 == 30:
                 j += 20
             if i % 100 == 0 or (i - 30) % 100 == 0:
+                suffix = "am"
+                if i>=1200: suffix = "pm"
                 y = 40 + (j - 700) * ((HEIGHT - 55) / 1500)
-                makeText(scene,miltoreadable(i),"black",5,y)
+                makeText(scene,miltoreadable(i)+suffix,"black",5,y)
                 if k%2==0: scene.addLine(0,y,WIDTH,y,QColor(200,200,200)) # Line to ease time recognition
                 else: drawDashedLine(scene,0,y,WIDTH,y,3,QColor(200,200,200))
                 k+=1
@@ -292,27 +296,35 @@ class Schedule:
         # Draw days of week on top edge
         for j in range(len(days[0])):
             x = (0.1 + 0.18 * j) * WIDTH
-            makeText(scene, days[0][j], "black", x, 10)
+            makeText(scene, days[0][j], "black", x, 0,30)
             scene.addLine(x,0,x,HEIGHT,QColor(200,200,200))
 
         # Draw courses
         for course in self.courses:
+            if course.crn == selectedcrn:
+                myColor = QColor(255, 100, 100)
+            else :
+                random.seed(course.crn)
+                minC = 100
+                maxC = 255
+                myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
             for day in course.times.days:
                 x = (0.1 + 0.18 * (days[1].index(day))) * WIDTH  # works
                 y = 40 + (miltohrspointmins(course.times.time)-7)/15 * (HEIGHT-55)  # not so much
                 h = minstohrspointmins(course.times.length)/15 * (HEIGHT-55)
-                myColor = QColor(200, 255, 200)
-                if course.crn == selectedcrn:
-                    myColor = QColor(255, 200, 200)
 
-                scene.addRect(x,y,WIDTH * 0.17,h,brush=myColor,pen=QColor(0,0,0,0))
-                content = f"{course.title} {course.type}"
+                scene.addRect(x,y,WIDTH * 0.17,h,brush=myColor)
+                content = f"{course.title} {course.type} {course.room}"
                 space = int(WIDTH * 0.03)
-                makeText(scene, content[:space], "black", x, y)
-                if len(content) >= space:
-                    makeText(scene, content[space : 2 * space], "black", x, y + 10)
-                if len(content) >= 2 * space:
-                    makeText(scene, content[2 * space : 3 * space], "black", x, y + 20)
+                index = lastIndexOf(content[:space]," ")
+                makeText(scene, content[:index], "black", x, y)
+                content = content[index+1:]
+                if len(content) >= 0:
+                    leftover = content[index+1:space]
+                    makeText(scene, content[:space], "black", x, y + 15)
+                    content = content[index+1:]
+                if len(content) >= 0:
+                    makeText(scene, content[:space], "black", x, y + 30)
 
 def drawDashedLine(scene:QGraphicsScene,x,y,x1,y1,dashLength:int,color:QColor):
     dx = abs(x1-x)
@@ -359,16 +371,19 @@ def makeText(
     color: str,
     x: int,
     y: int,
-    size: int = 15,
+    size: int = 12,
     rot: int = 0,
 ):
     thisFont = QFont()
     thisFont.setPixelSize(size)
     thisText = scene.addText(text)
+    thisText.setFont(thisFont)
     thisText.setPos(x, y)
     thisText.setRotation(rot)
     thisText.setDefaultTextColor(QColor(color))
 
+def lastIndexOf(str: str, target: str):
+    return len(str) - str[::-1].index(target[::-1]) - len(target)
 
 def minutes2hours(minutes: int):
     """
