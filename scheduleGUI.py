@@ -265,7 +265,8 @@ class Schedule:
 
     def drawSchedule(self, scene: QGraphicsScene):
         selectedcrn = self.courses[scene.parent().courseList.currentRow()].crn
-        if (scene.parent().courseList.currentRow() == -1): selectedcrn = -1
+        if scene.parent().courseList.currentRow() == -1:
+            selectedcrn = -1
         days = [
             ["Monday", "Tuedsay", "Wednesday", "Thursday", "Friday"],
             ["M", "T", "W", "R", "F"],
@@ -273,62 +274,56 @@ class Schedule:
         ]
         WIDTH = scene.width()
         HEIGHT = scene.height()
-        scene.addRect(0, 0, WIDTH, HEIGHT, brush=QColor(0, 255, 0))
+        scene.addRect(0, 0, WIDTH, HEIGHT, brush=QColor(250, 250, 250))
+
+        # Draw Time numbers on left edge
+        k = 0
         for i in range(700, 2200):
             j = i
             if i % 100 == 30:
                 j += 20
             if i % 100 == 0 or (i - 30) % 100 == 0:
-                makeText(
-                    scene,
-                    miltoreadable(i),
-                    "black",
-                    5,
-                    40 + (j - 700) * ((HEIGHT - 55) / 1500),
-                )
+                y = 40 + (j - 700) * ((HEIGHT - 55) / 1500)
+                makeText(scene,miltoreadable(i),"black",5,y)
+                if k%2==0: scene.addLine(0,y,WIDTH,y,QColor(200,200,200)) # Line to ease time recognition
+                else: drawDashedLine(scene,0,y,WIDTH,y,3,QColor(200,200,200))
+                k+=1
 
+        # Draw days of week on top edge
         for j in range(len(days[0])):
-            makeText(
-                scene,
-                days[0][j],
-                "black",
-                (0.1 + 0.18 * j) * WIDTH,
-                10,
-            )
+            x = (0.1 + 0.18 * j) * WIDTH
+            makeText(scene, days[0][j], "black", x, 10)
+            scene.addLine(x,0,x,HEIGHT,QColor(200,200,200))
+
+        # Draw courses
         for course in self.courses:
             for day in course.times.days:
-                x = (0.1 + 0.18 * (days[1].index(day))) * WIDTH
-                y = 40 + (course.times.time - 700) * ((HEIGHT - 55) / 1500)
-                myColor = QColor(200,255,200)
+                x = (0.1 + 0.18 * (days[1].index(day))) * WIDTH  # works
+                y = 40 + (miltohrspointmins(course.times.time)-7)/15 * (HEIGHT-55)  # not so much
+                h = minstohrspointmins(course.times.length)/15 * (HEIGHT-55)
+                myColor = QColor(200, 255, 200)
                 if course.crn == selectedcrn:
-                    myColor = QColor(255,200,200)
-                scene.addRect(
-                    x,
-                    y,
-                    WIDTH * 0.18,
-                    minutes2hours(course.times.length) * ((HEIGHT - 55) / 1500),
-                    brush=myColor,
-                )
+                    myColor = QColor(255, 200, 200)
+
+                scene.addRect(x,y,WIDTH * 0.17,h,brush=myColor,pen=QColor(0,0,0,0))
                 content = f"{course.title} {course.type}"
                 space = int(WIDTH * 0.03)
                 makeText(scene, content[:space], "black", x, y)
                 if len(content) >= space:
-                    makeText(
-                        scene,
-                        content[space : 2 * space],
-                        "black",
-                        x,
-                        y + 10,
-                    )
+                    makeText(scene, content[space : 2 * space], "black", x, y + 10)
                 if len(content) >= 2 * space:
-                    makeText(
-                        scene,
-                        content[2 * space : 3 * space],
-                        "black",
-                        x,
-                        y + 20,
-                    )
+                    makeText(scene, content[2 * space : 3 * space], "black", x, y + 20)
 
+def drawDashedLine(scene:QGraphicsScene,x,y,x1,y1,dashLength:int,color:QColor):
+    dx = abs(x1-x)
+    dy = abs(y1-y)
+    length = math.sqrt(dx**2+dy**2)
+    dashes = length/dashLength/2
+    xlength = dx/dashes/2
+    ylength = dy/dashes/2
+    for i in range(int(dashes)):
+        j = 2*i
+        scene.addLine(x+j*xlength,y+j*ylength,x+(j+1)*xlength,y1+(j+1)*ylength,color)
 
 def miltoreadable(time: int):
     """
@@ -340,6 +335,22 @@ def miltoreadable(time: int):
         time -= 1200
     result = str(math.floor(time / 100)) + ":" + str(time)[-2:]
     return result
+
+
+def minstohrspointmins(mins: int):
+    return ((mins // 60)) + (mins % 60) / 60
+
+
+def minstopercent(mins: int):
+    return minstohrspointmins(mins) / 24
+
+
+def miltohrspointmins(time: int):
+    return math.floor(time / 100) + ((time % 100) / 60)
+
+
+def miltopercent(time: int):
+    return miltohrspointmins(time) / 24
 
 
 def makeText(
@@ -380,14 +391,8 @@ class ViewOneSchedule(QWidget):
         # print(self.width(), self.height())
         self.scene = QGraphicsScene(0, 0, 1300, 800, parent=self)
         self.view = QGraphicsView(self.scene)
-        self.scene.addLine(
-            0, 0, self.view.width(), self.view.height(), QColor(255, 0, 0)
-        )
-        self.scene.addLine(
-            self.view.width(), 0, 0, self.view.height() * 2, QColor(255, 0, 0)
-        )
         self.courseList = QListWidget()
-        self.courseList.clicked.connect(self.listUpdate)
+        self.courseList.currentItemChanged.connect(self.listUpdate)
         self.courseList.setMaximumWidth(500)
         # for i in range(100):
         #     self.courseList.addItem(f"{i}")
@@ -399,7 +404,8 @@ class ViewOneSchedule(QWidget):
 
     def listUpdate(self):
         curitem = self.courseList.currentItem()
-        if curitem != None:self.schedule.drawSchedule(self.scene)
+        if curitem != None:
+            self.schedule.drawSchedule(self.scene)
 
     def setSchedule(self, schedule: Schedule):
         self.schedule = schedule
