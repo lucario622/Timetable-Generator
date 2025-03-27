@@ -1,3 +1,4 @@
+import json
 import math
 import sys
 import ctypes
@@ -21,10 +22,32 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QIcon, QColor, QFont
 
-allCourses = []
+allCourses = dict()
 
 WIDTH = 1920
 HEIGHT = 1060
+
+
+class CourseTime:
+    def __init__(self, days: list, time: int, length: int, biweekly: int):
+        self.days = days
+        self.time = time
+        self.length = length
+        self.biweekly = biweekly
+
+    def overlap(self, otherTime: object):
+        for day in self.days:
+            for otherday in otherTime.days:
+                if day == otherday:
+                    if (
+                        self.time >= otherTime.time
+                        and self.time <= otherTime.time + otherTime.length
+                    ) or (
+                        otherTime.time >= self.time
+                        and otherTime.time <= self.time + self.length
+                    ):
+                        return True
+        return False
 
 
 class Course:
@@ -115,12 +138,21 @@ class Course:
 
 
 class Schedule:
-    def __init__(self, courses: list, name: str = "Untitled Schedule"):
+    def __init__(self, courses: list[Course], name: str = "Untitled Schedule"):
         self.courses = courses
         crns = []
         for course in self.courses:
             crns.append(course.crn)
         self.crns = crns
+        self.name = name
+        self.fullClasses = 0
+        self.score = 0
+
+    def __init__(self, crns: list[int], name: str = "Untitled Schedule"):
+        self.crns = crns
+        self.courses = []
+        for crn in self.crns:
+            self.courses.append(allCourses[crn])
         self.name = name
         self.fullClasses = 0
         self.score = 0
@@ -232,12 +264,16 @@ class Schedule:
         # return 0
 
     def drawSchedule(self, scene: QGraphicsScene):
+        selectedcrn = self.courses[scene.parent().courseList.currentRow()].crn
+        if (scene.parent().courseList.currentRow() == -1): selectedcrn = -1
         days = [
             ["Monday", "Tuedsay", "Wednesday", "Thursday", "Friday"],
             ["M", "T", "W", "R", "F"],
             [1, 2, 3, 4, 5],
         ]
-        scene.addRect(0, 0, scene.width(), scene.height(), brush=QColor(0, 255, 0))
+        WIDTH = scene.width()
+        HEIGHT = scene.height()
+        scene.addRect(0, 0, WIDTH, HEIGHT, brush=QColor(0, 255, 0))
         for i in range(700, 2200):
             j = i
             if i % 100 == 30:
@@ -263,12 +299,15 @@ class Schedule:
             for day in course.times.days:
                 x = (0.1 + 0.18 * (days[1].index(day))) * WIDTH
                 y = 40 + (course.times.time - 700) * ((HEIGHT - 55) / 1500)
+                myColor = QColor(200,255,200)
+                if course.crn == selectedcrn:
+                    myColor = QColor(255,200,200)
                 scene.addRect(
                     x,
                     y,
                     WIDTH * 0.18,
                     minutes2hours(course.times.length) * ((HEIGHT - 55) / 1500),
-                    brush=QColor(200, 255, 200),
+                    brush=myColor,
                 )
                 content = f"{course.title} {course.type}"
                 space = int(WIDTH * 0.03)
@@ -338,9 +377,8 @@ class ViewOneSchedule(QWidget):
         # for i in range(5):
         #     newbutton = QPushButton(f'The number {i+1}')
         #     self.layout.addWidget(newbutton,i,i)
-
-        print(self.width(), self.height())
-        self.scene = QGraphicsScene(0, 0, self.width(), self.height(), parent=self)
+        # print(self.width(), self.height())
+        self.scene = QGraphicsScene(0, 0, 1300, 800, parent=self)
         self.view = QGraphicsView(self.scene)
         self.scene.addLine(
             0, 0, self.view.width(), self.view.height(), QColor(255, 0, 0)
@@ -348,19 +386,38 @@ class ViewOneSchedule(QWidget):
         self.scene.addLine(
             self.view.width(), 0, 0, self.view.height() * 2, QColor(255, 0, 0)
         )
-        self.layout.addWidget(self.view, 0, 0)
-        CourseList = QListWidget()
-        for i in range(100):
-            CourseList.addItem(f"{i}")
+        self.courseList = QListWidget()
+        self.courseList.clicked.connect(self.listUpdate)
+        self.courseList.setMaximumWidth(500)
+        # for i in range(100):
+        #     self.courseList.addItem(f"{i}")
         myFont = QFont()
-        myFont.setPixelSize(50)
-        CourseList.setFont(myFont)
-        self.layout.addWidget(CourseList, 0, 1)
+        myFont.setPixelSize(20)
+        self.courseList.setFont(myFont)
+        self.layout.addWidget(self.view, 0, 0)
+        self.layout.addWidget(self.courseList, 0, 1)
 
-    def setSchedule(self, schedule:Schedule):
+    def listUpdate(self):
+        curitem = self.courseList.currentItem()
+        if curitem != None:self.schedule.drawSchedule(self.scene)
+
+    def setSchedule(self, schedule: Schedule):
         self.schedule = schedule
         schedule.drawSchedule(self.scene)
+        for course in self.schedule.courses:
+            self.courseList.addItem(
+                course.code + " " + course.title + " " + course.type
+            )
         print(schedule)
+
+    def mousePressEvent(self, a0):
+        print(self.contentsMargins().top())
+        print(self.contentsMargins().left())
+        print(self.contentsMargins().right())
+        print(self.contentsMargins().bottom())
+
+        print(self.height())
+        print(self.width())
 
 
 class ViewSchedules(QTabWidget):
@@ -368,15 +425,38 @@ class ViewSchedules(QTabWidget):
         super().__init__()
 
         self.tabs = []
-        for i in range(6):
-            myTab = ViewOneSchedule()
-            self.addTab(myTab, f"Schedule #{i+1}")
-            self.tabs.append(myTab)
-            ",".join
 
-    def loadSchedules(self, schedules:Iterable[Schedule]):
-        for i in range(len(self.tabs)):
-            self.tabs[i].setSchedule(schedules[i])
+        myCrns = [72869, 72870, 73778, 75797, 75043, 74365, 75425, 74892, 75153, 70175]
+        self.addSchedule(myCrns)
+        self.addSchedule(
+            [72870, 72869, 74366, 73777, 70175, 75043, 74364, 72850, 74363, 70120]
+        )
+
+    def loadSchedules(self, schedules: list[Schedule]):
+        for i in range(min(len(schedules), 10 - len(self.tabs))):
+            self.addSchedule(schedules[i])
+
+    def loadSchedules(self, schedules: list[list[int]]):
+        for i in range(min(len(schedules), 10 - len(self.tabs))):
+            mySchedule = Schedule(schedules[i])
+            self.addSchedule(mySchedule)
+
+    def addSchedule(self, schedule: Schedule):
+        myTab = ViewOneSchedule()
+        self.addTab(
+            myTab, f"Schedule #{len(self.tabs)+1} - Score:{schedule.calcscore()}"
+        )
+        myTab.setSchedule(schedule)
+        self.tabs.append(myTab)
+
+    def addSchedule(self, schedule: list[int]):
+        myTab = ViewOneSchedule()
+        mySchedule = Schedule(schedule)
+        self.addTab(
+            myTab, f"Schedule #{len(self.tabs)+1} - Score:{mySchedule.calcscore()}"
+        )
+        myTab.setSchedule(mySchedule)
+        self.tabs.append(myTab)
 
 
 class InputCourses(QWidget):
@@ -442,8 +522,8 @@ class MainWindow(QMainWindow):
         for item in self.scene.selectedItems():
             item.setRotation(item.rotation() + 1)
 
-    def mousePressEvent(self, a0):
-        print(f"Left click moment at {a0.globalPosition()} or maybe {a0.pos()}")
+    # def mousePressEvent(self, a0):
+    #     print(f"Left click moment at {a0.globalPosition()} or maybe {a0.pos()}")
 
     def buttonAction(self):
         print("button be got pushed")
@@ -473,8 +553,36 @@ class MainWindow(QMainWindow):
         return self.textN[index].text()
 
 
-app = QApplication(sys.argv)
+allCoursesJSON = []
 
+with open("CourseFiles/Winter2025.json", "r") as f:
+    allCoursesJSON = json.load(f)
+for course in allCoursesJSON:
+    crn = course["crn"]
+    temptimes = CourseTime(
+        course["times"]["days"],
+        course["times"]["time"],
+        course["times"]["length"],
+        course["times"]["biweekly"],
+    )
+    temp = Course(
+        course["title"],
+        course["room"],
+        course["crn"],
+        course["type"],
+        course["code"],
+        temptimes,
+        course["section"],
+        course["instructor"],
+        course["maxpop"],
+        course["curpop"],
+    )
+    # if not (crn in allCourses):
+    allCourses[crn] = temp
+allCourses = dict(sorted(allCourses.items()))
+
+
+app = QApplication(sys.argv)
 window = MainWindow()
 # window.showMaximized()
 window.show()
