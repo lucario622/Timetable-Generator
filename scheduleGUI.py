@@ -23,6 +23,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtGui import QIcon, QColor, QFont
 
+from scheduel import *
+
 allCourses = dict()
 
 WIDTH = 1920
@@ -302,7 +304,7 @@ class Schedule:
         # Draw courses
         for course in self.courses:
             if course.crn == selectedcrn:
-                myColor = QColor(255, 100, 100)
+                myColor = QColor(255, 50, 50)
             else :
                 random.seed(course.crn)
                 minC = 100
@@ -498,6 +500,8 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(QIcon("Buildings/UA/0.png"))
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myapp.app.1")
 
+        readCourses()
+
         # self.setFixedSize(QSize(1920,1061))
         self.setBaseSize(QSize(1920, 1061))
         # self.setL
@@ -602,6 +606,8 @@ for course in allCoursesJSON:
     allCourses[crn] = temp
 allCourses = dict(sorted(allCourses.items()))
 
+coursefile = "Winter2025.json"
+readCourses()
 
 app = QApplication(sys.argv)
 window = MainWindow()
