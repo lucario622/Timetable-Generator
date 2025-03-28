@@ -1116,8 +1116,8 @@ def fastestAddCourses(skip=False):
             )
             allCoursesJSON.append(courseJSON)
             allCourses[crn] = course
-            print(course.fullDetail())
-            print("-" * 100)
+            # print(course.fullDetail())
+            # print("-" * 100)
 
             with open(coursefile, "w") as f:
                 json.dump(allCoursesJSON, f)
@@ -2290,16 +2290,15 @@ def schedulemenu():
                 for key in savedschedules:
                     print(savedschedules[key])
                 inp1 = input("Make a Selection: ")
-                inp2 = input(
-                    "choose display type ('timetable' 'notes' 'window' 'map'): "
-                )
+                inp2 = input("choose display type ('timetable' 'notes' 'window' 'map'): ")
                 if inp1 in savedschedules:
                     savedschedules[inp1].display(inp2)
                 else:
                     print("No timetable exists with name", inp1)
             case 4:
                 for key in savedschedules:
-                    print(savedschedules[key])
+                    if (savedschedules[key].checkValid()):
+                        print(str(savedschedules[key]))
             case 5:
                 makedatas()
             case 6:
