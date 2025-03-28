@@ -20,6 +20,8 @@ from PyQt6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QTabWidget,
+    QVBoxLayout,
+    QHBoxLayout,
 )
 from PyQt6.QtGui import QIcon, QColor, QFont
 
@@ -136,8 +138,6 @@ class Course:
                 return self.curpop
             case _:
                 return ""
-
-courseColours = [(255,255,255)]
 
 class Schedule:
     def __init__(self, courses: list[Course], name: str = "Untitled Schedule"):
@@ -266,9 +266,6 @@ class Schedule:
         # return 0
 
     def drawSchedule(self, scene: QGraphicsScene):
-        selectedcrn = self.courses[scene.parent().courseList.currentRow()].crn
-        if scene.parent().courseList.currentRow() == -1:
-            selectedcrn = -1
         days = [
             ["Monday", "Tuedsay", "Wednesday", "Thursday", "Friday"],
             ["M", "T", "W", "R", "F"],
@@ -301,8 +298,47 @@ class Schedule:
 
         # Draw courses
         for course in self.courses:
-            if course.crn == selectedcrn:
-                myColor = QColor(255, 50, 50)
+            random.seed(course.crn)
+            minC = 100
+            maxC = 255
+            myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
+            for day in course.times.days:
+                x = (0.1 + 0.18 * (days[1].index(day))) * WIDTH  # works
+                y = 40 + (miltohrspointmins(course.times.time)-7)/15 * (HEIGHT-55)  # not so much
+                h = minstohrspointmins(course.times.length)/15 * (HEIGHT-55)
+
+                scene.addRect(x,y,WIDTH * 0.17,h,brush=myColor)
+                content = f"{course.title} {course.type} {course.room}"
+                space = int(WIDTH * 0.03)
+                index = lastIndexOf(content[:space]," ")
+                makeText(scene, content[:index], "black", x, y)
+                content = content[index+1:]
+                if len(content) >= 0:
+                    makeText(scene, content[:space], "black", x, y + 15)
+                    content = content[index+1:]
+                if len(content) >= 0:
+                    makeText(scene, content[:space], "black", x, y + 30)
+                    
+    def redrawSchedule(self,scene:QGraphicsScene):
+        selectedcrn = self.courses[scene.parent().courseList.currentRow()].crn
+        if scene.parent().courseList.currentRow() == -1:
+            selectedcrn = -1
+        days = [
+            ["Monday", "Tuedsay", "Wednesday", "Thursday", "Friday"],
+            ["M", "T", "W", "R", "F"],
+            [1, 2, 3, 4, 5],
+        ]
+        WIDTH = scene.width()
+        HEIGHT = scene.height()
+
+        # Draw courses
+        for course in self.courses:
+            fontcolor = 'black'
+            if course.crn in removedCRNS:
+                fontcolor = 'white'
+                myColor = QColor(0,0,0)
+            elif course.crn == selectedcrn:
+                myColor = QColor(255, 15, 15)
             else :
                 random.seed(course.crn)
                 minC = 100
@@ -317,14 +353,13 @@ class Schedule:
                 content = f"{course.title} {course.type} {course.room}"
                 space = int(WIDTH * 0.03)
                 index = lastIndexOf(content[:space]," ")
-                makeText(scene, content[:index], "black", x, y)
+                makeText(scene, content[:index], fontcolor, x, y)
                 content = content[index+1:]
                 if len(content) >= 0:
-                    leftover = content[index+1:space]
-                    makeText(scene, content[:space], "black", x, y + 15)
+                    makeText(scene, content[:space], fontcolor, x, y + 15)
                     content = content[index+1:]
                 if len(content) >= 0:
-                    makeText(scene, content[:space], "black", x, y + 30)
+                    makeText(scene, content[:space], fontcolor, x, y + 30)
 
 def drawDashedLine(scene:QGraphicsScene,x,y,x1,y1,dashLength:int,color:QColor):
     dx = abs(x1-x)
@@ -408,25 +443,55 @@ class ViewOneSchedule(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.layout = QGridLayout()
+        self.tabLayout = QGridLayout()
 
-        self.setLayout(self.layout)
+        self.setLayout(self.tabLayout)
 
         self.scene = QGraphicsScene(0, 0, 1300, 800, parent=self)
         self.view = QGraphicsView(self.scene)
+        
+        self.rightPanel = QWidget()
+        self.rlayout = QVBoxLayout()
+        self.rlayout.setContentsMargins(0,0,0,0)
+        self.rightPanel.setLayout(self.rlayout)
+        
+        self.courseListButtons = QWidget()
+        self.rhlayout = QHBoxLayout()
+        self.courseListButtons.setLayout(self.rhlayout)
+        
+        self.omitbutton = QPushButton("Omit Course")
+        self.omitbutton.clicked.connect(self.omitcourse)
+        
+        self.rhlayout.addWidget(self.omitbutton)
+        
         self.courseList = QListWidget()
         self.courseList.currentItemChanged.connect(self.listUpdate)
-        self.courseList.setFixedWidth(500)
+        self.rightPanel.setFixedWidth(500)
         myFont = QFont()
         myFont.setPixelSize(20)
         self.courseList.setFont(myFont)
-        self.layout.addWidget(self.view, 0, 0)
-        self.layout.addWidget(self.courseList, 0, 1)
+        
+        self.tabLayout.addWidget(self.view, 0, 0)
+        self.rlayout.addWidget(self.courseList)
+        self.rlayout.addWidget(self.courseListButtons)
+        
+        self.tabLayout.addWidget(self.rightPanel, 0, 1)
 
+    def omitcourse(self):
+        curitem = self.courseList.currentItem()
+        currow = self.courseList.currentRow()
+        if curitem != None:
+            if not (self.schedule.courses[currow].crn in removedCRNS):
+                removedCRNS.append(self.schedule.courses[currow].crn)
+            else:
+                removedCRNS.remove(self.schedule.courses[currow].crn)
+            self.schedule.redrawSchedule(self.scene)
+            print(removedCRNS)
+    
     def listUpdate(self):
         curitem = self.courseList.currentItem()
         if curitem != None:
-            self.schedule.drawSchedule(self.scene)
+            self.schedule.redrawSchedule(self.scene)
 
     def setSchedule(self, schedule: Schedule):
         self.schedule = schedule
@@ -435,8 +500,24 @@ class ViewOneSchedule(QWidget):
             self.courseList.addItem(
                 course.code + " " + course.title + " " + course.type
             )
-        self.courseList.addItem(f"{schedule.fullClasses}/{len(schedule.crns)} full")
+        self.rlayout.addWidget(QLabel(f"{schedule.fullClasses}/{len(schedule.crns)} classes full"))
 
+class SchedulePanel(QWidget):
+    def __init__(self):
+        super().__init__()
+        
+        self.panelLayout = QVBoxLayout()
+        self.panelLayout.setContentsMargins(0,0,0,0)
+        
+        self.regeneratebutton = QPushButton("Re-Generatate Schedules")
+        self.regeneratebutton.clicked.connect(regenerateSchedules)
+        
+        self.tabs = ViewSchedules()
+        
+        self.panelLayout.addWidget(self.regeneratebutton)
+        self.panelLayout.addWidget(self.tabs)
+        
+        self.setLayout(self.panelLayout)
 
 class ViewSchedules(QTabWidget):
     def __init__(self):
@@ -449,14 +530,18 @@ class ViewSchedules(QTabWidget):
         self.addSchedule(
             [72870, 72869, 74366, 73777, 70175, 75043, 74364, 72850, 74363, 70120]
         )
+        self.currentChanged.connect(self.tabChanged)
+        
+    def tabChanged(self,ind:int):
+        self.tabs[ind].schedule.redrawSchedule(self.tabs[ind].scene)
 
-    def loadSchedules(self, schedules: list[Schedule]):
-        for i in range(min(len(schedules), 10 - len(self.tabs))):
-            self.addSchedule(schedules[i])
+    def loadSchedules(self, schedulelist: list[Schedule]):
+        for i in range(min(len(schedulelist), 10 - len(self.tabs))):
+            self.addSchedule(schedulelist[i])
 
-    def loadSchedules(self, schedules: list[list[int]]):
-        for i in range(min(len(schedules), 10 - len(self.tabs))):
-            mySchedule = Schedule(schedules[i])
+    def loadSchedules(self, crnlist: list[list[int]]):
+        for i in range(min(len(crnlist), 10 - len(self.tabs))):
+            mySchedule = Schedule(crnlist[i])
             self.addSchedule(mySchedule)
 
     def addSchedule(self, schedule: Schedule):
@@ -467,9 +552,9 @@ class ViewSchedules(QTabWidget):
         myTab.setSchedule(schedule)
         self.tabs.append(myTab)
 
-    def addSchedule(self, schedule: list[int]):
+    def addSchedule(self, crns: list[int]):
         myTab = ViewOneSchedule()
-        mySchedule = Schedule(schedule)
+        mySchedule = Schedule(crns)
         self.addTab(
             myTab, f"Schedule #{len(self.tabs)+1} - Score:{mySchedule.calcscore()}"
         )
@@ -506,7 +591,7 @@ class MainWindow(QMainWindow):
         inputPrefs = InputPreferences()
         tabs.addTab(inputPrefs, "Preferences")
 
-        viewSchedules = ViewSchedules()
+        viewSchedules = SchedulePanel()
         tabs.addTab(viewSchedules, "Schedules")
 
         # tabs.setTabEnabled(2,False)
@@ -563,7 +648,11 @@ class MainWindow(QMainWindow):
         return self.textN[index].text()
 
 
+def regenerateSchedules():
+    pass
+
 allCoursesJSON = []
+removedCRNS = []
 
 coursefile = "CourseFiles/Winter2025.json"
 
