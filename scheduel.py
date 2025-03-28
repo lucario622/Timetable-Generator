@@ -6,7 +6,7 @@ from pygame.locals import *
 from datetime import datetime
 import time
 
-pygame.init()
+# pygame.init()
 
 WIDTH = 1920
 HEIGHT = 1080
@@ -57,9 +57,11 @@ def firstNumIndex(str: str):
 # WIDTH = 860
 # HEIGHT = 540
 
-title_font = pygame.font.SysFont("Lucida Console", 15)
-text_font = pygame.font.SysFont("Lucida Console", 10)
-big_font = pygame.font.SysFont("Lucida Console", 30)
+# title_font = pygame.font.SysFont("Lucida Console", 15)
+# text_font = pygame.font.SysFont("Lucida Console", 10)
+# big_font = pygame.font.SysFont("Lucida Console", 30)
+
+text_font = title_font = big_font = coursefile = None
 
 
 class CampusMap:
@@ -2128,6 +2130,7 @@ def makedatas():
 
 def launchDemo():
     print("Demo Launched")
+    import scheduleGUI
 
 def manualSchedule():
     """
@@ -2389,7 +2392,7 @@ def searchmenu():
             case 3:
                 for key in allCourses:
                     print(allCourses[key])
-                print(len(allCourses) + " courses")
+                print(str(len(allCourses)) + " courses")
             case 4:
                 break
             case _:
@@ -2424,6 +2427,11 @@ def courseAddingMenu():
 
 
 def main():
+    global coursefile
+    pygame.init()
+    title_font = pygame.font.SysFont("Lucida Console", 15)
+    text_font = pygame.font.SysFont("Lucida Console", 10)
+    big_font = pygame.font.SysFont("Lucida Console", 30)
     coursefile = ""
     files = []
     for f in os.listdir("CourseFiles"):

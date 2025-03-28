@@ -3,9 +3,9 @@ import math
 import random
 import sys
 import ctypes
-from typing import Iterable
 
-from PyQt6.QtCore import QSize
+from PyQt6.QtCore import QSize, Qt
+# from PyQt6.QtCore.Qt import 
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -22,8 +22,6 @@ from PyQt6.QtWidgets import (
     QTabWidget,
 )
 from PyQt6.QtGui import QIcon, QColor, QFont
-
-from scheduel import *
 
 allCourses = dict()
 
@@ -352,18 +350,30 @@ def miltoreadable(time: int):
 
 
 def minstohrspointmins(mins: int):
-    return ((mins // 60)) + (mins % 60) / 60
+    """
+    e.g. 384 (minutes) -> 6.4 (hours)
+    """
+    return mins/60
 
 
 def minstopercent(mins: int):
+    """
+    e.g. 384 (minutes) -> 0.2666...
+    """
     return minstohrspointmins(mins) / 24
 
 
 def miltohrspointmins(time: int):
+    """
+    e.g. 1230 -> 12.5
+    """
     return math.floor(time / 100) + ((time % 100) / 60)
 
 
 def miltopercent(time: int):
+    """
+    e.g. 1230 -> 0.5208333...
+    """
     return miltohrspointmins(time) / 24
 
 
@@ -402,17 +412,11 @@ class ViewOneSchedule(QWidget):
 
         self.setLayout(self.layout)
 
-        # for i in range(5):
-        #     newbutton = QPushButton(f'The number {i+1}')
-        #     self.layout.addWidget(newbutton,i,i)
-        # print(self.width(), self.height())
         self.scene = QGraphicsScene(0, 0, 1300, 800, parent=self)
         self.view = QGraphicsView(self.scene)
         self.courseList = QListWidget()
         self.courseList.currentItemChanged.connect(self.listUpdate)
-        self.courseList.setMaximumWidth(500)
-        # for i in range(100):
-        #     self.courseList.addItem(f"{i}")
+        self.courseList.setFixedWidth(500)
         myFont = QFont()
         myFont.setPixelSize(20)
         self.courseList.setFont(myFont)
@@ -431,16 +435,7 @@ class ViewOneSchedule(QWidget):
             self.courseList.addItem(
                 course.code + " " + course.title + " " + course.type
             )
-        print(schedule)
-
-    def mousePressEvent(self, a0):
-        print(self.contentsMargins().top())
-        print(self.contentsMargins().left())
-        print(self.contentsMargins().right())
-        print(self.contentsMargins().bottom())
-
-        print(self.height())
-        print(self.width())
+        self.courseList.addItem(f"{schedule.fullClasses}/{len(schedule.crns)} full")
 
 
 class ViewSchedules(QTabWidget):
@@ -496,23 +491,14 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("My App")
+        self.setWindowTitle("Schedule Generator")
         self.setWindowIcon(QIcon("Buildings/UA/0.png"))
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myapp.app.1")
-
-        readCourses()
-
-        # self.setFixedSize(QSize(1920,1061))
-        self.setBaseSize(QSize(1920, 1061))
-        # self.setL
-        print(self.baseSize().width())
-        print(self.width(), self.height())
 
         tabs = QTabWidget()
         tabFont = QFont()
         tabFont.setPixelSize(20)
         tabs.setFont(tabFont)
-        # tabs.setTabPosition(QTabWidget.TabPosition.North)
 
         inputCourses = InputCourses()
         tabs.addTab(inputCourses, "Courses")
@@ -520,7 +506,6 @@ class MainWindow(QMainWindow):
         inputPrefs = InputPreferences()
         tabs.addTab(inputPrefs, "Preferences")
 
-        print(self.width(), self.height())
         viewSchedules = ViewSchedules()
         tabs.addTab(viewSchedules, "Schedules")
 
@@ -534,7 +519,7 @@ class MainWindow(QMainWindow):
         # print(a0.text())
         # print(a0.modifiers())
         # print("----------")
-        if a0.key() == 16777216:
+        if a0.key() == 16777216 and a0.modifiers() == Qt.KeyboardModifier.ShiftModifier:
             sys.exit()
         return super().keyPressEvent(a0)
 
@@ -580,7 +565,9 @@ class MainWindow(QMainWindow):
 
 allCoursesJSON = []
 
-with open("CourseFiles/Winter2025.json", "r") as f:
+coursefile = "CourseFiles/Winter2025.json"
+
+with open(coursefile, "r") as f:
     allCoursesJSON = json.load(f)
 for course in allCoursesJSON:
     crn = course["crn"]
@@ -606,12 +593,10 @@ for course in allCoursesJSON:
     allCourses[crn] = temp
 allCourses = dict(sorted(allCourses.items()))
 
-coursefile = "Winter2025.json"
-readCourses()
-
 app = QApplication(sys.argv)
 window = MainWindow()
+window.showFullScreen()
 # window.showMaximized()
-window.show()
+# window.show()
 
 app.exec()
