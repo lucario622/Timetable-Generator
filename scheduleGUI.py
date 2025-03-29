@@ -4,6 +4,8 @@ import random
 import sys
 import ctypes
 
+from ScheduleGenerator import makedatas, betteroptionstoschedules, allCourses
+
 from PyQt6.QtCore import QSize, Qt, QRectF
 # from PyQt6.QtCore.Qt import 
 from PyQt6.QtWidgets import (
@@ -24,8 +26,6 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
 )
 from PyQt6.QtGui import QIcon, QColor, QFont
-
-allCourses = dict()
 
 WIDTH = 1920
 HEIGHT = 1060
@@ -485,7 +485,7 @@ class SchedulePanel(QWidget):
         self.panelLayout.setContentsMargins(0,0,0,0)
         
         self.regeneratebutton = QPushButton("Re-Generatate Schedules")
-        self.regeneratebutton.clicked.connect(regenerateSchedules)
+        self.regeneratebutton.clicked.connect(self.regenerateSchedules)
         
         self.tabs = ViewSchedules()
         
@@ -493,6 +493,18 @@ class SchedulePanel(QWidget):
         self.panelLayout.addWidget(self.tabs)
         
         self.setLayout(self.panelLayout)
+    
+    def regenerateSchedules(self):
+        # allCourses = allCourses
+        im_cs = ["CSCI2072U","CSCI2040U","CSCI2020U","MATH2055U","MATH2060U","SCCO0999U"]
+        datas:list[list[int]] = makedatas(im_cs,allCourses,removedCRNS)
+        scheds = betteroptionstoschedules(datas,allCourses)
+        shortscheds = []
+        for e in scheds[:6]:
+            shortscheds.append(e.crns)
+        self.tabs.clearSchedules()
+        self.tabs.loadCrns(shortscheds)
+        self.tabs.setFocus()
 
 class ViewSchedules(QTabWidget):
     def __init__(self):
@@ -628,11 +640,12 @@ class MainWindow(QMainWindow):
         return self.textN[index].text()
 
 
-def regenerateSchedules():
-    pass
+    
+    
 
 allCoursesJSON = []
 removedCRNS = []
+allCourses = dict()
 
 coursefile = "CourseFiles/Winter2025.json"
 
