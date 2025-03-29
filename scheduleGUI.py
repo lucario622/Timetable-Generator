@@ -452,6 +452,7 @@ class ViewOneSchedule(QWidget):
         self.tabLayout.addWidget(self.rightPanel, 0, 1)
 
     def omitcourse(self):
+        self.courseList.setFocus()
         curitem = self.courseList.currentItem()
         currow = self.courseList.currentRow()
         if curitem != None:
@@ -460,7 +461,6 @@ class ViewOneSchedule(QWidget):
             else:
                 removedCRNS.remove(self.schedule.courses[currow].crn)
             self.schedule.redrawSchedule(self.scene)
-            print(removedCRNS)
     
     def listUpdate(self):
         curitem = self.courseList.currentItem()
@@ -501,25 +501,30 @@ class ViewSchedules(QTabWidget):
         self.tabs = []
 
         myCrns = [72869, 72870, 73778, 75797, 75043, 74365, 75425, 74892, 75153, 70175]
-        self.addSchedule(myCrns)
-        self.addSchedule(
+        self.addCrns(myCrns)
+        self.addCrns(
             [72870, 72869, 74366, 73777, 70175, 75043, 74364, 72850, 74363, 70120]
         )
         self.currentChanged.connect(self.tabChanged)
         
+    def clearSchedules(self):
+        self.tabs = []
+        self.clear()
+    
     def tabChanged(self,ind:int):
-        self.tabs[ind].schedule.redrawSchedule(self.tabs[ind].scene)
+        if ind != -1 and len(self.tabs) > 0:
+            self.tabs[ind].schedule.redrawSchedule(self.tabs[ind].scene)
 
     def loadSchedules(self, schedulelist: list[Schedule]):
         for i in range(min(len(schedulelist), 10 - len(self.tabs))):
             self.addSchedule(schedulelist[i])
 
-    def loadSchedules(self, crnlist: list[list[int]]):
+    def loadCrns(self, crnlist: list[list[int]]):
         for i in range(min(len(crnlist), 10 - len(self.tabs))):
             mySchedule = Schedule(crnlist[i])
             self.addSchedule(mySchedule)
 
-    def addSchedule(self, schedule: Schedule):
+    def addSchedule(self, schedule:Schedule):
         myTab = ViewOneSchedule()
         self.addTab(
             myTab, f"Schedule #{len(self.tabs)+1} - Score:{schedule.calcscore()}"
@@ -527,7 +532,7 @@ class ViewSchedules(QTabWidget):
         myTab.setSchedule(schedule)
         self.tabs.append(myTab)
 
-    def addSchedule(self, crns: list[int]):
+    def addCrns(self, crns: list[int]):
         myTab = ViewOneSchedule()
         mySchedule = Schedule(crns)
         self.addTab(
