@@ -30,6 +30,8 @@ allCourses = dict()
 WIDTH = 1920
 HEIGHT = 1060
 
+resolution:QSize = QSize()
+
 
 class CourseTime:
     def __init__(self, days: list, time: int, length: int, biweekly: int):
@@ -419,7 +421,7 @@ class ViewOneSchedule(QWidget):
 
         self.setLayout(self.tabLayout)
 
-        self.scene = QGraphicsScene(0, 0, 1300, 800, parent=self)
+        self.scene = QGraphicsScene(0, 0, int(resolution.width()*0.7), int(resolution.height()*0.8), parent=self)
         self.view = QGraphicsView(self.scene)
         
         self.rightPanel = QWidget()
@@ -438,7 +440,7 @@ class ViewOneSchedule(QWidget):
         
         self.courseList = QListWidget()
         self.courseList.currentItemChanged.connect(self.listUpdate)
-        self.rightPanel.setFixedWidth(500)
+        self.rightPanel.setFixedWidth(int(resolution.width()*0.25))
         myFont = QFont()
         myFont.setPixelSize(20)
         self.courseList.setFont(myFont)
@@ -656,6 +658,7 @@ for course in allCoursesJSON:
 allCourses = dict(sorted(allCourses.items()))
 
 app = QApplication(sys.argv)
+resolution = app.primaryScreen().size()
 window = MainWindow()
 window.showFullScreen()
 # window.showMaximized()
