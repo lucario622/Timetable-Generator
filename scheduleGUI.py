@@ -4,7 +4,7 @@ import random
 import sys
 import ctypes
 
-from PyQt6.QtCore import QSize, Qt
+from PyQt6.QtCore import QSize, Qt, QRectF
 # from PyQt6.QtCore.Qt import 
 from PyQt6.QtWidgets import (
     QApplication,
@@ -258,7 +258,7 @@ class Schedule:
                 return course
         # return 0
 
-    def drawSchedule(self, scene: QGraphicsScene):
+    def drawScheduleBG(self, scene: QGraphicsScene):
         days = [
             ["Monday", "Tuedsay", "Wednesday", "Thursday", "Friday"],
             ["M", "T", "W", "R", "F"],
@@ -288,29 +288,6 @@ class Schedule:
             x = (0.1 + 0.18 * j) * WIDTH
             makeText(scene, days[0][j], "black", x, 0,30)
             scene.addLine(x,0,x,HEIGHT,QColor(200,200,200))
-
-        # Draw courses
-        for course in self.courses:
-            random.seed(course.crn)
-            minC = 100
-            maxC = 255
-            myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
-            for day in course.times.days:
-                x = (0.1 + 0.18 * (days[1].index(day))) * WIDTH  # works
-                y = 40 + (miltohrspointmins(course.times.time)-7)/15 * (HEIGHT-55)  # not so much
-                h = minstohrspointmins(course.times.length)/15 * (HEIGHT-55)
-
-                scene.addRect(x,y,WIDTH * 0.17,h,brush=myColor)
-                content = f"{course.title} {course.type} {course.room}"
-                space = int(WIDTH * 0.03)
-                index = lastIndexOf(content[:space]," ")
-                makeText(scene, content[:index], "black", x, y)
-                content = content[index+1:]
-                if len(content) >= 0:
-                    makeText(scene, content[:space], "black", x, y + 15)
-                    content = content[index+1:]
-                if len(content) >= 0:
-                    makeText(scene, content[:space], "black", x, y + 30)
                     
     def redrawSchedule(self,scene:QGraphicsScene):
         selectedcrn = self.courses[scene.parent().courseList.currentRow()].crn
@@ -342,8 +319,10 @@ class Schedule:
                 y = 40 + (miltohrspointmins(course.times.time)-7)/15 * (HEIGHT-55)  # not so much
                 h = minstohrspointmins(course.times.length)/15 * (HEIGHT-55)
 
-                scene.addRect(x,y,WIDTH * 0.17,h,brush=myColor)
-                content = f"{course.title} {course.type} {course.room}"
+                myRect = QRectF(x,y,WIDTH * 0.17,h)
+                scene.addRect(myRect,brush=myColor)
+                # scene.addRect(x,y,WIDTH * 0.17,h,brush=myColor)
+                content = f"{course.title} {course.type} {course.room} crn:{course.crn}"
                 space = int(WIDTH * 0.03)
                 index = lastIndexOf(content[:space]," ")
                 makeText(scene, content[:index], fontcolor, x, y)
@@ -488,7 +467,8 @@ class ViewOneSchedule(QWidget):
 
     def setSchedule(self, schedule: Schedule):
         self.schedule = schedule
-        schedule.drawSchedule(self.scene)
+        schedule.drawScheduleBG(self.scene)
+        schedule.redrawSchedule(self.scene)
         for course in self.schedule.courses:
             self.courseList.addItem(
                 course.code + " " + course.title + " " + course.type
