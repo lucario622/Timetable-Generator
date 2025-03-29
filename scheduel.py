@@ -199,18 +199,15 @@ class CourseTime:
         self.length = length
         self.biweekly = biweekly
 
-    def overlap(self, otherTime: object):
+    def overlap(self, otherTime):
         for day in self.days:
             for otherday in otherTime.days:
                 if day == otherday:
-                    if (
-                        self.time >= otherTime.time
-                        and self.time <= otherTime.time + otherTime.length
-                    ) or (
-                        otherTime.time >= self.time
-                        and otherTime.time <= self.time + self.length
-                    ):
-                        return True
+                    selfstarttime = miltohrspointmins(self.time)
+                    selfendtime = selfstarttime+minstohrspointmins(self.length)
+                    otherstarttime = miltohrspointmins(otherTime.time)
+                    otherendtime = otherstarttime+minstohrspointmins(otherTime.length)
+                    return (selfstarttime <= otherstarttime and selfendtime >= otherstarttime) or (selfstarttime <= otherendtime and selfendtime >= otherendtime)
         return False
 
 
@@ -241,22 +238,18 @@ class Course:
 
     def isattime(self, day: str, time: int):
         if day in self.times.days:
-            if time >= self.times.time and time <= (
-                self.times.time + minutes2hours(self.times.length)
-            ):
-                return True
-            else:
-                return False
+            starttime:float = miltohrspointmins(self.times.time)
+            endtime:float = starttime+minstohrspointmins(self.times.length)
+            targettime:float = miltohrspointmins(time)
+            return (starttime <= targettime and endtime >= targettime)
         else:
             return False
 
     def isattimegen(self, time: int):
-        if time >= self.times.time and time <= (
-            self.times.time + minutes2hours(self.times.length)
-        ):
-            return True
-        else:
-            return False
+        starttime:float = miltohrspointmins(self.times.time)
+        endtime:float = starttime+minstohrspointmins(self.times.length)
+        targettime:float = miltohrspointmins(time)
+        return (starttime <= targettime and endtime >= targettime)
 
     def __str__(self):
         return f"{self.crn}: {self.code}|{self.title} {self.type} Section {self.section}. Meets at {self.times.time} on {self.times.days} for {self.times.length} minutes in room {self.room}"
@@ -302,12 +295,18 @@ class Course:
 
 
 class Schedule:
-    def __init__(self, courses: list, name: str = "Untitled Schedule"):
-        self.courses = courses
-        crns = []
-        for course in self.courses:
-            crns.append(course.crn)
-        self.crns = crns
+    def __init__(self, courses: list[Course], name: str = "Untitled Schedule"):
+        if type(courses)==list[int]:
+            self.crns = courses
+            self.courses = []
+            for crn in self.crns:
+                self.courses.append(allCourses[crn]) # type: ignore
+        else:
+            self.courses = courses
+            crns = []
+            for course in self.courses:
+                crns.append(course.crn)
+            self.crns = crns
         self.name = name
         self.fullClasses = 0
         self.score = 0
@@ -543,7 +542,7 @@ class Schedule:
                                 ),
                                 0,
                             )
-                            content = f"{course.title} {course.type}"
+                            content = f"{course.title} {course.type} crn:{course.crn}"
                             space = int(WIDTH * 0.03)
                             makeText(calendar_window, content[:space], "black", x, y)
                             if len(content) >= space:
@@ -684,6 +683,31 @@ class Schedule:
                 for course in self.courses:
                     print("\t", course)
 
+def minstohrspointmins(mins: int):
+    """
+    e.g. 384 (minutes) -> 6.4 (hours)
+    """
+    return mins/60
+
+
+def minstopercent(mins: int):
+    """
+    e.g. 384 (minutes) -> 0.2666...
+    """
+    return minstohrspointmins(mins) / 24
+
+def miltohrspointmins(time: int):
+    """
+    e.g. 1230 -> 12.5
+    """
+    return math.floor(time / 100) + ((time % 100) / 60)
+
+
+def miltopercent(time: int):
+    """
+    e.g. 1230 -> 0.5208333...
+    """
+    return miltohrspointmins(time) / 24
 
 def minutes2hours(minutes:int):
     """
@@ -2059,7 +2083,7 @@ def optionstoschedules(set_of_options: list[list[str]]):
         scored_list.append(all_valid_schedules[i])
     scored_list = sorted(scored_list, key=getscore, reverse=True)  # Sort by score
     presentSchedules(scored_list)
-    return
+    return scored_list
 
 
 def presentSchedules(scored_list: list[Schedule]):
@@ -2428,6 +2452,9 @@ def courseAddingMenu():
 def main():
     global coursefile
     pygame.init()
+    global title_font
+    global text_font
+    global big_font
     title_font = pygame.font.SysFont("Lucida Console", 15)
     text_font = pygame.font.SysFont("Lucida Console", 10)
     big_font = pygame.font.SysFont("Lucida Console", 30)

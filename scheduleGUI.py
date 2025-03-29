@@ -38,18 +38,15 @@ class CourseTime:
         self.length = length
         self.biweekly = biweekly
 
-    def overlap(self, otherTime: object):
+    def overlap(self, otherTime):
         for day in self.days:
             for otherday in otherTime.days:
                 if day == otherday:
-                    if (
-                        self.time >= otherTime.time
-                        and self.time <= otherTime.time + otherTime.length
-                    ) or (
-                        otherTime.time >= self.time
-                        and otherTime.time <= self.time + self.length
-                    ):
-                        return True
+                    selfstarttime = miltohrspointmins(self.time)
+                    selfendtime = selfstarttime+minstohrspointmins(self.length)
+                    otherstarttime = miltohrspointmins(otherTime.time)
+                    otherendtime = otherstarttime+minstohrspointmins(otherTime.length)
+                    return (selfstarttime <= otherstarttime and selfendtime >= otherstarttime) or (selfstarttime <= otherendtime and selfendtime >= otherendtime)
         return False
 
 
@@ -80,22 +77,18 @@ class Course:
 
     def isattime(self, day: str, time: int):
         if day in self.times.days:
-            if time >= self.times.time and time <= (
-                self.times.time + minutes2hours(self.times.length)
-            ):
-                return True
-            else:
-                return False
+            starttime:float = miltohrspointmins(self.times.time)
+            endtime:float = starttime+minstohrspointmins(self.times.length)
+            targettime:float = miltohrspointmins(time)
+            return (starttime <= targettime and endtime >= targettime)
         else:
             return False
 
     def isattimegen(self, time: int):
-        if time >= self.times.time and time <= (
-            self.times.time + minutes2hours(self.times.length)
-        ):
-            return True
-        else:
-            return False
+        starttime:float = miltohrspointmins(self.times.time)
+        endtime:float = starttime+minstohrspointmins(self.times.length)
+        targettime:float = miltohrspointmins(time)
+        return (starttime <= targettime and endtime >= targettime)
 
     def __str__(self):
         return f"{self.crn}: {self.code}|{self.title} {self.type} Section {self.section}. Meets at {self.times.time} on {self.times.days} for {self.times.length} minutes in room {self.room}"
