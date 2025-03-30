@@ -404,6 +404,7 @@ def minutes2hours(minutes: int):
     """
     return ((minutes // 60) * 100) + (minutes % 60)
 
+undoStack = []
 
 class ViewOneSchedule(QWidget):
     def __init__(self):
@@ -450,9 +451,15 @@ class ViewOneSchedule(QWidget):
         if curitem != None:
             if not (self.schedule.courses[currow].crn in removedCRNS):
                 removedCRNS.append(self.schedule.courses[currow].crn)
+            if (len(undoStack)>0 and int(undoStack[-1][1:]) == curcrn):
+                self.parent().parent().parent().undoOmission()
             else:
                 removedCRNS.remove(self.schedule.courses[currow].crn)
             self.schedule.redrawSchedule(self.scene)
+                self.parent().parent().parent().undobutton.setEnabled(True)
+                    undoStack.append("+"+str(curcrn))
+                    undoStack.append("-"+str(curcrn))
+                self.parent().parent().parent().undobutton.setText(f"Undo Course Omission ({len(undoStack)})")
     
     def listUpdate(self):
         curitem = self.courseList.currentItem()
@@ -479,12 +486,49 @@ class SchedulePanel(QWidget):
         self.regeneratebutton = QPushButton("Re-Generatate Schedules")
         self.regeneratebutton.clicked.connect(self.regenerateSchedules)
         
+        self.undobutton = QPushButton("Undo Course Omission")
+        self.undobutton.clicked.connect(self.undoOmission)
+        self.undobutton.setEnabled(False)
+        self.undobutton.setToolTip("Undo last course removal (Ctrl+Z)")
+        
         self.tabs = ViewSchedules()
         
         self.panelLayout.addWidget(self.regeneratebutton)
+        self.panelLayout.addWidget(self.undobutton)
         self.panelLayout.addWidget(self.tabs)
         
         self.setLayout(self.panelLayout)
+    
+    def keyPressEvent(self, a0):
+        if a0.key() == 90 and a0.modifiers() == Qt.KeyboardModifier.ControlModifier:
+            if len(undoStack)>0:
+                self.undoOmission()
+        return super().keyPressEvent(a0)
+    
+    def undoOmission(self):
+        actiontoundo = undoStack.pop()
+        self.undobutton.setText(f"Undo Course Omission ({len(undoStack)})")
+        if len(undoStack) == 0:
+            self.undobutton.setEnabled(False)
+        actiontype = actiontoundo[0]
+        crntoundo = int(actiontoundo[1:])
+        ind:int = self.tabs.tabs[self.tabs.currentIndex()].schedule.crns.index(crntoundo)
+        curitem:QListWidgetItem = self.tabs.tabs[self.tabs.currentIndex()].courseList.item(ind)
+        if actiontype == "+":
+            print(f"{crntoundo} removed from removed crns ({allCourses[crntoundo]})")
+            removedCRNS.remove(crntoundo)
+            random.seed(crntoundo)
+            minC = 100
+            maxC = 255
+            myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
+            curitem.setForeground(QColor('black'))
+            curitem.setBackground(myColor)
+        else:
+            print(f"{crntoundo} added back to removed crns ({allCourses[crntoundo]})")
+            removedCRNS.append(crntoundo)
+            curitem.setBackground(QColor('black'))
+            curitem.setForeground(QColor('white'))
+        self.tabs.tabs[self.tabs.currentIndex()].schedule.redrawSchedule(self.tabs.tabs[self.tabs.currentIndex()].scene)
     
     def regenerateSchedules(self):
         window.setCursor(QCursor(Qt.CursorShape.WaitCursor))
