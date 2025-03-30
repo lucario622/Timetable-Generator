@@ -219,7 +219,7 @@ class Course:
         crn: int,
         type: str,
         code: str,
-        times,
+        times:CourseTime,
         section: int,
         instructor: list,
         maxpop: int,
@@ -845,10 +845,10 @@ def readCourses():
     global allCourses
     allCoursesJSON = []
     allCourses = dict()
-    try:
-        coursefile = coursefile
-    except:
-        coursefile = "CourseFiles/Winter2025.json"
+    # try:
+    #     coursefile = coursefile
+    # except:
+    #     coursefile = "CourseFiles/Winter2025.json"
     print(coursefile)
     with open(coursefile, "r") as f:
         allCoursesJSON = json.load(f)
@@ -1284,6 +1284,12 @@ def addCourses():
         length = int(input("Length in minutes (80 170): "))
         room = input("Room (Ex: UA1350): ")
         biweekly = int(input("Biweekly? (0 1 2)"))
+        instructor = []
+        while inp != "stop" and inp != "":
+            instructor.append(inp)
+            inp = input("Instructor(s): ")
+        maxpop = input("Max capacity")
+        curpop = input("Current capacity")
         courseJSON = {
             "crn": crn,
             "type": coursetype,
@@ -1297,9 +1303,12 @@ def addCourses():
                 "length": length,
                 "biweekly": biweekly,
             },
+            "instructor": instructor,
+            "maxpop":maxpop,
+            "curpop":curpop,
         }
         course_time = CourseTime(days, time, length, biweekly)
-        course = Course(title, room, crn, coursetype, code, course_time, section)
+        course = Course(title, room, crn, coursetype, code, course_time, section, instructor, maxpop, curpop)
         allCoursesJSON.append(courseJSON)
         allCourses[crn] = course
 
