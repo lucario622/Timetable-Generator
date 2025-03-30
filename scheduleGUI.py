@@ -308,7 +308,8 @@ class Schedule:
                 h = minstohrspointmins(course.times.length)/15 * (HEIGHT-55)
 
                 myRect = QRectF(x,y,WIDTH * 0.17,h)
-                scene.addRect(myRect,brush=myColor)
+                myQGRI = scene.addRect(myRect,brush=myColor)
+                myQGRI.setData(69420,course.crn)
                 # scene.addRect(x,y,WIDTH * 0.17,h,brush=myColor)
                 content = f"{course.title} {course.type} {course.room} crn:{course.crn}"
                 space = int(WIDTH * 0.03)
@@ -320,6 +321,9 @@ class Schedule:
                     content = content[index+1:]
                 if len(content) >= 0:
                     makeText(scene, content[:space], fontcolor, x, y + 30)
+        for sceneitem in scene.items():
+            if sceneitem.type() == 3:
+                sceneitem.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
 
 def getscore(x: Schedule):
     """
@@ -446,6 +450,8 @@ class ViewOneSchedule(QWidget):
 
     def omitcourse(self):
         self.courseList.setFocus()
+        for QGitem in self.scene.selectedItems():
+            self.omitcrn(QGitem.data(69420))
         curitem = self.courseList.currentItem()
         currow = self.courseList.currentRow()
         if curitem != None:
@@ -459,6 +465,33 @@ class ViewOneSchedule(QWidget):
                 self.parent().parent().parent().undobutton.setEnabled(True)
                     undoStack.append("+"+str(curcrn))
                     undoStack.append("-"+str(curcrn))
+                self.parent().parent().parent().undobutton.setText(f"Undo Course Omission ({len(undoStack)})")
+        
+    def omitcrn(self,curcrn:int):
+        if curcrn in self.schedule.crns:
+            curitem = self.courseList.item(self.schedule.crns.index(curcrn))
+            if (len(undoStack)>0 and int(undoStack[-1][1:]) == curcrn):
+                self.parent().parent().parent().undoOmission()
+            else:
+                self.parent().parent().parent().undobutton.setEnabled(True)
+                if not (curcrn in removedCRNS):
+                    print(f"{curcrn} added to removed crns ({allCourses[curcrn]})")
+                    removedCRNS.append(curcrn)
+                    undoStack.append("+"+str(curcrn))
+                    curitem.setBackground(QColor('black'))
+                    curitem.setForeground(QColor('white'))
+                else:
+                    print(f"{curcrn} removed from removed crns ({allCourses[curcrn]})")
+                    removedCRNS.remove(curcrn)
+                    undoStack.append("-"+str(curcrn))
+                    random.seed(curcrn)
+                    minC = 100
+                    maxC = 255
+                    myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
+                    curitem.setForeground(QColor('black'))
+                    curitem.setBackground(myColor)
+                    print(curitem)
+                self.schedule.redrawSchedule(self.scene)
                 self.parent().parent().parent().undobutton.setText(f"Undo Course Omission ({len(undoStack)})")
     
     def listUpdate(self):
