@@ -449,23 +449,37 @@ class ViewOneSchedule(QWidget):
         self.tabLayout.addWidget(self.rightPanel, 0, 1)
 
     def omitcourse(self):
-        self.courseList.setFocus()
         for QGitem in self.scene.selectedItems():
             self.omitcrn(QGitem.data(69420))
+        # print(self.scene.selectedItems())
         curitem = self.courseList.currentItem()
         currow = self.courseList.currentRow()
         if curitem != None:
-            if not (self.schedule.courses[currow].crn in removedCRNS):
-                removedCRNS.append(self.schedule.courses[currow].crn)
+            curcrn = self.schedule.courses[currow].crn
             if (len(undoStack)>0 and int(undoStack[-1][1:]) == curcrn):
                 self.parent().parent().parent().undoOmission()
             else:
-                removedCRNS.remove(self.schedule.courses[currow].crn)
-            self.schedule.redrawSchedule(self.scene)
                 self.parent().parent().parent().undobutton.setEnabled(True)
+                if not (curcrn in removedCRNS):
+                    print(f"{curcrn} added to removed crns ({allCourses[curcrn]})")
+                    removedCRNS.append(curcrn)
                     undoStack.append("+"+str(curcrn))
+                    curitem.setBackground(QColor('black'))
+                    curitem.setForeground(QColor('white'))
+                else:
+                    print(f"{curcrn} removed from removed crns ({allCourses[curcrn]})")
+                    removedCRNS.remove(curcrn)
                     undoStack.append("-"+str(curcrn))
+                    random.seed(curcrn)
+                    minC = 100
+                    maxC = 255
+                    myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
+                    curitem.setForeground(QColor('black'))
+                    curitem.setBackground(myColor)
+                    print(curitem)
+                self.schedule.redrawSchedule(self.scene)
                 self.parent().parent().parent().undobutton.setText(f"Undo Course Omission ({len(undoStack)})")
+        # self.courseList.setFocus()
         
     def omitcrn(self,curcrn:int):
         if curcrn in self.schedule.crns:
@@ -494,19 +508,26 @@ class ViewOneSchedule(QWidget):
                 self.schedule.redrawSchedule(self.scene)
                 self.parent().parent().parent().undobutton.setText(f"Undo Course Omission ({len(undoStack)})")
     
-    def listUpdate(self):
-        curitem = self.courseList.currentItem()
+    def listUpdate(self,curitem:QListWidgetItem,previtem:QListWidgetItem):
         if curitem != None:
+            curitem.setForeground(QColor('white'))
             self.schedule.redrawSchedule(self.scene)
+        if previtem != None and (not self.schedule.courses[self.courseList.indexFromItem(previtem).row()].crn in removedCRNS):
+            previtem.setForeground(QColor('black'))
 
     def setSchedule(self, schedule: Schedule):
         self.schedule = schedule
         schedule.drawScheduleBG(self.scene)
         schedule.redrawSchedule(self.scene)
         for course in self.schedule.courses:
-            self.courseList.addItem(
-                course.code + " " + course.title + " " + course.type
-            )
+            myitem = QListWidgetItem(course.code + " " + course.title + " " + course.type)
+            random.seed(course.crn)
+            minC = 100
+            maxC = 255
+            myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
+            myitem.setForeground(QColor('black'))
+            myitem.setBackground(myColor)
+            self.courseList.addItem(myitem)
         self.rlayout.addWidget(QLabel(f"{schedule.fullClasses}/{len(schedule.crns)} classes full"))
 
 class SchedulePanel(QWidget):
