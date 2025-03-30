@@ -33,6 +33,8 @@ resolution:QSize = QSize()
 
 weights:list[int] = []
 
+uniqueCodes:list[str] = []
+
 class CourseTime:
     def __init__(self, days: list, time: int, length: int, biweekly: int):
         self.days = days
@@ -130,6 +132,34 @@ class Course:
                 return self.maxpop
             case "curpop":
                 return self.curpop
+            case _:
+                return ""
+
+uniqueCourses:dict[str,Course] = dict()
+
+
+class GeneralCourse:
+    def __init__(
+        self,
+        title: str,
+        code: str,
+        sections:list[Course]
+    ):
+        self.title = title
+        self.code = code
+        self.sections = sections
+    
+    def __str__(self):
+        return f"{self.code}|{self.title} {len(self.sections)} sections"
+    
+    def get(self, query: str):
+        match query.lower():
+            case "title":
+                return self.title
+            case "code":
+                return self.code
+            case "sections":
+                return self.sections
             case _:
                 return ""
 
@@ -669,7 +699,114 @@ class ViewSchedules(QTabWidget):
 class InputCourses(QWidget):
     def __init__(self):
         super().__init__()
+        
+        self.selectedCourses:list[str] = [] #List of course codes
+        
+        self.mainLayout = QHBoxLayout()
+        self.leftLayout = QVBoxLayout()
+        self.centerLayout = QVBoxLayout()
+        
+        #left side
+        self.codeinputlayout = QHBoxLayout()
+        self.codeLabel = QLabel("Course Code:")
+        self.codeInput = QLineEdit()
+        self.codeInput.textEdited.connect(self.searchforcourses)
+        self.codeLabel.setBuddy(self.codeInput)
+        
+        self.titleinputlayout = QHBoxLayout()
+        self.nameLabel = QLabel("Course Title:")
+        self.nameInput = QLineEdit()
+        self.nameInput.textEdited.connect(self.searchforcourses)
+        self.nameLabel.setBuddy(self.nameInput)
+        
+        self.codeinputlayout.addWidget(self.codeLabel)
+        self.codeinputlayout.addWidget(self.codeInput)
+        self.input1 = QWidget()
+        self.input1.setLayout(self.codeinputlayout)
+        self.titleinputlayout.addWidget(self.nameLabel)
+        self.titleinputlayout.addWidget(self.nameInput)
+        self.input2 = QWidget()
+        self.input2.setLayout(self.titleinputlayout)
+        
+        self.searchresults = QListWidget()
+        self.searchresults.itemSelectionChanged.connect(self.updateAddButton)
+        
+        self.leftLayout.addWidget(self.input1)
+        self.leftLayout.addWidget(self.input2)
+        self.leftLayout.addWidget(self.searchresults)
+        self.leftbox = QWidget()
+        self.leftbox.setLayout(self.leftLayout)
+        self.mainLayout.addWidget(self.leftbox)
+        
+        #center
+        self.addCourseButton = QPushButton("Add")
+        self.addCourseButton.clicked.connect(self.addSelected)
+        self.addCourseButton.setEnabled(False)
+        self.centerLayout.addWidget(self.addCourseButton)
+        
+        self.removeCourseButton = QPushButton("Remove")
+        self.removeCourseButton.clicked.connect(self.removeSelected)
+        self.centerLayout.addWidget(self.removeCourseButton)
+        self.removeCourseButton.setEnabled(False)
+        
+        self.centerBox = QWidget()
+        self.centerBox.setLayout(self.centerLayout)
+        self.centerBox.setMaximumHeight(100)
+        self.mainLayout.addWidget(self.centerBox)
 
+        #right side
+        self.selectionList = QListWidget()
+        self.mainLayout.addWidget(self.selectionList)
+        
+ 
+        # aligning label to the bottom
+        # self.label_1 = QLabel("Bottom")
+        # self.label_1.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # self.myLayout.addWidget(self.label_1)
+        self.setLayout(self.mainLayout)
+        
+    def updateAddButton(self):
+        if self.searchresults.currentItem() != None:
+            self.addCourseButton.setEnabled(True)
+        else:
+            self.addCourseButton.setEnabled(False)
+        
+    def searchforcourses(self):
+        self.searchresults.clear()
+        count = 0
+        for eachcode in uniquesorted:
+            eachtitle = uniqueCourses[eachcode].title
+            if (self.codeInput.text() != "" and self.codeInput.text().lower() in eachcode.lower()) or (self.nameInput.text() != "" and self.nameInput.text().lower() in eachtitle.lower()):
+                self.searchresults.addItem(f"{eachcode} {eachtitle}")
+                count+=1
+        if count == 0:
+            self.addCourseButton.setEnabled(False)
+    
+    def addSelected(self):
+        curitem = self.searchresults.currentItem()
+        if curitem != None:
+            if curitem.text().split(" ")[0] in self.selectedCourses:
+                print("Already Added")
+            else:
+                print(f"Add course {curitem.text()}")
+                self.removeCourseButton.setEnabled(True)
+                self.selectionList.addItem(curitem.text())
+                self.selectedCourses.append(curitem.text().split(" ")[0])
+        else:
+            print("No Course selected")
+        
+    def removeSelected(self):
+        curitem = self.selectionList.currentItem()
+        if curitem != None:
+            print(f"Remove course {curitem.text()}")
+            ccode = curitem.text().split(" ")[0]
+            removedrow = self.selectionList.takeItem(self.selectionList.currentRow())
+            del removedrow
+            self.selectedCourses.remove(ccode)
+            if self.selectionList.count() == 0:
+                self.removeCourseButton.setEnabled(False)
+        else:
+            print("No Course selected")
 
 class InputPreferences(QWidget):
     def __init__(self):
@@ -755,6 +892,11 @@ allCoursesJSON = []
 removedCRNS = []
 allCourses:dict[int,Course] = dict()
 
+def firstNumIndex(str: str):
+    for i in range(len(str)):
+        if str[i].isnumeric():
+            return i
+
 coursefile = "CourseFiles/Winter2025.json"
 
 with open(coursefile, "r") as f:
@@ -781,6 +923,17 @@ for course in allCoursesJSON:
     )
     allCourses[crn] = temp
 allCourses = dict(sorted(allCourses.items()))
+
+
+for course in allCourses.values():
+    if course.code in uniqueCodes:
+        uniqueCourses[course.code].get("sections").append(course)
+    else:
+        newGenCourse:GeneralCourse = GeneralCourse(course.title,course.code,[course])
+        uniqueCodes.append(course.code)
+        uniqueCourses[course.code] = newGenCourse
+
+uniquesorted = sorted(uniqueCourses,key=lambda a:a[firstNumIndex(a):-1])
 
 app = QApplication(sys.argv)
 resolution = app.primaryScreen().size()
