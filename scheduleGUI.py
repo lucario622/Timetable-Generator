@@ -25,7 +25,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
 )
-from PyQt6.QtGui import QIcon, QColor, QFont
+from PyQt6.QtGui import QIcon, QColor, QFont, QCursor
 
 WIDTH = 1920
 HEIGHT = 1060
@@ -136,11 +136,17 @@ class Course:
 
 class Schedule:
     def __init__(self, courses: list[Course], name: str = "Untitled Schedule"):
-        self.courses = courses
-        crns = []
-        for course in self.courses:
-            crns.append(course.crn)
-        self.crns = crns
+        if type(courses)==list[int]:
+            self.crns = courses
+            self.courses = []
+            for crn in self.crns:
+                self.courses.append(allCourses[crn]) # type: ignore
+        else:
+            self.courses = courses
+            crns = []
+            for course in self.courses:
+                crns.append(course.crn)
+            self.crns = crns
         self.name = name
         self.fullClasses = 0
         self.score = 0
@@ -153,15 +159,6 @@ class Schedule:
         self.name = name
         self.fullClasses = 0
         self.score = 0
-
-    def checkValid(self):
-        for course in self.courses:
-            for course_ in self.courses:
-                if course == course_:
-                    continue
-                if course.overlap(course_):
-                    return False
-        return True
 
     def checkFull(self):
         self.fullClasses = 0
@@ -223,17 +220,6 @@ class Schedule:
             + " courses, Score: "
             + str(self.score)
         )
-
-    def addCourse(self, crn):
-        if crn not in allCourses:
-            return False
-        self.courses.append(allCourses[crn])
-        self.crns.append(crn)
-        if self.checkValid():
-            return True
-        self.crns.pop()
-        self.courses.pop()
-        return False
 
     def __eq__(self, other):
         for selfcrn in self.crns:
@@ -334,6 +320,12 @@ class Schedule:
                     content = content[index+1:]
                 if len(content) >= 0:
                     makeText(scene, content[:space], fontcolor, x, y + 30)
+
+def getscore(x: Schedule):
+    """
+    Used to sort scored_list in optionstoschedules()
+    """
+    return x.score
 
 def drawDashedLine(scene:QGraphicsScene,x,y,x1,y1,dashLength:int,color:QColor):
     dx = abs(x1-x)
@@ -495,16 +487,32 @@ class SchedulePanel(QWidget):
         self.setLayout(self.panelLayout)
     
     def regenerateSchedules(self):
-        # allCourses = allCourses
+        window.setCursor(QCursor(Qt.CursorShape.WaitCursor))
+        
         im_cs = ["CSCI2072U","CSCI2040U","CSCI2020U","MATH2055U","MATH2060U","SCCO0999U"]
+        cs_01 = ["MATH1010U","CSCI1030U","PHY1010U","CSCI1060U","COMM1050U"]
         datas:list[list[int]] = makedatas(im_cs,allCourses,removedCRNS)
-        scheds = betteroptionstoschedules(datas,allCourses)
+        print(datas)
+        scheds:list[Schedule] = betteroptionstoschedules(datas)
+        
+        print(str(len(scheds)) + " valid schedules")
+        scored_list:list[Schedule] = []
+        for i in range(
+            len(scheds)
+        ):  # score all schedules (might be time consuming if calcscore has O(n^2+) efficiency)
+            scheds[i].calcscore()
+            scored_list.append(scheds[i])
+        scored_list = sorted(scored_list, key=getscore, reverse=True)  # Sort by score
+        
         shortscheds = []
         for e in scheds[:6]:
             shortscheds.append(e.crns)
         self.tabs.clearSchedules()
         self.tabs.loadCrns(shortscheds)
         self.tabs.setFocus()
+        window.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
+        # tabwidg.removeTab(3)
+        # tabwidg.setCurrentIndex(2)
 
 class ViewSchedules(QTabWidget):
     def __init__(self):
