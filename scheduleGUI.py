@@ -7,7 +7,6 @@ import ctypes
 from ScheduleGenerator import makedatas, betteroptionstoschedules, allCourses
 
 from PyQt6.QtCore import QSize, Qt, QRectF
-# from PyQt6.QtCore.Qt import 
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -32,6 +31,7 @@ HEIGHT = 1060
 
 resolution:QSize = QSize()
 
+weights:list[int] = []
 
 class CourseTime:
     def __init__(self, days: list, time: int, length: int, biweekly: int):
@@ -51,7 +51,6 @@ class CourseTime:
                     return (selfstarttime <= otherstarttime and selfendtime >= otherstarttime) or (selfstarttime <= otherendtime and selfendtime >= otherendtime)
         return False
 
-
 class Course:
     def __init__(
         self,
@@ -60,7 +59,7 @@ class Course:
         crn: int,
         type: str,
         code: str,
-        times,
+        times:CourseTime,
         section: int,
         instructor: list,
         maxpop: int,
@@ -353,13 +352,11 @@ def miltoreadable(time: int):
     result = str(math.floor(time / 100)) + ":" + str(time)[-2:]
     return result
 
-
 def minstohrspointmins(mins: int):
     """
     e.g. 384 (minutes) -> 6.4 (hours)
     """
     return mins/60
-
 
 def minstopercent(mins: int):
     """
@@ -367,20 +364,17 @@ def minstopercent(mins: int):
     """
     return minstohrspointmins(mins) / 24
 
-
 def miltohrspointmins(time: int):
     """
     e.g. 1230 -> 12.5
     """
     return math.floor(time / 100) + ((time % 100) / 60)
 
-
 def miltopercent(time: int):
     """
     e.g. 1230 -> 0.5208333...
     """
     return miltohrspointmins(time) / 24
-
 
 def makeText(
     scene: QGraphicsScene,
@@ -618,11 +612,24 @@ class ViewSchedules(QTabWidget):
 
         self.tabs = []
 
-        myCrns = [72869, 72870, 73778, 75797, 75043, 74365, 75425, 74892, 75153, 70175]
-        self.addCrns(myCrns)
-        self.addCrns(
-            [72870, 72869, 74366, 73777, 70175, 75043, 74364, 72850, 74363, 70120]
-        )
+        # myCrns = [72869, 72870, 73778, 75797, 75043, 74365, 75425, 74892, 75153, 70175]
+        # myCrns = [
+        #     40290,
+        #     40299,
+        #     42684,
+        #     43913,
+        #     43914,
+        #     42944,
+        #     42751,
+        #     42757,
+        #     40364,
+        #     42978,
+        #     41929
+        # ]
+        # self.addCrns(myCrns)
+        # self.addCrns(
+        #     [72870, 72869, 74366, 73777, 70175, 75043, 74364, 72850, 74363, 70120]
+        # )
         self.currentChanged.connect(self.tabChanged)
         
     def clearSchedules(self):
@@ -659,7 +666,6 @@ class ViewSchedules(QTabWidget):
         myTab.setSchedule(mySchedule)
         self.tabs.append(myTab)
 
-
 class InputCourses(QWidget):
     def __init__(self):
         super().__init__()
@@ -668,7 +674,6 @@ class InputCourses(QWidget):
 class InputPreferences(QWidget):
     def __init__(self):
         super().__init__()
-
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -693,7 +698,8 @@ class MainWindow(QMainWindow):
         tabs.addTab(viewSchedules, "Schedules")
 
         # tabs.setTabEnabled(2,False)
-        tabs.setCurrentIndex(2)
+        tabs.setTabVisible(2,False)
+        # tabs.setCurrentIndex(2)
 
         self.setCentralWidget(tabs)
 
@@ -745,13 +751,9 @@ class MainWindow(QMainWindow):
     def summonText(self, index):
         return self.textN[index].text()
 
-
-    
-    
-
 allCoursesJSON = []
 removedCRNS = []
-allCourses = dict()
+allCourses:dict[int,Course] = dict()
 
 coursefile = "CourseFiles/Winter2025.json"
 
@@ -777,7 +779,6 @@ for course in allCoursesJSON:
         course["maxpop"],
         course["curpop"],
     )
-    # if not (crn in allCourses):
     allCourses[crn] = temp
 allCourses = dict(sorted(allCourses.items()))
 
