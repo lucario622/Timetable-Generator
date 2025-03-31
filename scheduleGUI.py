@@ -774,9 +774,14 @@ class InputCourses(QWidget):
     def searchforcourses(self):
         self.searchresults.clear()
         count = 0
+        if self.codeInput.text() == "" and self.nameInput.text() == "":
+            self.addCourseButton.setEnabled(False)
+            return
         for eachcode in uniquesorted:
             eachtitle = uniqueCourses[eachcode].title
-            if (self.codeInput.text() != "" and self.codeInput.text().lower() in eachcode.lower()) or (self.nameInput.text() != "" and self.nameInput.text().lower() in eachtitle.lower()):
+            titlehit = (self.nameInput.text() != "" and self.nameInput.text().lower() in eachtitle.lower())
+            codehit = (self.codeInput.text() != "" and self.codeInput.text().lower() in eachcode.lower())
+            if (codehit and self.nameInput.text() == "") or (titlehit and self.codeInput.text() == "") or (titlehit and codehit):
                 self.searchresults.addItem(f"{eachcode} {eachtitle}")
                 count+=1
         if count == 0:
