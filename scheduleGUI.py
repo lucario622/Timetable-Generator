@@ -719,7 +719,9 @@ class InputCourses(QWidget):
         self.presetslabel.setBuddy(self.presetsDD)
         self.presetsPush = QPushButton("Add all")
         self.presetsPush.clicked.connect(self.addAllInPreset)
+        self.presetsPush.setEnabled(False)
         self.presetsDD.currentIndexChanged.connect(self.presetselected)
+        self.presetsDD.addItem(f"- Select -")
         for csname in filecontents:
             print(csname)
             for i in range(4):
@@ -785,8 +787,16 @@ class InputCourses(QWidget):
         self.mainLayout.addWidget(self.centerBox)
 
         #right side
+        self.rightLayout = QVBoxLayout()
+        self.rightBox = QWidget()
+        self.rightBox.setLayout(self.rightLayout)
+        self.proceedButton = QPushButton("Proceed")
+        self.proceedButton.setEnabled(False)
+        self.proceedButton.setMinimumHeight(100)
         self.selectionList = QListWidget()
-        self.mainLayout.addWidget(self.selectionList)
+        self.rightLayout.addWidget(self.selectionList)
+        self.rightLayout.addWidget(self.proceedButton)
+        self.mainLayout.addWidget(self.rightBox)
         
  
         # aligning label to the bottom
@@ -802,20 +812,28 @@ class InputCourses(QWidget):
             self.addCourseButton.setEnabled(False)
         
     def addAllInPreset(self):
-        self.removeAllCourseButton.setEnabled(True)
-        self.removeCourseButton.setEnabled(True)
-        for eachcode in self.presetsDD.itemData(self.presetsDD.currentIndex()):
-            self.selectionList.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
-            self.selectedCourses.append(eachcode)
+        if self.presetsDD.currentIndex() != 0:
+            self.removeAllCourseButton.setEnabled(True)
+            self.removeCourseButton.setEnabled(True)
+            self.proceedButton.setEnabled(True)
+            for eachcode in self.presetsDD.itemData(self.presetsDD.currentIndex()):
+                self.selectionList.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
+                self.selectedCourses.append(eachcode)
         
     def presetselected(self,ind):
         if self.firsttime:
             self.firsttime = False
             return
-        self.searchresults.clear()
-        print(self.presetsDD.itemData(ind))
-        for eachcode in self.presetsDD.itemData(ind):
-            self.searchresults.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
+        if self.presetsDD.currentIndex() != 0:
+            self.presetsPush.setEnabled(True)
+            self.searchresults.clear()
+            print(self.presetsDD.itemData(ind)) # prints selected program's courses
+            for eachcode in self.presetsDD.itemData(ind):
+                self.searchresults.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
+        else:
+            self.searchresults.clear()
+            self.presetsPush.setEnabled(False)
+
     
     def searchforcourses(self):
         self.searchresults.clear()
@@ -842,6 +860,7 @@ class InputCourses(QWidget):
                 print(f"Add course {curitem.text()}")
                 self.removeCourseButton.setEnabled(True)
                 self.removeAllCourseButton.setEnabled(True)
+                self.proceedButton.setEnabled(True)
                 self.selectionList.addItem(curitem.text())
                 self.selectedCourses.append(curitem.text().split(" ")[0])
         else:
@@ -852,6 +871,7 @@ class InputCourses(QWidget):
         self.selectionList.clear()
         self.selectedCourses = []
         self.removeCourseButton.setEnabled(False)
+        self.proceedButton.setEnabled(False)
         
     def removeSelected(self):
         curitem = self.selectionList.currentItem()
@@ -863,6 +883,8 @@ class InputCourses(QWidget):
             self.selectedCourses.remove(ccode)
             if self.selectionList.count() == 0:
                 self.removeCourseButton.setEnabled(False)
+                self.removeAllCourseButton.setEnabled(False)
+                self.proceedButton.setEnabled(False)
         else:
             print("No Course selected")
 
