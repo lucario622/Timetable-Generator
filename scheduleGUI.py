@@ -886,6 +886,8 @@ class InputCourses(QWidget):
                 count+=1
         if count == 0:
             self.addCourseButton.setEnabled(False)
+        if count == 1:
+            self.searchresults.setCurrentRow(0)
     
     def addSelected(self):
         curitem = self.searchresults.currentItem()
