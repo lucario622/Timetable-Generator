@@ -23,6 +23,7 @@ from PyQt6.QtWidgets import (
     QTabWidget,
     QVBoxLayout,
     QHBoxLayout,
+    QComboBox,
 )
 from PyQt6.QtGui import QIcon, QColor, QFont, QCursor
 
@@ -707,6 +708,24 @@ class InputCourses(QWidget):
         self.centerLayout = QVBoxLayout()
         
         #left side
+        termtype = int(str(list(allCourses)[0])[0])
+        termstr = "Fall" if (termtype == 4) else "Winter"
+        with open("Programs.json",'r') as f:
+            filecontents = json.load(f)
+        self.presetsmenu = QHBoxLayout()
+        self.presetsDD = QComboBox()
+        self.firsttime = True
+        self.presetslabel = QLabel("Programs:")
+        self.presetslabel.setBuddy(self.presetsDD)
+        self.presetsPush = QPushButton("Add all")
+        self.presetsPush.clicked.connect(self.addAllInPreset)
+        self.presetsDD.currentIndexChanged.connect(self.presetselected)
+        for csname in filecontents:
+            print(csname)
+            for i in range(4):
+                if (i+termtype)%2==0: #correct term
+                    self.presetsDD.addItem(f"{csname} Year {math.ceil(i/2.0)} {termstr}",filecontents[csname][i])
+        
         self.codeinputlayout = QHBoxLayout()
         self.codeLabel = QLabel("Course Code:")
         self.codeInput = QLineEdit()
@@ -727,10 +746,16 @@ class InputCourses(QWidget):
         self.titleinputlayout.addWidget(self.nameInput)
         self.input2 = QWidget()
         self.input2.setLayout(self.titleinputlayout)
+        self.presetsmenu.addWidget(self.presetslabel)
+        self.presetsmenu.addWidget(self.presetsDD)
+        self.presetsmenu.addWidget(self.presetsPush)
+        self.DDbox = QWidget()
+        self.DDbox.setLayout(self.presetsmenu)
         
         self.searchresults = QListWidget()
         self.searchresults.itemSelectionChanged.connect(self.updateAddButton)
         
+        self.leftLayout.addWidget(self.DDbox)
         self.leftLayout.addWidget(self.input1)
         self.leftLayout.addWidget(self.input2)
         self.leftLayout.addWidget(self.searchresults)
@@ -776,6 +801,22 @@ class InputCourses(QWidget):
         else:
             self.addCourseButton.setEnabled(False)
         
+    def addAllInPreset(self):
+        self.removeAllCourseButton.setEnabled(True)
+        self.removeCourseButton.setEnabled(True)
+        for eachcode in self.presetsDD.itemData(self.presetsDD.currentIndex()):
+            self.selectionList.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
+            self.selectedCourses.append(eachcode)
+        
+    def presetselected(self,ind):
+        if self.firsttime:
+            self.firsttime = False
+            return
+        self.searchresults.clear()
+        print(self.presetsDD.itemData(ind))
+        for eachcode in self.presetsDD.itemData(ind):
+            self.searchresults.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
+    
     def searchforcourses(self):
         self.searchresults.clear()
         count = 0
@@ -826,6 +867,7 @@ class InputCourses(QWidget):
             print("No Course selected")
 
 class InputPreferences(QWidget):
+    
     def __init__(self):
         super().__init__()
 
