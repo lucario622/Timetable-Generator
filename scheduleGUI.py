@@ -749,9 +749,14 @@ class InputCourses(QWidget):
         self.centerLayout.addWidget(self.removeCourseButton)
         self.removeCourseButton.setEnabled(False)
         
+        self.removeAllCourseButton = QPushButton("Remove All")
+        self.removeAllCourseButton.clicked.connect(self.removeAll)
+        self.centerLayout.addWidget(self.removeAllCourseButton)
+        self.removeAllCourseButton.setEnabled(False)
+        
         self.centerBox = QWidget()
         self.centerBox.setLayout(self.centerLayout)
-        self.centerBox.setMaximumHeight(100)
+        self.centerBox.setMaximumHeight(150)
         self.mainLayout.addWidget(self.centerBox)
 
         #right side
@@ -795,10 +800,17 @@ class InputCourses(QWidget):
             else:
                 print(f"Add course {curitem.text()}")
                 self.removeCourseButton.setEnabled(True)
+                self.removeAllCourseButton.setEnabled(True)
                 self.selectionList.addItem(curitem.text())
                 self.selectedCourses.append(curitem.text().split(" ")[0])
         else:
             print("No Course selected")
+        
+    def removeAll(self):
+        self.removeAllCourseButton.setEnabled(False)
+        self.selectionList.clear()
+        self.selectedCourses = []
+        self.removeCourseButton.setEnabled(False)
         
     def removeSelected(self):
         curitem = self.selectionList.currentItem()
