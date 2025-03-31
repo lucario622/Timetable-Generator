@@ -105,7 +105,7 @@ class Course:
 
 class Schedule:
     def __init__(self, courses: list[Course], name: str = "Untitled Schedule"):
-        if type(courses)==list[int]:
+        if len(courses)>0 and type(courses[0])==int:
             self.crns = courses
             self.courses = []
             for crn in self.crns:
@@ -326,16 +326,20 @@ def betteroptionstoschedules(set_of_options: list[list[int]]):
     global datalengths
     global datas
     global all_valid_schedules
+    global absstarttime
     all_valid_schedules = []
     datas = set_of_options
     total = 1
     for eachclass in set_of_options:
         total *= len(eachclass)
         datalengths.append(len(eachclass))
-    print(total)
+    if total == 0:
+        return [],0
+    print(str(total) + "Schedules to be processed")
     
+    absstarttime = math.floor(time.time() * 1000)
     for crn0 in set_of_options[0]:
         recursiveSchedules(str(crn0),1)
     
-    print(completedCount)
-    return all_valid_schedules
+    print(str(completedCount) + "Schedules processed in "+str((math.floor(time.time()*1000)-absstarttime))+" Ms")
+    return all_valid_schedules, (math.floor(time.time()*1000)-absstarttime)/1000

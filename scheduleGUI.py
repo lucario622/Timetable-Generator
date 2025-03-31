@@ -36,6 +36,8 @@ weights:list[int] = []
 
 uniqueCodes:list[str] = []
 
+currentCodes:list[str] = []
+
 class CourseTime:
     def __init__(self, days: list, time: int, length: int, biweekly: int):
         self.days = days
@@ -137,7 +139,6 @@ class Course:
                 return ""
 
 uniqueCourses:dict[str,Course] = dict()
-
 
 class GeneralCourse:
     def __init__(
@@ -359,7 +360,7 @@ def getscore(x: Schedule):
     """
     Used to sort scored_list in optionstoschedules()
     """
-    return x.score
+    return x.calcscore()
 
 def drawDashedLine(scene:QGraphicsScene,x,y,x1,y1,dashLength:int,color:QColor):
     dx = abs(x1-x)
@@ -476,7 +477,6 @@ class ViewOneSchedule(QWidget):
     def omitcourse(self):
         for QGitem in self.scene.selectedItems():
             self.omitcrn(QGitem.data(69420))
-        # print(self.scene.selectedItems())
         curitem = self.courseList.currentItem()
         currow = self.courseList.currentRow()
         if curitem != None:
@@ -486,14 +486,21 @@ class ViewOneSchedule(QWidget):
             else:
                 self.parent().parent().parent().undobutton.setEnabled(True)
                 if not (curcrn in removedCRNS):
-                    print(f"{curcrn} added to removed crns ({allCourses[curcrn]})")
                     removedCRNS.append(curcrn)
+                    curdatas = makedatas(currentCodes,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    print(str(curtotal) + " Courses to be processed after having removed " + str(curcrn))
+                    thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
+                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
                     undoStack.append("+"+str(curcrn))
                     curitem.setBackground(QColor('black'))
                     curitem.setForeground(QColor('white'))
                 else:
-                    print(f"{curcrn} removed from removed crns ({allCourses[curcrn]})")
                     removedCRNS.remove(curcrn)
+                    curdatas = makedatas(currentCodes,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
+                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
                     undoStack.append("-"+str(curcrn))
                     random.seed(curcrn)
                     minC = 100
@@ -501,7 +508,6 @@ class ViewOneSchedule(QWidget):
                     myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
                     curitem.setForeground(QColor('black'))
                     curitem.setBackground(myColor)
-                    print(curitem)
                 self.schedule.redrawSchedule(self.scene)
                 self.parent().parent().parent().undobutton.setText(f"Undo Course Omission ({len(undoStack)})")
         # self.courseList.setFocus()
@@ -514,14 +520,20 @@ class ViewOneSchedule(QWidget):
             else:
                 self.parent().parent().parent().undobutton.setEnabled(True)
                 if not (curcrn in removedCRNS):
-                    print(f"{curcrn} added to removed crns ({allCourses[curcrn]})")
                     removedCRNS.append(curcrn)
+                    curdatas = makedatas(currentCodes,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
+                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
                     undoStack.append("+"+str(curcrn))
                     curitem.setBackground(QColor('black'))
                     curitem.setForeground(QColor('white'))
                 else:
-                    print(f"{curcrn} removed from removed crns ({allCourses[curcrn]})")
                     removedCRNS.remove(curcrn)
+                    curdatas = makedatas(currentCodes,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
+                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
                     undoStack.append("-"+str(curcrn))
                     random.seed(curcrn)
                     minC = 100
@@ -529,7 +541,6 @@ class ViewOneSchedule(QWidget):
                     myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
                     curitem.setForeground(QColor('black'))
                     curitem.setBackground(myColor)
-                    print(curitem)
                 self.schedule.redrawSchedule(self.scene)
                 self.parent().parent().parent().undobutton.setText(f"Undo Course Omission ({len(undoStack)})")
     
@@ -562,7 +573,7 @@ class SchedulePanel(QWidget):
         self.panelLayout = QVBoxLayout()
         self.panelLayout.setContentsMargins(0,0,0,0)
         
-        self.regeneratebutton = QPushButton("Re-Generatate Schedules")
+        self.regeneratebutton = QPushButton("Re-Generate Schedules")
         self.regeneratebutton.clicked.connect(self.regenerateSchedules)
         
         self.undobutton = QPushButton("Undo Course Omission")
@@ -577,6 +588,7 @@ class SchedulePanel(QWidget):
         self.panelLayout.addWidget(self.tabs)
         
         self.setLayout(self.panelLayout)
+        self.avgtime = 1
     
     def keyPressEvent(self, a0):
         if a0.key() == 90 and a0.modifiers() == Qt.KeyboardModifier.ControlModifier:
@@ -591,51 +603,70 @@ class SchedulePanel(QWidget):
             self.undobutton.setEnabled(False)
         actiontype = actiontoundo[0]
         crntoundo = int(actiontoundo[1:])
-        ind:int = self.tabs.tabs[self.tabs.currentIndex()].schedule.crns.index(crntoundo)
-        curitem:QListWidgetItem = self.tabs.tabs[self.tabs.currentIndex()].courseList.item(ind)
+        if self.tabs.currentIndex() != -1: 
+            ind:int = self.tabs.tabs[self.tabs.currentIndex()].schedule.crns.index(crntoundo)
+            curitem:QListWidgetItem = self.tabs.tabs[self.tabs.currentIndex()].courseList.item(ind)
         if actiontype == "+":
-            print(f"{crntoundo} removed from removed crns ({allCourses[crntoundo]})")
             removedCRNS.remove(crntoundo)
-            random.seed(crntoundo)
-            minC = 100
-            maxC = 255
-            myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
-            curitem.setForeground(QColor('black'))
-            curitem.setBackground(myColor)
+            if self.tabs.currentIndex() != -1:
+                random.seed(crntoundo)
+                minC = 100
+                maxC = 255
+                myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
+                curitem.setForeground(QColor('black'))
+                curitem.setBackground(myColor)
         else:
-            print(f"{crntoundo} added back to removed crns ({allCourses[crntoundo]})")
             removedCRNS.append(crntoundo)
-            curitem.setBackground(QColor('black'))
-            curitem.setForeground(QColor('white'))
-        self.tabs.tabs[self.tabs.currentIndex()].schedule.redrawSchedule(self.tabs.tabs[self.tabs.currentIndex()].scene)
+            if self.tabs.currentIndex() != -1:
+                curitem.setBackground(QColor('black'))
+                curitem.setForeground(QColor('white'))
+        if self.tabs.currentIndex() != -1: self.tabs.tabs[self.tabs.currentIndex()].schedule.redrawSchedule(self.tabs.tabs[self.tabs.currentIndex()].scene)
+        if self.tabs.count() == 0:
+            self.regenerateSchedules(codes=currentCodes)
     
-    def regenerateSchedules(self):
+    def regenerateSchedules(self,a0=False,codes:list[str]=None):
         window.setCursor(QCursor(Qt.CursorShape.WaitCursor))
-        
+        if codes == None: codes = currentCodes
         im_cs = ["CSCI2072U","CSCI2040U","CSCI2020U","MATH2055U","MATH2060U","SCCO0999U"]
         cs_01 = ["MATH1010U","CSCI1030U","PHY1010U","CSCI1060U","COMM1050U"]
-        datas:list[list[int]] = makedatas(im_cs,allCourses,removedCRNS)
-        print(datas)
-        scheds:list[Schedule] = betteroptionstoschedules(datas)
-        
-        print(str(len(scheds)) + " valid schedules")
+        datas:list[list[int]] = makedatas(codes,allCourses,removedCRNS)
+        datotal = calctotal(datas)
+        scheds, ttltime = betteroptionstoschedules(datas)
+        if datotal != 0: self.avgtime = ttltime/datotal 
+        else: self.avgtime = 1
+        print(str(ttltime) + " Time taken in seconds")
+        print(str(self.avgtime) + " Time taken per item")
+        print(f"{self.avgtime}*{datotal} = {self.avgtime*datotal} = {ttltime}")
+
+        print(str(len(scheds)) + " valid schedules found")
         scored_list:list[Schedule] = []
         for i in range(
             len(scheds)
         ):  # score all schedules (might be time consuming if calcscore has O(n^2+) efficiency)
+            scheds[i] = Schedule(scheds[i].crns)
             scheds[i].calcscore()
             scored_list.append(scheds[i])
         scored_list = sorted(scored_list, key=getscore, reverse=True)  # Sort by score
         
         shortscheds = []
-        for e in scheds[:6]:
+        for e in scored_list[:6]:
             shortscheds.append(e.crns)
         self.tabs.clearSchedules()
         self.tabs.loadCrns(shortscheds)
         self.tabs.setFocus()
         window.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
+        self.regeneratebutton.setText(f"Re-Generate Schedules (est.{ttltime}s)")
         # tabwidg.removeTab(3)
         # tabwidg.setCurrentIndex(2)
+
+def calctotal(arr):
+    total = 1
+    for eachentry in arr:
+        minitotal = 0
+        for eacheachentry in eachentry:
+            if not (eacheachentry in removedCRNS): minitotal += 1
+        total *= minitotal
+    return total
 
 class ViewSchedules(QTabWidget):
     def __init__(self):
@@ -711,7 +742,7 @@ class InputCourses(QWidget):
         termtype = int(str(list(allCourses)[0])[0])
         termstr = "Fall" if (termtype == 4) else "Winter"
         with open("Programs.json",'r') as f:
-            filecontents = json.load(f)
+            filecontents:dict[str,list[list[str]]] = json.load(f)
         self.presetsmenu = QHBoxLayout()
         self.presetsDD = QComboBox()
         self.firsttime = True
@@ -722,8 +753,8 @@ class InputCourses(QWidget):
         self.presetsPush.setEnabled(False)
         self.presetsDD.currentIndexChanged.connect(self.presetselected)
         self.presetsDD.addItem(f"- Select -")
+        print(filecontents.keys())
         for csname in filecontents:
-            print(csname)
             for i in range(4):
                 if (i+termtype)%2==0: #correct term
                     self.presetsDD.addItem(f"{csname} Year {math.ceil(i/2.0)} {termstr}",filecontents[csname][i])
@@ -791,6 +822,7 @@ class InputCourses(QWidget):
         self.rightBox = QWidget()
         self.rightBox.setLayout(self.rightLayout)
         self.proceedButton = QPushButton("Proceed")
+        self.proceedButton.clicked.connect(self.proceed)
         self.proceedButton.setEnabled(False)
         self.proceedButton.setMinimumHeight(100)
         self.selectionList = QListWidget()
@@ -798,13 +830,18 @@ class InputCourses(QWidget):
         self.rightLayout.addWidget(self.proceedButton)
         self.mainLayout.addWidget(self.rightBox)
         
- 
-        # aligning label to the bottom
-        # self.label_1 = QLabel("Bottom")
-        # self.label_1.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        # self.myLayout.addWidget(self.label_1)
         self.setLayout(self.mainLayout)
         
+    def proceed(self):
+        global currentCodes
+        currentCodes = self.selectedCourses
+        print(currentCodes)
+        mainwind:QTabWidget = self.parent().parent()
+        mainwind.setTabVisible(2,True)
+        mainwind.setCurrentIndex(2)
+        schedview:SchedulePanel = mainwind.parent().viewSchedules
+        schedview.regenerateSchedules(codes=currentCodes)
+
     def updateAddButton(self):
         if self.searchresults.currentItem() != None:
             self.addCourseButton.setEnabled(True)
@@ -827,7 +864,6 @@ class InputCourses(QWidget):
         if self.presetsDD.currentIndex() != 0:
             self.presetsPush.setEnabled(True)
             self.searchresults.clear()
-            print(self.presetsDD.itemData(ind)) # prints selected program's courses
             for eachcode in self.presetsDD.itemData(ind):
                 self.searchresults.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
         else:
@@ -906,17 +942,18 @@ class MainWindow(QMainWindow):
         tabFont.setPixelSize(20)
         tabs.setFont(tabFont)
 
-        inputCourses = InputCourses()
-        tabs.addTab(inputCourses, "Courses")
+        self.inputCourses = InputCourses()
+        tabs.addTab(self.inputCourses, "Courses")
 
-        inputPrefs = InputPreferences()
-        tabs.addTab(inputPrefs, "Preferences")
+        self.inputPrefs = InputPreferences()
+        tabs.addTab(self.inputPrefs, "Preferences")
 
-        viewSchedules = SchedulePanel()
-        tabs.addTab(viewSchedules, "Schedules")
+        self.viewSchedules = SchedulePanel()
+        tabs.addTab(self.viewSchedules, "Schedules")
 
         # tabs.setTabEnabled(2,False)
         tabs.setTabVisible(2,False)
+        tabs.setTabVisible(1,False)
         # tabs.setCurrentIndex(2)
 
         self.setCentralWidget(tabs)
@@ -929,45 +966,6 @@ class MainWindow(QMainWindow):
         if a0.key() == 16777216 and a0.modifiers() == Qt.KeyboardModifier.ShiftModifier:
             sys.exit()
         return super().keyPressEvent(a0)
-
-    def listCheck(self):
-        curitem = self.myListW.currentItem()
-        if curitem != None:
-            print(curitem.text())
-
-    def rotate(self):
-        for item in self.scene.selectedItems():
-            item.setRotation(item.rotation() + 1)
-
-    # def mousePressEvent(self, a0):
-    #     print(f"Left click moment at {a0.globalPosition()} or maybe {a0.pos()}")
-
-    def buttonAction(self):
-        print("button be got pushed")
-
-    def placeButton(self, layout: QGridLayout, x, y, text):
-        newbutton = QPushButton(text)
-        layout.addWidget(newbutton, x, y)
-        return newbutton
-
-    def placeLinkedButton(self, layout: QGridLayout, x, y, text, linkedIndex):
-        newbutton = QPushButton(text)
-        newbutton.clicked.connect(lambda: print(self.summonText(linkedIndex)))
-        layout.addWidget(newbutton, x, y)
-        return newbutton
-
-    def placeLabel(self, layout: QGridLayout, x, y, text):
-        newLabel = QLabel(text)
-        layout.addWidget(newLabel, x, y)
-        return newLabel
-
-    def placeInputField(self, layout: QGridLayout, x, y):
-        newLineEdit = QLineEdit()
-        layout.addWidget(newLineEdit, x, y)
-        return newLineEdit
-
-    def summonText(self, index):
-        return self.textN[index].text()
 
 allCoursesJSON = []
 removedCRNS = []
