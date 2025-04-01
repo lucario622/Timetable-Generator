@@ -321,7 +321,8 @@ class Schedule:
         ]
         WIDTH = scene.width()
         HEIGHT = scene.height()
-        scene.addRect(0, 0, WIDTH, HEIGHT, brush=QColor(250, 250, 250))
+        BGRect = scene.addRect(0, 0, WIDTH, HEIGHT, brush=QColor(250, 250, 250))
+        BGRect.setData(1000,"BG")
 
         # Draw Time numbers on left edge
         k = 0
@@ -389,7 +390,7 @@ class Schedule:
                 if len(content) >= 0:
                     makeText(scene, content[:space], fontcolor, x, y + 30)
         for sceneitem in scene.items():
-            if sceneitem.type() == 3:
+            if sceneitem.type() == 3 and sceneitem.data(1000) != "BG":
                 sceneitem.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
 
 def getscore(x: Schedule):
@@ -693,7 +694,6 @@ class SchedulePanel(QWidget):
         
         shortscheds = []
         shortscheds_ = []
-        # scored_list[0].similar(scored_list[2])
         for e in scored_list:
             neeext = False
             for e_ in shortscheds_:
