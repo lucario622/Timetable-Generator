@@ -622,7 +622,7 @@ class SchedulePanel(QWidget):
         self.panelLayout.addWidget(self.tabs)
         
         self.setLayout(self.panelLayout)
-        self.avgtime = 1
+        self.avgtime = 1/4000
     
     def keyPressEvent(self, a0):
         if a0.key() == 90 and a0.modifiers() == Qt.KeyboardModifier.ControlModifier:
@@ -667,7 +667,7 @@ class SchedulePanel(QWidget):
         datotal = calctotal(datas)
         scheds, ttltime = betteroptionstoschedules(datas)
         if datotal != 0: self.avgtime = ttltime/datotal 
-        else: self.avgtime = 1
+        else: self.avgtime = 1/4000
         print(str(ttltime) + " Time taken in seconds")
         print(str(self.avgtime) + " Time taken per item")
         print(f"{self.avgtime}*{datotal} = {self.avgtime*datotal} = {ttltime}")
