@@ -856,6 +856,11 @@ class InputCourses(QWidget):
             for eachcode in self.presetsDD.itemData(self.presetsDD.currentIndex()):
                 self.selectionList.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
                 self.selectedCourses.append(eachcode)
+            avgtime = self.parent().parent().parent().viewSchedules.avgtime
+            if avgtime != 1:
+                curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
+                curtotal = calctotal(curdatas)
+                self.proceedButton.setText(f"Proceed (est.{round(avgtime*curtotal,4)}s)")
         
     def presetselected(self,ind):
         if self.firsttime:
@@ -901,6 +906,11 @@ class InputCourses(QWidget):
                 self.proceedButton.setEnabled(True)
                 self.selectionList.addItem(curitem.text())
                 self.selectedCourses.append(curitem.text().split(" ")[0])
+                avgtime = self.parent().parent().parent().viewSchedules.avgtime
+                if avgtime != 1:
+                    curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    self.proceedButton.setText(f"Proceed (est.{round(avgtime*curtotal,4)}s)")
         else:
             print("No Course selected")
         
@@ -908,6 +918,7 @@ class InputCourses(QWidget):
         self.removeAllCourseButton.setEnabled(False)
         self.selectionList.clear()
         self.selectedCourses = []
+        self.proceedButton.setText("Proceed")
         self.removeCourseButton.setEnabled(False)
         self.proceedButton.setEnabled(False)
         
@@ -920,9 +931,16 @@ class InputCourses(QWidget):
             del removedrow
             self.selectedCourses.remove(ccode)
             if self.selectionList.count() == 0:
+                self.proceedButton.setText("Proceed")
                 self.removeCourseButton.setEnabled(False)
                 self.removeAllCourseButton.setEnabled(False)
                 self.proceedButton.setEnabled(False)
+            else:
+                avgtime = self.parent().parent().parent().viewSchedules.avgtime
+                if avgtime != 1:
+                    curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    self.proceedButton.setText(f"Proceed (est.{round(avgtime*curtotal,4)}s)")
         else:
             print("No Course selected")
 
