@@ -157,15 +157,15 @@ class timeAmount:
     def __str__(self):
         result = ""
         if self.totalYears != 0:
-            result += f"{self.totalYears} Years, "
+            result += f"{int(self.totalYears)} Years, "
         if self.totalDays != 0:
-            result += f"{self.remDays} Days, "
+            result += f"{int(self.remDays)} Days, "
         if self.totalHours != 0:
-            result += f"{self.remHours} Hours, "
+            result += f"{int(self.remHours)} Hours, "
         if self.totalMinutes != 0:
-            result += f"{self.remMinutes} Minutes, "
+            result += f"{int(self.remMinutes)} Minutes, "
         if self.totalSeconds != 0:
-            result += f"{self.remSeconds} Seconds, "
+            result += f"{int(self.remSeconds)} Seconds, "
         if self.totalMs != 0:
             result += f"{round(self.remMs,4)} ms"
         return result
@@ -522,7 +522,7 @@ class ViewOneSchedule(QWidget):
                     print(str(curtotal) + " Courses to be processed after having removed " + str(curcrn))
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
                     esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
-                    thebutton.setText(f"Re-Generate Schedules (est. {str(esttime)})")
+                    thebutton.setText(f"Re-Generate Schedules (est. {esttime})")
                     undoStack.append("+"+str(curcrn))
                     curitem.setBackground(QColor('black'))
                     curitem.setForeground(QColor('white'))
