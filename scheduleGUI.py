@@ -889,8 +889,9 @@ class InputCourses(QWidget):
             self.removeCourseButton.setEnabled(True)
             self.proceedButton.setEnabled(True)
             for eachcode in self.presetsDD.itemData(self.presetsDD.currentIndex()):
-                self.selectionList.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
-                self.selectedCourses.append(eachcode)
+                if not eachcode in self.selectedCourses:
+                    self.selectionList.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
+                    self.selectedCourses.append(eachcode)
             avgtime = self.parent().parent().parent().viewSchedules.avgtime
             if avgtime != 1:
                 curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
