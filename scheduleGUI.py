@@ -158,17 +158,17 @@ class timeAmount:
         result = ""
         if self.totalYears != 0:
             result += f"{int(self.totalYears)} Years, "
-        if self.totalDays != 0:
+        if self.remDays != 0:
             result += f"{int(self.remDays)} Days, "
-        if self.totalHours != 0:
+        if self.remHours != 0:
             result += f"{int(self.remHours)} Hours, "
-        if self.totalMinutes != 0:
+        if self.remMinutes != 0:
             result += f"{int(self.remMinutes)} Minutes, "
-        if self.totalSeconds != 0:
+        if self.remSeconds != 0:
             result += f"{int(self.remSeconds)} Seconds, "
-        if self.totalMs != 0:
-            result += f"{round(self.remMs,4)} ms"
-        return result
+        if int(round(self.remMs,4)) != 0:
+            result += f"{int(round(self.remMs,4))} ms, "
+        return result[:-2]
 
 class GeneralCourse:
     def __init__(
@@ -211,6 +211,7 @@ class Schedule:
         self.name = name
         self.fullClasses = 0
         self.score = 0
+        self.timeatschool = 0
 
     def __init__(self, crns: list[int], name: str = "Untitled Schedule"):
         self.crns = crns
@@ -220,6 +221,18 @@ class Schedule:
         self.name = name
         self.fullClasses = 0
         self.score = 0
+
+    def similar(self,self_):
+        result = False
+        specialstr1 = ""
+        specialstr2 = ""
+        speciallist1 = sorted(self.courses,key=lambda a:(".".join(a.times.days)+str(a.times.time)))
+        speciallist2 = sorted(self_.courses,key=lambda a:(".".join(a.times.days)+str(a.times.time)))
+        for course in speciallist1:
+            specialstr1+=course.code+course.type
+        for course_ in speciallist2:
+            specialstr2+=course_.code+course_.type
+        return specialstr1 == specialstr2
 
     def checkFull(self):
         self.fullClasses = 0
@@ -244,33 +257,26 @@ class Schedule:
         # add up time spent in class, in school, and in breaks
         classtime = 0
         schooltime = 0
-        timeranges = []
         for day in days:
             starttime = 0
             endtime = 0
             for course in sorted(self.courses, key=lambda a: a.times.time):
                 if day in course.times.days:
                     starttime = course.times.time
+                    starttime = miltohrspointmins(starttime)
                     break
-            for course in sorted(
-                self.courses, key=lambda a: a.times.time, reverse=True
-            ):
+            for course in sorted(self.courses, key=lambda a: a.times.time, reverse=True):
                 if day in course.times.days:
-                    endtime = course.times.time + minutes2hours(course.times.length)
-                    if endtime % 100 >= 60:
-                        endtime += 40
+                    endtime = miltohrspointmins(course.times.time)+minstohrspointmins(course.times.length)
                     break
-            timeranges.append([starttime, endtime])
-        for each in timeranges:
-            strt = (each[0] // 100) * 60 + (each[0] % 100)
-            end = (each[1] // 100) * 60 + (each[1] % 100)
-            schooltime += end - strt
+            schooltime += endtime-starttime
         for course in self.courses:
-            classtime += course.times.length
+            classtime += minstohrspointmins(course.times.length)
         breaktime = schooltime - classtime
 
-        self.score = (5 - self.daycount) * 400
-        self.score += 3900 - schooltime
+        self.score = (5 - self.daycount) * 1000 # Based on number of days off
+        self.score += int((60 - schooltime)/60*1000) # Based on amount of time (not) at school
+        self.timeatschool = timeAmount(schooltime*60*60*1000)
         return self.score
 
     def __str__(self):
@@ -598,7 +604,7 @@ class ViewOneSchedule(QWidget):
             myitem.setForeground(QColor('black'))
             myitem.setBackground(myColor)
             self.courseList.addItem(myitem)
-        self.rlayout.addWidget(QLabel(f"{schedule.fullClasses}/{len(schedule.crns)} classes full"))
+        self.rlayout.addWidget(QLabel(f"{schedule.fullClasses}/{len(schedule.crns)} classes full, {schedule.timeatschool} at school"))
 
 class SchedulePanel(QWidget):
     def __init__(self):
@@ -622,7 +628,7 @@ class SchedulePanel(QWidget):
         self.panelLayout.addWidget(self.tabs)
         
         self.setLayout(self.panelLayout)
-        self.avgtime = 1/4000
+        self.avgtime = 1/10000
     
     def keyPressEvent(self, a0):
         if a0.key() == 90 and a0.modifiers() == Qt.KeyboardModifier.ControlModifier:
@@ -637,12 +643,17 @@ class SchedulePanel(QWidget):
             self.undobutton.setEnabled(False)
         actiontype = actiontoundo[0]
         crntoundo = int(actiontoundo[1:])
-        if self.tabs.currentIndex() != -1: 
+        redrawScreen = True
+        if self.tabs.currentIndex() == -1:
+            redrawScreen = False
+        elif (not crntoundo in self.tabs.tabs[self.tabs.currentIndex()].schedule.crns):
+            redrawScreen = False
+        if redrawScreen:
             ind:int = self.tabs.tabs[self.tabs.currentIndex()].schedule.crns.index(crntoundo)
             curitem:QListWidgetItem = self.tabs.tabs[self.tabs.currentIndex()].courseList.item(ind)
         if actiontype == "+":
             removedCRNS.remove(crntoundo)
-            if self.tabs.currentIndex() != -1:
+            if redrawScreen:
                 random.seed(crntoundo)
                 minC = 100
                 maxC = 255
@@ -651,23 +662,21 @@ class SchedulePanel(QWidget):
                 curitem.setBackground(myColor)
         else:
             removedCRNS.append(crntoundo)
-            if self.tabs.currentIndex() != -1:
+            if redrawScreen:
                 curitem.setBackground(QColor('black'))
                 curitem.setForeground(QColor('white'))
-        if self.tabs.currentIndex() != -1: self.tabs.tabs[self.tabs.currentIndex()].schedule.redrawSchedule(self.tabs.tabs[self.tabs.currentIndex()].scene)
+        if redrawScreen: self.tabs.tabs[self.tabs.currentIndex()].schedule.redrawSchedule(self.tabs.tabs[self.tabs.currentIndex()].scene)
         if self.tabs.count() == 0:
             self.regenerateSchedules(codes=currentCodes)
     
     def regenerateSchedules(self,a0=False,codes:list[str]=None):
         window.setCursor(QCursor(Qt.CursorShape.WaitCursor))
         if codes == None: codes = currentCodes
-        im_cs = ["CSCI2072U","CSCI2040U","CSCI2020U","MATH2055U","MATH2060U","SCCO0999U"]
-        cs_01 = ["MATH1010U","CSCI1030U","PHY1010U","CSCI1060U","COMM1050U"]
         datas:list[list[int]] = makedatas(codes,allCourses,removedCRNS)
         datotal = calctotal(datas)
         scheds, ttltime = betteroptionstoschedules(datas)
         if datotal != 0: self.avgtime = ttltime/datotal 
-        else: self.avgtime = 1/4000
+        else: self.avgtime = 1/10000
         print(str(ttltime) + " Time taken in seconds")
         print(str(self.avgtime) + " Time taken per item")
         print(f"{self.avgtime}*{datotal} = {self.avgtime*datotal} = {ttltime}")
@@ -683,8 +692,17 @@ class SchedulePanel(QWidget):
         scored_list = sorted(scored_list, key=getscore, reverse=True)  # Sort by score
         
         shortscheds = []
-        for e in scored_list[:6]:
+        shortscheds_ = []
+        # scored_list[0].similar(scored_list[2])
+        for e in scored_list:
+            neeext = False
+            for e_ in shortscheds_:
+                if e.similar(e_): neeext = True
+            if neeext: continue
             shortscheds.append(e.crns)
+            shortscheds_.append(e)
+            if len(shortscheds) == 7:
+                break
         self.tabs.clearSchedules()
         self.tabs.loadCrns(shortscheds)
         self.tabs.setFocus()
