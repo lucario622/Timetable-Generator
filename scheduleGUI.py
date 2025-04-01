@@ -140,6 +140,36 @@ class Course:
 
 uniqueCourses:dict[str,Course] = dict()
 
+class timeAmount:
+    def __init__(self, value):
+        self.totalMs = value
+        self.totalSeconds = value // 1000
+        self.totalMinutes = value // 1000 // 60
+        self.totalHours = value // 1000 // 60 // 60
+        self.totalDays = value // 1000 // 60 // 60 // 24
+        self.totalYears = value // 1000 // 60 // 60 // 24 // 365
+        self.remMs = value % 1000
+        self.remSeconds = value // 1000 % 60
+        self.remMinutes = value // 1000 // 60 % 60
+        self.remHours = value // 1000 // 60 // 60 % 24
+        self.remDays = value // 1000 // 60 // 60 // 24 % 365
+
+    def __str__(self):
+        result = ""
+        if self.totalYears != 0:
+            result += f"{self.totalYears} Years, "
+        if self.totalDays != 0:
+            result += f"{self.remDays} Days, "
+        if self.totalHours != 0:
+            result += f"{self.remHours} Hours, "
+        if self.totalMinutes != 0:
+            result += f"{self.remMinutes} Minutes, "
+        if self.totalSeconds != 0:
+            result += f"{self.remSeconds} Seconds, "
+        if self.totalMs != 0:
+            result += f"{round(self.remMs,4)} ms"
+        return result
+
 class GeneralCourse:
     def __init__(
         self,
@@ -491,7 +521,8 @@ class ViewOneSchedule(QWidget):
                     curtotal = calctotal(curdatas)
                     print(str(curtotal) + " Courses to be processed after having removed " + str(curcrn))
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
-                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
+                    esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
+                    thebutton.setText(f"Re-Generate Schedules (est. {str(esttime)})")
                     undoStack.append("+"+str(curcrn))
                     curitem.setBackground(QColor('black'))
                     curitem.setForeground(QColor('white'))
@@ -500,7 +531,8 @@ class ViewOneSchedule(QWidget):
                     curdatas = makedatas(currentCodes,allCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
-                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
+                    esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
+                    thebutton.setText(f"Re-Generate Schedules (est. {esttime})")
                     undoStack.append("-"+str(curcrn))
                     random.seed(curcrn)
                     minC = 100
@@ -524,7 +556,8 @@ class ViewOneSchedule(QWidget):
                     curdatas = makedatas(currentCodes,allCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
-                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
+                    esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
+                    thebutton.setText(f"Re-Generate Schedules (est.{str(esttime)})")
                     undoStack.append("+"+str(curcrn))
                     curitem.setBackground(QColor('black'))
                     curitem.setForeground(QColor('white'))
@@ -533,7 +566,8 @@ class ViewOneSchedule(QWidget):
                     curdatas = makedatas(currentCodes,allCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
-                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
+                    esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
+                    thebutton.setText(f"Re-Generate Schedules (est.{esttime})")
                     undoStack.append("-"+str(curcrn))
                     random.seed(curcrn)
                     minC = 100
@@ -655,7 +689,8 @@ class SchedulePanel(QWidget):
         self.tabs.loadCrns(shortscheds)
         self.tabs.setFocus()
         window.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
-        self.regeneratebutton.setText(f"Re-Generate Schedules (est.{ttltime}s)")
+        esttime = timeAmount(ttltime*1000)
+        self.regeneratebutton.setText(f"Re-Generate Schedules (est.{esttime})")
         # tabwidg.removeTab(3)
         # tabwidg.setCurrentIndex(2)
 
@@ -860,7 +895,8 @@ class InputCourses(QWidget):
             if avgtime != 1:
                 curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
                 curtotal = calctotal(curdatas)
-                self.proceedButton.setText(f"Proceed (est.{round(avgtime*curtotal,4)}s)")
+                esttime = timeAmount(avgtime*curtotal*1000)
+                self.proceedButton.setText(f"Proceed (est.{esttime})")
         
     def presetselected(self,ind):
         if self.firsttime:
@@ -910,7 +946,8 @@ class InputCourses(QWidget):
                 if avgtime != 1:
                     curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
-                    self.proceedButton.setText(f"Proceed (est.{round(avgtime*curtotal,4)}s)")
+                    esttime = timeAmount(avgtime*curtotal*1000)
+                    self.proceedButton.setText(f"Proceed (est.{esttime})")
         else:
             print("No Course selected")
         
@@ -940,7 +977,8 @@ class InputCourses(QWidget):
                 if avgtime != 1:
                     curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
-                    self.proceedButton.setText(f"Proceed (est.{round(avgtime*curtotal,4)}s)")
+                    esttime = timeAmount(avgtime*curtotal*1000)
+                    self.proceedButton.setText(f"Proceed (est.{esttime})")
         else:
             print("No Course selected")
 
