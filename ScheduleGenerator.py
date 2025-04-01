@@ -269,9 +269,7 @@ def makedatas(courses:list[str],allCourses1:dict[int,Course],remcrns:list[int]):
     for i in range(len(set_of_all_options)):
         newoptions.append([])
         for eachcrn in set_of_all_options[i]:
-            if eachcrn in remcrns:
-                pass
-            else:
+            if not eachcrn in remcrns:
                 newoptions[i].append(eachcrn)
     newoptions = trimdatas(newoptions)
     return newoptions
