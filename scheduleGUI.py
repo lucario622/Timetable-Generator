@@ -378,7 +378,6 @@ class Schedule:
                 myRect = QRectF(x,y,WIDTH * 0.17,h)
                 myQGRI = scene.addRect(myRect,brush=myColor)
                 myQGRI.setData(69420,course.crn)
-                # scene.addRect(x,y,WIDTH * 0.17,h,brush=myColor)
                 content = f"{course.title} {course.type} {course.room} crn:{course.crn}"
                 space = int(WIDTH * 0.03)
                 index = lastIndexOf(content[:space]," ")
@@ -840,6 +839,7 @@ class InputCourses(QWidget):
         
         self.searchresults = QListWidget()
         self.searchresults.itemSelectionChanged.connect(self.updateAddButton)
+        self.searchresults.itemDoubleClicked.connect(self.addOnDoubleClick)
         
         self.leftLayout.addWidget(self.DDbox)
         self.leftLayout.addWidget(self.input1)
@@ -879,6 +879,7 @@ class InputCourses(QWidget):
         self.proceedButton.setEnabled(False)
         self.proceedButton.setMinimumHeight(100)
         self.selectionList = QListWidget()
+        self.selectionList.itemDoubleClicked.connect(self.removeOnDoubleClick)
         self.rightLayout.addWidget(self.selectionList)
         self.rightLayout.addWidget(self.proceedButton)
         self.mainLayout.addWidget(self.rightBox)
@@ -969,6 +970,26 @@ class InputCourses(QWidget):
                     self.proceedButton.setText(f"Proceed (est.{esttime})")
         else:
             print("No Course selected")
+            
+    def addOnDoubleClick(self,curitem:QListWidgetItem):
+        if curitem != None:
+            if curitem.text().split(" ")[0] in self.selectedCourses:
+                print("Already Added")
+            else:
+                print(f"Add course {curitem.text()}")
+                self.removeCourseButton.setEnabled(True)
+                self.removeAllCourseButton.setEnabled(True)
+                self.proceedButton.setEnabled(True)
+                self.selectionList.addItem(curitem.text())
+                self.selectedCourses.append(curitem.text().split(" ")[0])
+                avgtime = self.parent().parent().parent().viewSchedules.avgtime
+                if avgtime != 1:
+                    curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    esttime = timeAmount(avgtime*curtotal*1000)
+                    self.proceedButton.setText(f"Proceed (est.{esttime})")
+        else:
+            print("No Course selected")
         
     def removeAll(self):
         self.removeAllCourseButton.setEnabled(False)
@@ -980,6 +1001,28 @@ class InputCourses(QWidget):
         
     def removeSelected(self):
         curitem = self.selectionList.currentItem()
+        if curitem != None:
+            print(f"Remove course {curitem.text()}")
+            ccode = curitem.text().split(" ")[0]
+            removedrow = self.selectionList.takeItem(self.selectionList.currentRow())
+            del removedrow
+            self.selectedCourses.remove(ccode)
+            if self.selectionList.count() == 0:
+                self.proceedButton.setText("Proceed")
+                self.removeCourseButton.setEnabled(False)
+                self.removeAllCourseButton.setEnabled(False)
+                self.proceedButton.setEnabled(False)
+            else:
+                avgtime = self.parent().parent().parent().viewSchedules.avgtime
+                if avgtime != 1:
+                    curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    esttime = timeAmount(avgtime*curtotal*1000)
+                    self.proceedButton.setText(f"Proceed (est.{esttime})")
+        else:
+            print("No Course selected")
+    
+    def removeOnDoubleClick(self,curitem:QListWidgetItem):
         if curitem != None:
             print(f"Remove course {curitem.text()}")
             ccode = curitem.text().split(" ")[0]
