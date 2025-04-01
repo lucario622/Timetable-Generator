@@ -1,8 +1,6 @@
 import math
 import time
 
-allCourses = dict()
-
 class CourseTime:
     def __init__(self, days: list, time: int, length: int, biweekly: int):
         self.days = days
@@ -103,6 +101,8 @@ class Course:
             case _:
                 return ""
 
+allCourses:dict[int,Course] = dict()
+
 class Schedule:
     def __init__(self, courses: list[Course], name: str = "Untitled Schedule"):
         if len(courses)>0 and type(courses[0])==int:
@@ -197,7 +197,7 @@ def longtoshortday(longday: str):
     result = days[1][days[0].index(longday)]
     return result
 
-def functionalSearch(field: str, target, allCourses:dict):
+def functionalSearch(field: str, target):
     """
     Returns a list of all courses whose 'field' match 'target'
     """
@@ -217,7 +217,7 @@ def functionalSearch(field: str, target, allCourses:dict):
     else:
         return results
 
-def narrowSearch(crns:list[int], field:str, target, allCourses:dict):
+def narrowSearch(crns:list[int], field:str, target):
     """
     Filters a list of crns to those whose 'field' match 'target'
     """
@@ -236,7 +236,26 @@ def narrowSearch(crns:list[int], field:str, target, allCourses:dict):
     else:
         return results
 
-def makedatas(courses:list[str],allCourses1:dict,remcrns:list[int]):
+def trimdatas(set_of_ops:list[list[int]]):
+    new_ops:list[list[int]] = []
+    specialcourses:list[Course] = []
+    for i in range(len(set_of_ops)):
+        if len(set_of_ops[i]) == 1:
+            specialcourses.append(allCourses[set_of_ops[i][0]])
+    for i in range(len(set_of_ops)):
+        new_ops.append([])
+        if len(set_of_ops[i]) != 1:
+            for j in range(len(set_of_ops[i])):
+                curcourse = allCourses[set_of_ops[i][j]]
+                passes = True
+                for specialcourse in specialcourses:
+                    if curcourse.overlap(specialcourse): passes = False
+                if passes: new_ops[i].append(set_of_ops[i][j])
+        else:
+            new_ops[i] = [set_of_ops[i][0]]
+    return new_ops
+
+def makedatas(courses:list[str],allCourses1:dict[int,Course],remcrns:list[int]):
     """
     Get list of needed classes from list of courses
     """
@@ -245,7 +264,7 @@ def makedatas(courses:list[str],allCourses1:dict,remcrns:list[int]):
     set_of_all_options = []
     for code in courses:
         for classType in LTLListfromCourse(code,allCourses1):
-            set_of_all_options.append(narrowSearch(functionalSearch("code", code,allCourses1), "type", classType,allCourses1))
+            set_of_all_options.append(narrowSearch(functionalSearch("code", code), "type", classType))
     newoptions:list[list[int]] = []
     for i in range(len(set_of_all_options)):
         newoptions.append([])
@@ -254,10 +273,10 @@ def makedatas(courses:list[str],allCourses1:dict,remcrns:list[int]):
                 pass
             else:
                 newoptions[i].append(eachcrn)
-            
+    newoptions = trimdatas(newoptions)
     return newoptions
 
-def LTLListfromCourse(code,allCourses:dict):
+def LTLListfromCourse(code,allCourses):
     """
     Takes a course code (e.g. CSCI2020U), and returns which section types it has as a list.
 
