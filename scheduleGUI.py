@@ -24,6 +24,7 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QComboBox,
+    QFileDialog,
 )
 from PyQt6.QtGui import QIcon, QColor, QFont, QCursor
 
@@ -511,10 +512,14 @@ class ViewOneSchedule(QWidget):
         self.courseListButtons = QWidget()
         self.rhlayout = QHBoxLayout()
         self.courseListButtons.setLayout(self.rhlayout)
+
+        self.exportButton = QPushButton("Export Schedule")
+        self.exportButton.clicked.connect(self.exportSchedule)
         
         self.omitbutton = QPushButton("Omit Course")
         self.omitbutton.clicked.connect(self.omitcourse)
         
+        self.rhlayout.addWidget(self.exportButton)
         self.rhlayout.addWidget(self.omitbutton)
         
         self.courseList = QListWidget()
@@ -625,6 +630,47 @@ class ViewOneSchedule(QWidget):
             myitem.setBackground(myColor)
             self.courseList.addItem(myitem)
         self.rlayout.addWidget(QLabel(f"{schedule.fullClasses}/{len(schedule.crns)} classes full, {schedule.timeatschool} at school"))
+
+    def exportSchedule(self):
+        thetabs:QTabWidget = self.parent().parent().parent().parent().parent()
+        thetabs.setTabsClosable(True)
+        exportmenu = QWidget()
+        exportlayout = QHBoxLayout()
+        icsButton = QPushButton("Export as .ics (iCalendar)")
+        icsButton.clicked.connect(self.exportasics)
+        exportlayout.addWidget(icsButton)
+        thetabs.addTab(exportmenu,"Export")
+        exportmenu.setLayout(exportlayout)
+        thetabs.setCurrentWidget(exportmenu)
+    
+    def exportasics(self):
+        print("uhhh BEGIN:VCALENDAR or smth")
+        constructedics = "BEGIN:VCALENDAR\n"
+        constructedics += "PRODID:-//Fischer//Schedule Generator something//EN\n"
+        constructedics += "VERSION:2.0\n"
+        for course in self.schedule.courses:
+            constructedics += "BEGIN:VEVENT\n"
+            starttimestring = "" #20250415T230000Z is tuesday april 15th at 7pm
+            constructedics += f"DTSTART:{starttimestring}\n"
+            endtimestring = ""
+            constructedics += f"DTEND:{endtimestring}\n"
+            summarystring = course.title
+            constructedics += f"SUMMARY:{summarystring}\n"
+            locationstring = course.room
+            constructedics += f"LOCATION:{locationstring}\n"
+            constructedics += "END:VEVENT\n"
+        constructedics = "END:VCALENDAR\n"
+        file_dialog = QFileDialog(self)
+        file_dialog.setWindowTitle("Save File")
+        file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
+        file_dialog.setViewMode(QFileDialog.ViewMode.Detail)
+        file_dialog.setDefaultSuffix(".ics")
+
+        if file_dialog.exec():
+            selected_file = file_dialog.selectedFiles()[0]
+            print("Selected "+  selected_file)
+            with open(selected_file,'w') as f:
+                f.write(constructedics)
 
 class SchedulePanel(QWidget):
     def __init__(self):
