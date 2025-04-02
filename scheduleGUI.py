@@ -30,6 +30,8 @@ from PyQt6.QtGui import QIcon, QColor, QFont, QCursor
 WIDTH = 1920
 HEIGHT = 1060
 
+DARKMODE = True
+
 resolution:QSize = QSize()
 
 weights:list[int] = []
@@ -321,7 +323,13 @@ class Schedule:
         ]
         WIDTH = scene.width()
         HEIGHT = scene.height()
-        BGRect = scene.addRect(0, 0, WIDTH, HEIGHT, brush=QColor(250, 250, 250))
+        if DARKMODE:
+            myBGColor = QColor(30,30,30)
+            myLineColor = QColor(250,250,250)
+        else:
+            myBGColor = QColor(250,250,250)
+            myLineColor = QColor(30,30,30)
+        BGRect = scene.addRect(0, 0, WIDTH, HEIGHT, brush=myBGColor,pen=myBGColor)
         BGRect.setData(1000,"BG")
 
         # Draw Time numbers on left edge
@@ -334,21 +342,27 @@ class Schedule:
                 suffix = "am"
                 if i>=1200: suffix = "pm"
                 y = 40 + (j - 700) * ((HEIGHT - 55) / 1500)
-                makeText(scene,miltoreadable(i)+suffix,"black",5,y)
-                if k%2==0: scene.addLine(0,y,WIDTH,y,QColor(200,200,200)) # Line to ease time recognition
-                else: drawDashedLine(scene,0,y,WIDTH,y,3,QColor(200,200,200))
+                makeText(scene,miltoreadable(i)+suffix,myLineColor,5,y)
+                if k%2==0: scene.addLine(0,y,WIDTH,y,myLineColor) # Line to ease time recognition
+                else: drawDashedLine(scene,0,y,WIDTH,y,3,myLineColor)
                 k+=1
 
         # Draw days of week on top edge
         for j in range(len(days[0])):
             x = (0.1 + 0.18 * j) * WIDTH
-            makeText(scene, days[0][j], "black", x, 0,30)
-            scene.addLine(x,0,x,HEIGHT,QColor(200,200,200))
+            makeText(scene, days[0][j], myLineColor, x, 0,30)
+            scene.addLine(x,0,x,HEIGHT,myLineColor)
                     
     def redrawSchedule(self,scene:QGraphicsScene):
         selectedcrn = self.courses[scene.parent().courseList.currentRow()].crn
         if scene.parent().courseList.currentRow() == -1:
             selectedcrn = -1
+        if DARKMODE:
+            myBGColor = QColor(30,30,30)
+            myLineColor = QColor(250,250,250)
+        else:
+            myBGColor = QColor(250,250,250)
+            myLineColor = QColor(30,30,30)
         days = [
             ["Monday", "Tuedsay", "Wednesday", "Thursday", "Friday"],
             ["M", "T", "W", "R", "F"],
@@ -371,23 +385,28 @@ class Schedule:
                 maxC = 255
                 myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
             for day in course.times.days:
-                x = (0.1 + 0.18 * (days[1].index(day))) * WIDTH  # works
-                y = 40 + (miltohrspointmins(course.times.time)-7)/15 * (HEIGHT-55)  # not so much
+                x = (0.1 + 0.18 * (days[1].index(day))) * WIDTH
+                y = 40 + (miltohrspointmins(course.times.time)-7)/15 * (HEIGHT-55)
                 h = minstohrspointmins(course.times.length)/15 * (HEIGHT-55)
 
                 myRect = QRectF(x,y,WIDTH * 0.17,h)
-                myQGRI = scene.addRect(myRect,brush=myColor)
+                myQGRI = scene.addRect(myRect,brush=myColor,pen=myLineColor)
                 myQGRI.setData(69420,course.crn)
                 content = f"{course.title} {course.type} {course.room} crn:{course.crn}"
-                space = int(WIDTH * 0.03)
+                # space = int(WIDTH * 0.03)
+                space = int(WIDTH * 0.03 / 1.25)
                 index = lastIndexOf(content[:space]," ")
-                makeText(scene, content[:index], fontcolor, x, y)
+                y -= 8
+                makeText(scene, content[:index], fontcolor, x, y, size=15)
+                
                 content = content[index+1:]
                 if len(content) >= 0:
-                    makeText(scene, content[:space], fontcolor, x, y + 15)
+                    index = lastIndexOf(content[:space]," ")
+                    makeText(scene, content[:index], fontcolor, x, y + 15, size=15)
                     content = content[index+1:]
                 if len(content) >= 0:
-                    makeText(scene, content[:space], fontcolor, x, y + 30)
+                    index = lastIndexOf(content[:space]," ")
+                    makeText(scene, content[:index], fontcolor, x, y + 30, size=15)
         for sceneitem in scene.items():
             if sceneitem.type() == 3 and sceneitem.data(1000) != "BG":
                 sceneitem.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
@@ -462,6 +481,7 @@ def makeText(
     thisText.setDefaultTextColor(QColor(color))
 
 def lastIndexOf(str: str, target: str):
+    if not target in str: return len(str)
     return len(str) - str[::-1].index(target[::-1]) - len(target)
 
 def minutes2hours(minutes: int):
