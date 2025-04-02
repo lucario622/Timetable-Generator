@@ -30,6 +30,8 @@ from PyQt6.QtGui import QIcon, QColor, QFont, QCursor
 WIDTH = 1920
 HEIGHT = 1060
 
+DARKMODE = True
+
 resolution:QSize = QSize()
 
 weights:list[int] = []
@@ -140,6 +142,36 @@ class Course:
 
 uniqueCourses:dict[str,Course] = dict()
 
+class timeAmount:
+    def __init__(self, value):
+        self.totalMs = value
+        self.totalSeconds = value // 1000
+        self.totalMinutes = value // 1000 // 60
+        self.totalHours = value // 1000 // 60 // 60
+        self.totalDays = value // 1000 // 60 // 60 // 24
+        self.totalYears = value // 1000 // 60 // 60 // 24 // 365
+        self.remMs = value % 1000
+        self.remSeconds = value // 1000 % 60
+        self.remMinutes = value // 1000 // 60 % 60
+        self.remHours = value // 1000 // 60 // 60 % 24
+        self.remDays = value // 1000 // 60 // 60 // 24 % 365
+
+    def __str__(self):
+        result = ""
+        if self.totalYears != 0:
+            result += f"{int(self.totalYears)} Years, "
+        if self.remDays != 0:
+            result += f"{int(self.remDays)} Days, "
+        if self.remHours != 0:
+            result += f"{int(self.remHours)} Hours, "
+        if self.remMinutes != 0:
+            result += f"{int(self.remMinutes)} Minutes, "
+        if self.remSeconds != 0:
+            result += f"{int(self.remSeconds)} Seconds, "
+        if int(round(self.remMs,4)) != 0:
+            result += f"{int(round(self.remMs,4))} ms, "
+        return result[:-2]
+
 class GeneralCourse:
     def __init__(
         self,
@@ -181,6 +213,7 @@ class Schedule:
         self.name = name
         self.fullClasses = 0
         self.score = 0
+        self.timeatschool = 0
 
     def __init__(self, crns: list[int], name: str = "Untitled Schedule"):
         self.crns = crns
@@ -190,6 +223,18 @@ class Schedule:
         self.name = name
         self.fullClasses = 0
         self.score = 0
+
+    def similar(self,self_):
+        result = False
+        specialstr1 = ""
+        specialstr2 = ""
+        speciallist1 = sorted(self.courses,key=lambda a:(".".join(a.times.days)+str(a.times.time)))
+        speciallist2 = sorted(self_.courses,key=lambda a:(".".join(a.times.days)+str(a.times.time)))
+        for course in speciallist1:
+            specialstr1+=course.code+course.type
+        for course_ in speciallist2:
+            specialstr2+=course_.code+course_.type
+        return specialstr1 == specialstr2
 
     def checkFull(self):
         self.fullClasses = 0
@@ -214,33 +259,26 @@ class Schedule:
         # add up time spent in class, in school, and in breaks
         classtime = 0
         schooltime = 0
-        timeranges = []
         for day in days:
             starttime = 0
             endtime = 0
             for course in sorted(self.courses, key=lambda a: a.times.time):
                 if day in course.times.days:
                     starttime = course.times.time
+                    starttime = miltohrspointmins(starttime)
                     break
-            for course in sorted(
-                self.courses, key=lambda a: a.times.time, reverse=True
-            ):
+            for course in sorted(self.courses, key=lambda a: a.times.time, reverse=True):
                 if day in course.times.days:
-                    endtime = course.times.time + minutes2hours(course.times.length)
-                    if endtime % 100 >= 60:
-                        endtime += 40
+                    endtime = miltohrspointmins(course.times.time)+minstohrspointmins(course.times.length)
                     break
-            timeranges.append([starttime, endtime])
-        for each in timeranges:
-            strt = (each[0] // 100) * 60 + (each[0] % 100)
-            end = (each[1] // 100) * 60 + (each[1] % 100)
-            schooltime += end - strt
+            schooltime += endtime-starttime
         for course in self.courses:
-            classtime += course.times.length
+            classtime += minstohrspointmins(course.times.length)
         breaktime = schooltime - classtime
 
-        self.score = (5 - self.daycount) * 400
-        self.score += 3900 - schooltime
+        self.score = (5 - self.daycount) * 1000 # Based on number of days off
+        self.score += int((60 - schooltime)/60*1000) # Based on amount of time (not) at school
+        self.timeatschool = timeAmount(schooltime*60*60*1000)
         return self.score
 
     def __str__(self):
@@ -285,7 +323,14 @@ class Schedule:
         ]
         WIDTH = scene.width()
         HEIGHT = scene.height()
-        scene.addRect(0, 0, WIDTH, HEIGHT, brush=QColor(250, 250, 250))
+        if DARKMODE:
+            myBGColor = QColor(30,30,30)
+            myLineColor = QColor(250,250,250)
+        else:
+            myBGColor = QColor(250,250,250)
+            myLineColor = QColor(30,30,30)
+        BGRect = scene.addRect(0, 0, WIDTH, HEIGHT, brush=myBGColor,pen=myBGColor)
+        BGRect.setData(1000,"BG")
 
         # Draw Time numbers on left edge
         k = 0
@@ -297,21 +342,27 @@ class Schedule:
                 suffix = "am"
                 if i>=1200: suffix = "pm"
                 y = 40 + (j - 700) * ((HEIGHT - 55) / 1500)
-                makeText(scene,miltoreadable(i)+suffix,"black",5,y)
-                if k%2==0: scene.addLine(0,y,WIDTH,y,QColor(200,200,200)) # Line to ease time recognition
-                else: drawDashedLine(scene,0,y,WIDTH,y,3,QColor(200,200,200))
+                makeText(scene,miltoreadable(i)+suffix,myLineColor,5,y)
+                if k%2==0: scene.addLine(0,y,WIDTH,y,myLineColor) # Line to ease time recognition
+                else: drawDashedLine(scene,0,y,WIDTH,y,3,myLineColor)
                 k+=1
 
         # Draw days of week on top edge
         for j in range(len(days[0])):
             x = (0.1 + 0.18 * j) * WIDTH
-            makeText(scene, days[0][j], "black", x, 0,30)
-            scene.addLine(x,0,x,HEIGHT,QColor(200,200,200))
+            makeText(scene, days[0][j], myLineColor, x, 0,30)
+            scene.addLine(x,0,x,HEIGHT,myLineColor)
                     
     def redrawSchedule(self,scene:QGraphicsScene):
         selectedcrn = self.courses[scene.parent().courseList.currentRow()].crn
         if scene.parent().courseList.currentRow() == -1:
             selectedcrn = -1
+        if DARKMODE:
+            myBGColor = QColor(30,30,30)
+            myLineColor = QColor(250,250,250)
+        else:
+            myBGColor = QColor(250,250,250)
+            myLineColor = QColor(30,30,30)
         days = [
             ["Monday", "Tuedsay", "Wednesday", "Thursday", "Friday"],
             ["M", "T", "W", "R", "F"],
@@ -334,26 +385,30 @@ class Schedule:
                 maxC = 255
                 myColor = QColor(random.randrange(minC,maxC),random.randrange(minC,maxC),random.randrange(minC,maxC))
             for day in course.times.days:
-                x = (0.1 + 0.18 * (days[1].index(day))) * WIDTH  # works
-                y = 40 + (miltohrspointmins(course.times.time)-7)/15 * (HEIGHT-55)  # not so much
+                x = (0.1 + 0.18 * (days[1].index(day))) * WIDTH
+                y = 40 + (miltohrspointmins(course.times.time)-7)/15 * (HEIGHT-55)
                 h = minstohrspointmins(course.times.length)/15 * (HEIGHT-55)
 
                 myRect = QRectF(x,y,WIDTH * 0.17,h)
-                myQGRI = scene.addRect(myRect,brush=myColor)
+                myQGRI = scene.addRect(myRect,brush=myColor,pen=myLineColor)
                 myQGRI.setData(69420,course.crn)
-                # scene.addRect(x,y,WIDTH * 0.17,h,brush=myColor)
                 content = f"{course.title} {course.type} {course.room} crn:{course.crn}"
-                space = int(WIDTH * 0.03)
+                # space = int(WIDTH * 0.03)
+                space = int(WIDTH * 0.03 / 1.25)
                 index = lastIndexOf(content[:space]," ")
-                makeText(scene, content[:index], fontcolor, x, y)
+                y -= 8
+                makeText(scene, content[:index], fontcolor, x, y, size=15)
+                
                 content = content[index+1:]
                 if len(content) >= 0:
-                    makeText(scene, content[:space], fontcolor, x, y + 15)
+                    index = lastIndexOf(content[:space]," ")
+                    makeText(scene, content[:index], fontcolor, x, y + 15, size=15)
                     content = content[index+1:]
                 if len(content) >= 0:
-                    makeText(scene, content[:space], fontcolor, x, y + 30)
+                    index = lastIndexOf(content[:space]," ")
+                    makeText(scene, content[:index], fontcolor, x, y + 30, size=15)
         for sceneitem in scene.items():
-            if sceneitem.type() == 3:
+            if sceneitem.type() == 3 and sceneitem.data(1000) != "BG":
                 sceneitem.setFlag(QGraphicsItem.GraphicsItemFlag.ItemIsSelectable)
 
 def getscore(x: Schedule):
@@ -426,6 +481,7 @@ def makeText(
     thisText.setDefaultTextColor(QColor(color))
 
 def lastIndexOf(str: str, target: str):
+    if not target in str: return len(str)
     return len(str) - str[::-1].index(target[::-1]) - len(target)
 
 def minutes2hours(minutes: int):
@@ -491,7 +547,8 @@ class ViewOneSchedule(QWidget):
                     curtotal = calctotal(curdatas)
                     print(str(curtotal) + " Courses to be processed after having removed " + str(curcrn))
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
-                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
+                    esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
+                    thebutton.setText(f"Re-Generate Schedules (est. {esttime})")
                     undoStack.append("+"+str(curcrn))
                     curitem.setBackground(QColor('black'))
                     curitem.setForeground(QColor('white'))
@@ -500,7 +557,8 @@ class ViewOneSchedule(QWidget):
                     curdatas = makedatas(currentCodes,allCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
-                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
+                    esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
+                    thebutton.setText(f"Re-Generate Schedules (est. {esttime})")
                     undoStack.append("-"+str(curcrn))
                     random.seed(curcrn)
                     minC = 100
@@ -524,7 +582,8 @@ class ViewOneSchedule(QWidget):
                     curdatas = makedatas(currentCodes,allCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
-                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
+                    esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
+                    thebutton.setText(f"Re-Generate Schedules (est.{str(esttime)})")
                     undoStack.append("+"+str(curcrn))
                     curitem.setBackground(QColor('black'))
                     curitem.setForeground(QColor('white'))
@@ -533,7 +592,8 @@ class ViewOneSchedule(QWidget):
                     curdatas = makedatas(currentCodes,allCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
-                    thebutton.setText(f"Re-Generate Schedules (est.{round(self.parent().parent().parent().avgtime*curtotal,4)}s)")
+                    esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
+                    thebutton.setText(f"Re-Generate Schedules (est.{esttime})")
                     undoStack.append("-"+str(curcrn))
                     random.seed(curcrn)
                     minC = 100
@@ -564,7 +624,7 @@ class ViewOneSchedule(QWidget):
             myitem.setForeground(QColor('black'))
             myitem.setBackground(myColor)
             self.courseList.addItem(myitem)
-        self.rlayout.addWidget(QLabel(f"{schedule.fullClasses}/{len(schedule.crns)} classes full"))
+        self.rlayout.addWidget(QLabel(f"{schedule.fullClasses}/{len(schedule.crns)} classes full, {schedule.timeatschool} at school"))
 
 class SchedulePanel(QWidget):
     def __init__(self):
@@ -588,7 +648,7 @@ class SchedulePanel(QWidget):
         self.panelLayout.addWidget(self.tabs)
         
         self.setLayout(self.panelLayout)
-        self.avgtime = 1
+        self.avgtime = 1/10000
     
     def keyPressEvent(self, a0):
         if a0.key() == 90 and a0.modifiers() == Qt.KeyboardModifier.ControlModifier:
@@ -603,12 +663,17 @@ class SchedulePanel(QWidget):
             self.undobutton.setEnabled(False)
         actiontype = actiontoundo[0]
         crntoundo = int(actiontoundo[1:])
-        if self.tabs.currentIndex() != -1: 
+        redrawScreen = True
+        if self.tabs.currentIndex() == -1:
+            redrawScreen = False
+        elif (not crntoundo in self.tabs.tabs[self.tabs.currentIndex()].schedule.crns):
+            redrawScreen = False
+        if redrawScreen:
             ind:int = self.tabs.tabs[self.tabs.currentIndex()].schedule.crns.index(crntoundo)
             curitem:QListWidgetItem = self.tabs.tabs[self.tabs.currentIndex()].courseList.item(ind)
         if actiontype == "+":
             removedCRNS.remove(crntoundo)
-            if self.tabs.currentIndex() != -1:
+            if redrawScreen:
                 random.seed(crntoundo)
                 minC = 100
                 maxC = 255
@@ -617,23 +682,21 @@ class SchedulePanel(QWidget):
                 curitem.setBackground(myColor)
         else:
             removedCRNS.append(crntoundo)
-            if self.tabs.currentIndex() != -1:
+            if redrawScreen:
                 curitem.setBackground(QColor('black'))
                 curitem.setForeground(QColor('white'))
-        if self.tabs.currentIndex() != -1: self.tabs.tabs[self.tabs.currentIndex()].schedule.redrawSchedule(self.tabs.tabs[self.tabs.currentIndex()].scene)
+        if redrawScreen: self.tabs.tabs[self.tabs.currentIndex()].schedule.redrawSchedule(self.tabs.tabs[self.tabs.currentIndex()].scene)
         if self.tabs.count() == 0:
             self.regenerateSchedules(codes=currentCodes)
     
     def regenerateSchedules(self,a0=False,codes:list[str]=None):
         window.setCursor(QCursor(Qt.CursorShape.WaitCursor))
         if codes == None: codes = currentCodes
-        im_cs = ["CSCI2072U","CSCI2040U","CSCI2020U","MATH2055U","MATH2060U","SCCO0999U"]
-        cs_01 = ["MATH1010U","CSCI1030U","PHY1010U","CSCI1060U","COMM1050U"]
         datas:list[list[int]] = makedatas(codes,allCourses,removedCRNS)
         datotal = calctotal(datas)
         scheds, ttltime = betteroptionstoschedules(datas)
         if datotal != 0: self.avgtime = ttltime/datotal 
-        else: self.avgtime = 1
+        else: self.avgtime = 1/10000
         print(str(ttltime) + " Time taken in seconds")
         print(str(self.avgtime) + " Time taken per item")
         print(f"{self.avgtime}*{datotal} = {self.avgtime*datotal} = {ttltime}")
@@ -649,13 +712,22 @@ class SchedulePanel(QWidget):
         scored_list = sorted(scored_list, key=getscore, reverse=True)  # Sort by score
         
         shortscheds = []
-        for e in scored_list[:6]:
+        shortscheds_ = []
+        for e in scored_list:
+            neeext = False
+            for e_ in shortscheds_:
+                if e.similar(e_): neeext = True
+            if neeext: continue
             shortscheds.append(e.crns)
+            shortscheds_.append(e)
+            if len(shortscheds) == 7:
+                break
         self.tabs.clearSchedules()
         self.tabs.loadCrns(shortscheds)
         self.tabs.setFocus()
         window.setCursor(QCursor(Qt.CursorShape.ArrowCursor))
-        self.regeneratebutton.setText(f"Re-Generate Schedules (est.{ttltime}s)")
+        esttime = timeAmount(ttltime*1000)
+        self.regeneratebutton.setText(f"Re-Generate Schedules (est.{esttime})")
         # tabwidg.removeTab(3)
         # tabwidg.setCurrentIndex(2)
 
@@ -787,6 +859,7 @@ class InputCourses(QWidget):
         
         self.searchresults = QListWidget()
         self.searchresults.itemSelectionChanged.connect(self.updateAddButton)
+        self.searchresults.itemDoubleClicked.connect(self.addOnDoubleClick)
         
         self.leftLayout.addWidget(self.DDbox)
         self.leftLayout.addWidget(self.input1)
@@ -826,6 +899,7 @@ class InputCourses(QWidget):
         self.proceedButton.setEnabled(False)
         self.proceedButton.setMinimumHeight(100)
         self.selectionList = QListWidget()
+        self.selectionList.itemDoubleClicked.connect(self.removeOnDoubleClick)
         self.rightLayout.addWidget(self.selectionList)
         self.rightLayout.addWidget(self.proceedButton)
         self.mainLayout.addWidget(self.rightBox)
@@ -854,8 +928,15 @@ class InputCourses(QWidget):
             self.removeCourseButton.setEnabled(True)
             self.proceedButton.setEnabled(True)
             for eachcode in self.presetsDD.itemData(self.presetsDD.currentIndex()):
-                self.selectionList.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
-                self.selectedCourses.append(eachcode)
+                if not eachcode in self.selectedCourses:
+                    self.selectionList.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
+                    self.selectedCourses.append(eachcode)
+            avgtime = self.parent().parent().parent().viewSchedules.avgtime
+            if avgtime != 1:
+                curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
+                curtotal = calctotal(curdatas)
+                esttime = timeAmount(avgtime*curtotal*1000)
+                self.proceedButton.setText(f"Proceed (est.{esttime})")
         
     def presetselected(self,ind):
         if self.firsttime:
@@ -901,6 +982,32 @@ class InputCourses(QWidget):
                 self.proceedButton.setEnabled(True)
                 self.selectionList.addItem(curitem.text())
                 self.selectedCourses.append(curitem.text().split(" ")[0])
+                avgtime = self.parent().parent().parent().viewSchedules.avgtime
+                if avgtime != 1:
+                    curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    esttime = timeAmount(avgtime*curtotal*1000)
+                    self.proceedButton.setText(f"Proceed (est.{esttime})")
+        else:
+            print("No Course selected")
+            
+    def addOnDoubleClick(self,curitem:QListWidgetItem):
+        if curitem != None:
+            if curitem.text().split(" ")[0] in self.selectedCourses:
+                print("Already Added")
+            else:
+                print(f"Add course {curitem.text()}")
+                self.removeCourseButton.setEnabled(True)
+                self.removeAllCourseButton.setEnabled(True)
+                self.proceedButton.setEnabled(True)
+                self.selectionList.addItem(curitem.text())
+                self.selectedCourses.append(curitem.text().split(" ")[0])
+                avgtime = self.parent().parent().parent().viewSchedules.avgtime
+                if avgtime != 1:
+                    curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    esttime = timeAmount(avgtime*curtotal*1000)
+                    self.proceedButton.setText(f"Proceed (est.{esttime})")
         else:
             print("No Course selected")
         
@@ -908,6 +1015,7 @@ class InputCourses(QWidget):
         self.removeAllCourseButton.setEnabled(False)
         self.selectionList.clear()
         self.selectedCourses = []
+        self.proceedButton.setText("Proceed")
         self.removeCourseButton.setEnabled(False)
         self.proceedButton.setEnabled(False)
         
@@ -920,9 +1028,39 @@ class InputCourses(QWidget):
             del removedrow
             self.selectedCourses.remove(ccode)
             if self.selectionList.count() == 0:
+                self.proceedButton.setText("Proceed")
                 self.removeCourseButton.setEnabled(False)
                 self.removeAllCourseButton.setEnabled(False)
                 self.proceedButton.setEnabled(False)
+            else:
+                avgtime = self.parent().parent().parent().viewSchedules.avgtime
+                if avgtime != 1:
+                    curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    esttime = timeAmount(avgtime*curtotal*1000)
+                    self.proceedButton.setText(f"Proceed (est.{esttime})")
+        else:
+            print("No Course selected")
+    
+    def removeOnDoubleClick(self,curitem:QListWidgetItem):
+        if curitem != None:
+            print(f"Remove course {curitem.text()}")
+            ccode = curitem.text().split(" ")[0]
+            removedrow = self.selectionList.takeItem(self.selectionList.currentRow())
+            del removedrow
+            self.selectedCourses.remove(ccode)
+            if self.selectionList.count() == 0:
+                self.proceedButton.setText("Proceed")
+                self.removeCourseButton.setEnabled(False)
+                self.removeAllCourseButton.setEnabled(False)
+                self.proceedButton.setEnabled(False)
+            else:
+                avgtime = self.parent().parent().parent().viewSchedules.avgtime
+                if avgtime != 1:
+                    curdatas = makedatas(self.selectedCourses,allCourses,removedCRNS)
+                    curtotal = calctotal(curdatas)
+                    esttime = timeAmount(avgtime*curtotal*1000)
+                    self.proceedButton.setText(f"Proceed (est.{esttime})")
         else:
             print("No Course selected")
 

@@ -1,7 +1,8 @@
 import math
+import threading
 import time
 
-allCourses = dict()
+import concurrent.futures
 
 class CourseTime:
     def __init__(self, days: list, time: int, length: int, biweekly: int):
@@ -103,6 +104,8 @@ class Course:
             case _:
                 return ""
 
+allCourses:dict[int,Course] = dict()
+
 class Schedule:
     def __init__(self, courses: list[Course], name: str = "Untitled Schedule"):
         if len(courses)>0 and type(courses[0])==int:
@@ -127,6 +130,14 @@ class Schedule:
                     continue
                 if course.overlap(course_):
                     return False
+        return True
+
+    def checkLastValid(self):
+        lastCourse = self.courses[-1]
+        for i in range(len(self.courses)-1):
+            curCourse = self.courses[i]
+            if curCourse.overlap(lastCourse):
+                return False
         return True
     
     def checkFull(self):
@@ -197,7 +208,7 @@ def longtoshortday(longday: str):
     result = days[1][days[0].index(longday)]
     return result
 
-def functionalSearch(field: str, target, allCourses:dict):
+def functionalSearch(field: str, target):
     """
     Returns a list of all courses whose 'field' match 'target'
     """
@@ -217,7 +228,7 @@ def functionalSearch(field: str, target, allCourses:dict):
     else:
         return results
 
-def narrowSearch(crns:list[int], field:str, target, allCourses:dict):
+def narrowSearch(crns:list[int], field:str, target):
     """
     Filters a list of crns to those whose 'field' match 'target'
     """
@@ -236,7 +247,26 @@ def narrowSearch(crns:list[int], field:str, target, allCourses:dict):
     else:
         return results
 
-def makedatas(courses:list[str],allCourses1:dict,remcrns:list[int]):
+def trimdatas(set_of_ops:list[list[int]]):
+    new_ops:list[list[int]] = []
+    specialcourses:list[Course] = []
+    for i in range(len(set_of_ops)):
+        if len(set_of_ops[i]) == 1:
+            specialcourses.append(allCourses[set_of_ops[i][0]])
+    for i in range(len(set_of_ops)):
+        new_ops.append([])
+        if len(set_of_ops[i]) != 1:
+            for j in range(len(set_of_ops[i])):
+                curcourse = allCourses[set_of_ops[i][j]]
+                passes = True
+                for specialcourse in specialcourses:
+                    if curcourse.overlap(specialcourse): passes = False
+                if passes: new_ops[i].append(set_of_ops[i][j])
+        else:
+            new_ops[i] = [set_of_ops[i][0]]
+    return new_ops
+
+def makedatas(courses:list[str],allCourses1:dict[int,Course],remcrns:list[int]):
     """
     Get list of needed classes from list of courses
     """
@@ -244,20 +274,19 @@ def makedatas(courses:list[str],allCourses1:dict,remcrns:list[int]):
     allCourses = allCourses1
     set_of_all_options = []
     for code in courses:
-        for classType in LTLListfromCourse(code,allCourses1):
-            set_of_all_options.append(narrowSearch(functionalSearch("code", code,allCourses1), "type", classType,allCourses1))
+        for classType in LTLListfromCourse(code):
+            set_of_all_options.append(narrowSearch(functionalSearch("code", code), "type", classType))
     newoptions:list[list[int]] = []
     for i in range(len(set_of_all_options)):
         newoptions.append([])
         for eachcrn in set_of_all_options[i]:
-            if eachcrn in remcrns:
-                pass
-            else:
+            if not eachcrn in remcrns:
                 newoptions[i].append(eachcrn)
-            
+    newoptions = trimdatas(newoptions)
+    newoptions = sorted(newoptions,key=lambda a:len(a),reverse=True)
     return newoptions
 
-def LTLListfromCourse(code,allCourses:dict):
+def LTLListfromCourse(code):
     """
     Takes a course code (e.g. CSCI2020U), and returns which section types it has as a list.
 
@@ -298,20 +327,25 @@ datas:list[list[int]] = []
 datalengths:list[int] = []
 
 def recursiveSchedules(currentPath:str,nextIndex:int):
+    """
+    ### We love recursion here
+    """
     global completedCount
     global validCount
     global fullcount
     if nextIndex >= len(datas):
-        completedCount+=1
         thissched = Schedule(splitPath(currentPath))
-        if thissched.checkValid(): 
-            validCount+=1
-            all_valid_schedules.append(thissched)
-        if thissched.checkFull(): fullcount+=1
+        if thissched.checkLastValid(): 
+            with threading.Lock():
+                validCount+=1
+                all_valid_schedules.append(thissched)
+                completedCount+=1
+            # if thissched.checkFull(): fullcount+=1
+        # print("Thread #"+threading.current_thread().name[-1]+" completed a schedule",end="\t")
         return
     for nextcrn in datas[nextIndex]:
         nextSchedule:Schedule = Schedule(splitPath(currentPath+str(nextcrn)))
-        if nextSchedule.checkValid():
+        if nextSchedule.checkLastValid():
             recursiveSchedules(currentPath+str(nextcrn),nextIndex+1)
         else:
             completedCount+=prod(datalengths,nextIndex+1,len(datas))
@@ -335,11 +369,12 @@ def betteroptionstoschedules(set_of_options: list[list[int]]):
         datalengths.append(len(eachclass))
     if total == 0:
         return [],0
-    print(str(total) + "Schedules to be processed")
+    print(str(total) + " Schedules to be processed")
     
     absstarttime = math.floor(time.time() * 1000)
-    for crn0 in set_of_options[0]:
-        recursiveSchedules(str(crn0),1)
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(set_of_options[0])) as executor:
+        for crn0 in set_of_options[0]:
+            executor.submit(recursiveSchedules,str(crn0),1)
     
-    print(str(completedCount) + "Schedules processed in "+str((math.floor(time.time()*1000)-absstarttime))+" Ms")
+    print(str(completedCount) + " Schedules processed in "+str((math.floor(time.time()*1000)-absstarttime))+" Ms")
     return all_valid_schedules, (math.floor(time.time()*1000)-absstarttime)/1000
