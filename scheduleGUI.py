@@ -644,21 +644,42 @@ class ViewOneSchedule(QWidget):
         thetabs.setCurrentWidget(exportmenu)
     
     def exportasics(self):
-        print("uhhh BEGIN:VCALENDAR or smth")
         constructedics = "BEGIN:VCALENDAR\n"
         constructedics += "PRODID:-//Fischer//Schedule Generator something//EN\n"
         constructedics += "VERSION:2.0\n"
         for course in self.schedule.courses:
-            constructedics += "BEGIN:VEVENT\n"
-            starttimestring = "" #20250415T230000Z is tuesday april 15th at 7pm
-            constructedics += f"DTSTART:{starttimestring}\n"
-            endtimestring = ""
-            constructedics += f"DTEND:{endtimestring}\n"
-            summarystring = course.title
-            constructedics += f"SUMMARY:{summarystring}\n"
-            locationstring = course.room
-            constructedics += f"LOCATION:{locationstring}\n"
-            constructedics += "END:VEVENT\n"
+            for lecday in course.times.days:
+                constructedics += "BEGIN:VEVENT\n"
+                mn = "01"
+                if season == "S": mn = "05"
+                if season == "F": mn = "09"
+                dow = (int(year[2:])//4)+7+int(year[2:])
+                if season == "W" and int(year[2:])%4 == 0: dow -= 1
+                dow = dow%7
+                if season == "W": dy = (10-dow)
+                if season == "F": dy = (10-dow)
+                match dow:
+                    case 1:dy="01"
+                    case 2:dy="02"
+                    case 3:dy="03"
+                if season == "S": dy = (10-dow)
+                # dy is currently the date of the first day of the semester (monday)
+                starttimestring = f"{year}{mn}{dy}T{course.times.time}00" #20250415T230000Z is tuesday april 15th at 7pm but stored as UTC time
+                ## By removing the Z we can have it just be at that time regardless of the time zone
+                ## yyyymmddThhmmss
+                
+                constructedics += f"DTSTART:{starttimestring}\n"
+                mn = "04"
+                if season == "S": mn = "08"
+                if season == "F": mn = "12"
+                endtimestring = f"{year}{mn}{dy}T{course.times.time}00"
+                constructedics += f"DTEND:{endtimestring}\n"
+                locationstring = course.room
+                constructedics += f"LOCATION:{locationstring}\n"
+                summarystring = f"{course.title} {course.type}"
+                constructedics += f"SUMMARY:{summarystring}\n"
+                constructedics += "TRANSP:OPAQUE\n"
+                constructedics += "END:VEVENT\n"
         constructedics = "END:VCALENDAR\n"
         file_dialog = QFileDialog(self)
         file_dialog.setWindowTitle("Save File")
@@ -1164,6 +1185,20 @@ def firstNumIndex(str: str):
 
 coursefile = "CourseFiles/Winter2025.json"
 
+year = coursefile[coursefile.index(".")-4:coursefile.index(".")]
+season = "F"
+match (coursefile[coursefile.index("/")+1:coursefile.index(".")-4]):
+    case "Winter":
+        season = "W"
+    case "Fall":
+        season = "F"
+    case "Summer":
+        season = "S"
+print(year)
+dow = (int(year[2:])//4)+8+int(year[2:])
+if int(year[2:])%4 == 0: dow -= 1
+dow = dow%7
+print(dow)
 with open(coursefile, "r") as f:
     allCoursesJSON = json.load(f)
 for course in allCoursesJSON:
