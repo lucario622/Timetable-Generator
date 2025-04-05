@@ -429,6 +429,12 @@ def drawDashedLine(scene:QGraphicsScene,x,y,x1,y1,dashLength:int,color:QColor):
         j = 2*i
         scene.addLine(x+j*xlength,y+j*ylength,x+(j+1)*xlength,y1+(j+1)*ylength,color)
 
+def ftnum(num:int,n:int=4):
+    result = str(int(num))
+    for i in range(n-len(result)):
+        result = "0"+result
+    return result
+
 def miltoreadable(time: int):
     """
     Takes 24h time as integer and returns 12h time with colon (e.g. 1540->3:40)
@@ -649,38 +655,56 @@ class ViewOneSchedule(QWidget):
         constructedics += "VERSION:2.0\n"
         for course in self.schedule.courses:
             for lecday in course.times.days:
+                days = ['M','T','W','R','F']
+                dayscodes = ['MO','TU','WE','TH','FR']
+                dayindex = days.index(lecday)
                 constructedics += "BEGIN:VEVENT\n"
+                
                 mn = "01"
                 if season == "S": mn = "05"
                 if season == "F": mn = "09"
-                dow = (int(year[2:])//4)+7+int(year[2:])
-                if season == "W" and int(year[2:])%4 == 0: dow -= 1
-                dow = dow%7
-                if season == "W": dy = (10-dow)
-                if season == "F": dy = (10-dow)
-                match dow:
-                    case 1:dy="01"
-                    case 2:dy="02"
-                    case 3:dy="03"
-                if season == "S": dy = (10-dow)
-                # dy is currently the date of the first day of the semester (monday)
-                starttimestring = f"{year}{mn}{dy}T{course.times.time}00" #20250415T230000Z is tuesday april 15th at 7pm but stored as UTC time
-                ## By removing the Z we can have it just be at that time regardless of the time zone
-                ## yyyymmddThhmmss
                 
+                dow = (int(year[2:])//4)+8+int(year[2:])
+                if season == "W" and int(year[2:])%4 == 0: dow -= 1 # because january of leap year
+                if season == "F": dow += 5
+                if season == "S": dow += 1
+                dow = dow%7
+                if season == "W": intdy = (10-dow)
+                if season == "F": intdy = (9-dow)%7+1
+                if season == "S": intdy = (9-dow)%7+1
+                # match dow:
+                #     case 1:dy="02"
+                #     case 2:dy="01"
+                #     case 3:dy="07"
+                #     case 4:dy="06"
+                #     case 5:dy="05"
+                #     case 6:dy="04"
+                #     case 7:dy="03"
+                dy = ftnum(intdy+dayindex,2)
+                # dy is currently the date of the first day of the semester (monday)
+                starttimestring = f"{year}{mn}{dy}T{ftnum(course.times.time)}00" #20250415T230000Z is tuesday april 15th at 7pm but stored as UTC time
                 constructedics += f"DTSTART:{starttimestring}\n"
-                mn = "04"
-                if season == "S": mn = "08"
-                if season == "F": mn = "12"
-                endtimestring = f"{year}{mn}{dy}T{course.times.time}00"
+                endtime = miltohrspointmins(course.times.time)+minstohrspointmins(course.times.length)
+                endtime = math.floor(endtime)*100+(endtime%1)*60
+                endtimestring = f"{year}{mn}{dy}T{ftnum(endtime)}00"
                 constructedics += f"DTEND:{endtimestring}\n"
+                mn = "02"
+                if season == "S": mn = "06"
+                if season == "F": mn = "10"
+                rwdy = (21-dow)
+                if season == "F": rwdy = 16-intdy
+                if season == "S": rwdy = 16-intdy
+                dowcode = dayscodes[dayindex]
+                constructedics += f"RRULE:FREQ=WEEKLY;WKST=SU;COUNT=13;BYDAY={dowcode}\n"
+                exdatestring = f"{year}{mn}{ftnum(rwdy+dayindex,2)}T{ftnum(course.times.time)}00"
+                constructedics += f"EXDATE:{exdatestring}\n"
                 locationstring = course.room
                 constructedics += f"LOCATION:{locationstring}\n"
                 summarystring = f"{course.title} {course.type}"
                 constructedics += f"SUMMARY:{summarystring}\n"
                 constructedics += "TRANSP:OPAQUE\n"
                 constructedics += "END:VEVENT\n"
-        constructedics = "END:VCALENDAR\n"
+        constructedics += "END:VCALENDAR\n"
         file_dialog = QFileDialog(self)
         file_dialog.setWindowTitle("Save File")
         file_dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)
@@ -896,7 +920,7 @@ class InputCourses(QWidget):
         for csname in filecontents:
             for i in range(4):
                 if (i+termtype)%2==0: #correct term
-                    self.presetsDD.addItem(f"{csname} Year {math.ceil(i/2.0)} {termstr}",filecontents[csname][i])
+                    self.presetsDD.addItem(f"{csname} Year {math.floor(i/2.0)+1} {termstr}",filecontents[csname][i])
         
         self.codeinputlayout = QHBoxLayout()
         self.codeLabel = QLabel("Course Code:")
@@ -1195,7 +1219,7 @@ match (coursefile[coursefile.index("/")+1:coursefile.index(".")-4]):
     case "Summer":
         season = "S"
 print(year)
-dow = (int(year[2:])//4)+8+int(year[2:])
+dow = (int(year[2:])//4)+13+int(year[2:])
 if int(year[2:])%4 == 0: dow -= 1
 dow = dow%7
 print(dow)
