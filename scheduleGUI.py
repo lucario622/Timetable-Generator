@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QComboBox,
     QFileDialog,
+    QMessageBox,
 )
 from PyQt6.QtGui import QIcon, QColor, QFont, QCursor
 
@@ -143,6 +144,12 @@ class Course:
 
 uniqueCourses:dict[str,Course] = dict()
 
+fallIcon = None
+winterIcon = None
+fallwinterIcon = None
+
+ChosenCourses:dict[int,Course] = None
+
 class timeAmount:
     def __init__(self, value):
         self.totalMs = value
@@ -183,6 +190,7 @@ class GeneralCourse:
         self.title = title
         self.code = code
         self.sections = sections
+        self.termoffered = 0
     
     def __str__(self):
         return f"{self.code}|{self.title} {len(self.sections)} sections"
@@ -195,6 +203,8 @@ class GeneralCourse:
                 return self.code
             case "sections":
                 return self.sections
+            case "termoffered":
+                return self.termoffered
             case _:
                 return ""
 
@@ -554,7 +564,7 @@ class ViewOneSchedule(QWidget):
                 self.parent().parent().parent().undobutton.setEnabled(True)
                 if not (curcrn in removedCRNS):
                     removedCRNS.append(curcrn)
-                    curdatas = makedatas(currentCodes,allCourses,removedCRNS)
+                    curdatas = makedatas(currentCodes,ChosenCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
                     print(str(curtotal) + " Courses to be processed after having removed " + str(curcrn))
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
@@ -565,7 +575,7 @@ class ViewOneSchedule(QWidget):
                     curitem.setForeground(QColor('white'))
                 else:
                     removedCRNS.remove(curcrn)
-                    curdatas = makedatas(currentCodes,allCourses,removedCRNS)
+                    curdatas = makedatas(currentCodes,ChosenCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
                     esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
@@ -590,7 +600,7 @@ class ViewOneSchedule(QWidget):
                 self.parent().parent().parent().undobutton.setEnabled(True)
                 if not (curcrn in removedCRNS):
                     removedCRNS.append(curcrn)
-                    curdatas = makedatas(currentCodes,allCourses,removedCRNS)
+                    curdatas = makedatas(currentCodes,ChosenCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
                     esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
@@ -600,7 +610,7 @@ class ViewOneSchedule(QWidget):
                     curitem.setForeground(QColor('white'))
                 else:
                     removedCRNS.remove(curcrn)
-                    curdatas = makedatas(currentCodes,allCourses,removedCRNS)
+                    curdatas = makedatas(currentCodes,ChosenCourses,removedCRNS)
                     curtotal = calctotal(curdatas)
                     thebutton:QPushButton = self.parent().parent().parent().regeneratebutton
                     esttime = timeAmount(self.parent().parent().parent().avgtime*curtotal*1000)
@@ -783,7 +793,7 @@ class SchedulePanel(QWidget):
     def regenerateSchedules(self,a0=False,codes:list[str]=None):
         window.setCursor(QCursor(Qt.CursorShape.WaitCursor))
         if codes == None: codes = currentCodes
-        datas:list[list[int]] = makedatas(codes,allCourses,removedCRNS)
+        datas:list[list[int]] = makedatas(codes,ChosenCourses,removedCRNS)
         datotal = calctotal(datas)
         scheds, ttltime = betteroptionstoschedules(datas)
         if datotal != 0: self.avgtime = ttltime/datotal 
@@ -895,11 +905,19 @@ class InputCourses(QWidget):
     def __init__(self):
         super().__init__()
         
+        global fallIcon
+        global winterIcon
+        global fallwinterIcon
+        
         self.selectedCourses:list[str] = [] #List of course codes
         
         self.mainLayout = QHBoxLayout()
         self.leftLayout = QVBoxLayout()
         self.centerLayout = QVBoxLayout()
+        
+        fallIcon = QIcon("imgs/FallIcon.png")
+        winterIcon = QIcon("imgs/WinterIcon.png")
+        fallwinterIcon = QIcon("imgs/FallWinterIcon.png")
         
         #left side
         termtype = int(str(list(allCourses)[0])[0])
@@ -999,6 +1017,29 @@ class InputCourses(QWidget):
         
     def proceed(self):
         global currentCodes
+        global ChosenCourses
+        canFall = True
+        canWinter = True
+        for selectedCourse in self.selectedCourses:
+            if not selectedCourse in fallcodes:
+                canFall = False
+            if not selectedCourse in wintercodes:
+                canWinter = False
+        print(f"{canFall = }")
+        print(f"{canWinter = }")
+        if canFall:
+            ChosenCourses = FallCourses
+        elif canWinter:
+            ChosenCourses = WinterCourses
+        else:
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Icon.Critical)
+            msg.setText("Error")
+            msg.setFixedSize(500,200)
+            msg.setInformativeText("Can't combine Fall and Winter courses")
+            msg.setWindowTitle("Error")
+            msg.exec()
+            return
         currentCodes = self.selectedCourses
         print(currentCodes)
         mainwind:QTabWidget = self.parent().parent()
@@ -1020,7 +1061,15 @@ class InputCourses(QWidget):
             self.proceedButton.setEnabled(True)
             for eachcode in self.presetsDD.itemData(self.presetsDD.currentIndex()):
                 if not eachcode in self.selectedCourses:
-                    self.selectionList.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
+                    newicon = fallIcon
+                    if uniqueCourses[eachcode].code in wintercodes:
+                        if uniqueCourses[eachcode].code in fallcodes:
+                            newicon = fallwinterIcon
+                        else:
+                            newicon = winterIcon
+                    newitem = QListWidgetItem(f"{eachcode} {uniqueCourses[eachcode].title}")
+                    newitem.setIcon(newicon)
+                    self.selectionList.addItem(newitem)
                     self.selectedCourses.append(eachcode)
             avgtime = self.parent().parent().parent().viewSchedules.avgtime
             if avgtime != 1:
@@ -1037,11 +1086,18 @@ class InputCourses(QWidget):
             self.presetsPush.setEnabled(True)
             self.searchresults.clear()
             for eachcode in self.presetsDD.itemData(ind):
-                self.searchresults.addItem(f"{eachcode} {uniqueCourses[eachcode].title}")
+                newicon = fallIcon
+                if uniqueCourses[eachcode].code in wintercodes:
+                    if uniqueCourses[eachcode].code in fallcodes:
+                        newicon = fallwinterIcon
+                    else:
+                        newicon = winterIcon
+                newitem = QListWidgetItem(f"{eachcode} {uniqueCourses[eachcode].title}")
+                newitem.setIcon(newicon)
+                self.searchresults.addItem(newitem)
         else:
             self.searchresults.clear()
             self.presetsPush.setEnabled(False)
-
     
     def searchforcourses(self):
         self.searchresults.clear()
@@ -1054,7 +1110,15 @@ class InputCourses(QWidget):
             titlehit = (self.nameInput.text() != "" and self.nameInput.text().lower() in eachtitle.lower())
             codehit = (self.codeInput.text() != "" and self.codeInput.text().lower() in eachcode.lower())
             if (codehit and self.nameInput.text() == "") or (titlehit and self.codeInput.text() == "") or (titlehit and codehit):
-                self.searchresults.addItem(f"{eachcode} {eachtitle}")
+                newitem = QListWidgetItem(f"{eachcode} {eachtitle}")
+                myicon = fallIcon
+                if uniqueCourses[eachcode].code in wintercodes:
+                    if uniqueCourses[eachcode].code in fallcodes:
+                        myicon = fallwinterIcon
+                    else:
+                        myicon = winterIcon
+                newitem.setIcon(myicon)
+                self.searchresults.addItem(newitem)
                 count+=1
         if count == 0:
             self.addCourseButton.setEnabled(False)
@@ -1071,7 +1135,9 @@ class InputCourses(QWidget):
                 self.removeCourseButton.setEnabled(True)
                 self.removeAllCourseButton.setEnabled(True)
                 self.proceedButton.setEnabled(True)
-                self.selectionList.addItem(curitem.text())
+                newitem = QListWidgetItem(curitem.text())
+                newitem.setIcon(curitem.icon())
+                self.selectionList.addItem(newitem)
                 self.selectedCourses.append(curitem.text().split(" ")[0])
                 avgtime = self.parent().parent().parent().viewSchedules.avgtime
                 if avgtime != 1:
@@ -1091,7 +1157,9 @@ class InputCourses(QWidget):
                 self.removeCourseButton.setEnabled(True)
                 self.removeAllCourseButton.setEnabled(True)
                 self.proceedButton.setEnabled(True)
-                self.selectionList.addItem(curitem.text())
+                newitem = QListWidgetItem(curitem.text())
+                newitem.setIcon(curitem.icon())
+                self.selectionList.addItem(newitem)
                 self.selectedCourses.append(curitem.text().split(" ")[0])
                 avgtime = self.parent().parent().parent().viewSchedules.avgtime
                 if avgtime != 1:
@@ -1201,6 +1269,8 @@ class MainWindow(QMainWindow):
 allCoursesJSON = []
 removedCRNS = []
 allCourses:dict[int,Course] = dict()
+FallCourses:dict[int,Course] = dict()
+WinterCourses:dict[int,Course] = dict()
 
 def firstNumIndex(str: str):
     for i in range(len(str)):
@@ -1208,6 +1278,7 @@ def firstNumIndex(str: str):
             return i
 
 coursefile = "CourseFiles/Winter2025.json"
+coursefallfile= "CourseFiles/Fall2024.json"
 
 year = coursefile[coursefile.index(".")-4:coursefile.index(".")]
 season = "F"
@@ -1223,39 +1294,53 @@ dow = (int(year[2:])//4)+13+int(year[2:])
 if int(year[2:])%4 == 0: dow -= 1
 dow = dow%7
 print(dow)
-with open(coursefile, "r") as f:
-    allCoursesJSON = json.load(f)
-for course in allCoursesJSON:
-    crn = course["crn"]
-    temptimes = CourseTime(
-        course["times"]["days"],
-        course["times"]["time"],
-        course["times"]["length"],
-        course["times"]["biweekly"],
-    )
-    temp = Course(
-        course["title"],
-        course["room"],
-        course["crn"],
-        course["type"],
-        course["code"],
-        temptimes,
-        course["section"],
-        course["instructor"],
-        course["maxpop"],
-        course["curpop"],
-    )
-    allCourses[crn] = temp
+wintercodes = []
+fallcodes = []
+termtype = "W"
+for files in [coursefile,coursefallfile]:
+    with open(files, "r") as f:
+        allCoursesJSON = json.load(f)
+    for course in allCoursesJSON:
+        crn = course["crn"]
+        temptimes = CourseTime(
+            course["times"]["days"],
+            course["times"]["time"],
+            course["times"]["length"],
+            course["times"]["biweekly"],
+        )
+        temp = Course(
+            course["title"],
+            course["room"],
+            course["crn"],
+            course["type"],
+            course["code"],
+            temptimes,
+            course["section"],
+            course["instructor"],
+            course["maxpop"],
+            course["curpop"],
+        )
+        if termtype == "F":
+            FallCourses[crn] = temp
+        else:
+            WinterCourses[crn] = temp
+        allCourses[crn] = temp
+        if termtype == "W":
+            if not course["code"] in wintercodes:
+                wintercodes.append(course["code"])
+        else:
+            if not course["code"] in fallcodes:
+                fallcodes.append(course["code"])
+        if temp.code in uniqueCodes:
+            uniqueCourses[temp.code].get("sections").append(temp)
+        else:
+            newGenCourse:GeneralCourse = GeneralCourse(temp.title,temp.code,[temp])
+            uniqueCodes.append(temp.code)
+            uniqueCourses[temp.code] = newGenCourse
+    termtype = "F"
+FallCourses = dict(sorted(FallCourses.items()))
+WinterCourses = dict(sorted(WinterCourses.items()))
 allCourses = dict(sorted(allCourses.items()))
-
-
-for course in allCourses.values():
-    if course.code in uniqueCodes:
-        uniqueCourses[course.code].get("sections").append(course)
-    else:
-        newGenCourse:GeneralCourse = GeneralCourse(course.title,course.code,[course])
-        uniqueCodes.append(course.code)
-        uniqueCourses[course.code] = newGenCourse
 
 uniquesorted = sorted(uniqueCourses,key=lambda a:a[firstNumIndex(a):-1])
 
