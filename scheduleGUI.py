@@ -846,8 +846,6 @@ class ViewSchedules(QTabWidget):
         super().__init__()
 
         self.tabs = []
-
-        # myCrns = [72869, 72870, 73778, 75797, 75043, 74365, 75425, 74892, 75153, 70175]
         
         self.currentChanged.connect(self.tabChanged)
         
