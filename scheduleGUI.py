@@ -1233,7 +1233,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Schedule Generator")
-        self.setWindowIcon(QIcon("Buildings/UA/0.png"))
+        self.setWindowIcon(QIcon("imgs/FallWinterIcon.png"))
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID("myapp.app.1")
 
         tabs = QTabWidget()
