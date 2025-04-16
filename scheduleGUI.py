@@ -848,23 +848,7 @@ class ViewSchedules(QTabWidget):
         self.tabs = []
 
         # myCrns = [72869, 72870, 73778, 75797, 75043, 74365, 75425, 74892, 75153, 70175]
-        # myCrns = [
-        #     40290,
-        #     40299,
-        #     42684,
-        #     43913,
-        #     43914,
-        #     42944,
-        #     42751,
-        #     42757,
-        #     40364,
-        #     42978,
-        #     41929
-        # ]
-        # self.addCrns(myCrns)
-        # self.addCrns(
-        #     [72870, 72869, 74366, 73777, 70175, 75043, 74364, 72850, 74363, 70120]
-        # )
+        
         self.currentChanged.connect(self.tabChanged)
         
     def clearSchedules(self):
@@ -920,8 +904,6 @@ class InputCourses(QWidget):
         fallwinterIcon = QIcon("imgs/FallWinterIcon.png")
         
         #left side
-        termtype = int(str(list(allCourses)[0])[0])
-        termstr = "Fall" if (termtype == 4) else "Winter"
         with open("Programs.json",'r') as f:
             filecontents:dict[str,list[list[str]]] = json.load(f)
         self.presetsmenu = QHBoxLayout()
@@ -933,12 +915,12 @@ class InputCourses(QWidget):
         self.presetsPush.clicked.connect(self.addAllInPreset)
         self.presetsPush.setEnabled(False)
         self.presetsDD.currentIndexChanged.connect(self.presetselected)
+        self.presetsDD.setMaxVisibleItems(100)
         self.presetsDD.addItem(f"- Select -")
         print(filecontents.keys())
         for csname in filecontents:
             for i in range(4):
-                if (i+termtype)%2==0: #correct term
-                    self.presetsDD.addItem(f"{csname} Year {math.floor(i/2.0)+1} {termstr}",filecontents[csname][i])
+                self.presetsDD.addItem(f"{csname} Year {math.floor(i/2.0)+1} {["Fall","Winter"][i%2]}",filecontents[csname][i])
         
         self.codeinputlayout = QHBoxLayout()
         self.codeLabel = QLabel("Course Code:")
