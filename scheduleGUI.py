@@ -1257,8 +1257,8 @@ def firstNumIndex(str: str):
         if str[i].isnumeric():
             return i
 
-coursefile = "CourseFiles/Winter2025.json"
-coursefallfile= "CourseFiles/Fall2024.json"
+coursefile = "CourseFiles/Winter2026.json"
+coursefallfile= "CourseFiles/Fall2025.json"
 
 year = coursefile[coursefile.index(".")-4:coursefile.index(".")]
 season = "F"
