@@ -1084,13 +1084,13 @@ def fastestAddCourses(skip=False):
                 index = total.index("Room:")
                 stuff = total[: index - 1]
                 room = ""
-                match stuff:
-                    case "Software and Informatics Resea":
-                        room += "SIR"
-                    case "Shawenjigewining Hall":
-                        room += "SHA"
-                    case _:
-                        pass
+                # match stuff:
+                #     case "Software and Informatics Resea":
+                #         room += "SIR"
+                #     case "Shawenjigewining Hall":
+                #         room += "SHA"
+                #     case _:
+                #         pass
                 total = total[index + 6 :]
 
                 # index = lastIndexOf(total,"Start")
@@ -1098,7 +1098,7 @@ def fastestAddCourses(skip=False):
                 if biweekly == 0:
                     index = total.index("Start")
                 room += total[: index - 1]
-                # "SIR"+"2060" || ""+"UA1350"
+                # "SIR"+"2060" || ""+"SCI1350"
                 index = lastIndexOf(total, "Start")
                 total = total[index + 44 :]
             if total.count("FULL:") != 0:
@@ -1215,13 +1215,13 @@ def fastAddCourses():
         index = total.index("Room:")
         stuff = total[: index - 1]
         room = ""
-        match stuff:
-            case "Software and Informatics Resea":
-                room += "SIR"
-            case "Shawenjigewining Hall":
-                room += "SHA"
-            case _:
-                pass
+        # match stuff:
+        #     case "Software and Informatics Resea":
+        #         room += "SIR"
+        #     case "Shawenjigewining Hall":
+        #         room += "SHA"
+        #     case _:
+        #         pass
         total = total[index + 6 :]
 
         index = total.index("Start")
@@ -1282,7 +1282,7 @@ def addCourses():
             inp = input("Days (M T W R F) ('stop' to stop): ")
         time = int(input("Time (0000-2400): "))
         length = int(input("Length in minutes (80 170): "))
-        room = input("Room (Ex: UA1350): ")
+        room = input("Room (Ex: SCI1350): ")
         biweekly = int(input("Biweekly? (0 1 2)"))
         instructor = []
         while inp != "stop" and inp != "":
