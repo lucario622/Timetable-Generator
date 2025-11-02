@@ -918,7 +918,7 @@ class InputCourses(QWidget):
         print(filecontents.keys())
         for csname in filecontents:
             for i in range(4):
-                self.presetsDD.addItem(f"{csname} Year {math.floor(i/2.0)+1} {["Fall","Winter"][i%2]}",filecontents[csname][i])
+                self.presetsDD.addItem(f"{csname} Year {math.floor(i/2.0)+1} {('Fall' if i%2 == 0 else 'Winter')}",filecontents[csname][i])
         
         self.codeinputlayout = QHBoxLayout()
         self.codeLabel = QLabel("Course Code:")

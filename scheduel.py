@@ -141,7 +141,7 @@ class CampusMap:
                         floor = 0
                     floor = int(floor)
                     building = fullroom[:i]
-                    separated.append([fullroom, building, floor])
+                    separated.append([fullroom, building, floor, crn])
                     break
         buildingfloors = dict()
         for each in separated:
@@ -173,6 +173,7 @@ class CampusMap:
                         10,
                         0,
                     )
+                    makeTextCent(map_window,allCourses[room[3]].code,"red",self.rooms[fullroom][0], self.rooms[fullroom][1],30)
                 pygame.display.flip()
                 pygame.time.delay(100)
                 events = pygame.event.get()
@@ -2348,7 +2349,8 @@ def mapmenu():
         print("1. Show a Course location on a map")
         print("2. Cycle through several courses on the map")
         print("3. Show all Courses currently running")
-        print("4. Back")
+        print("4. Print all Courses currently running")
+        print("5. Back")
         inp = inp = input("Make a Selection: ")
         if not inp.isnumeric():
             print("input must be a number")
@@ -2398,6 +2400,33 @@ def mapmenu():
                         running.append(course.crn)
                 campusmap.displaylist(running)
             case 4:
+                running = []
+                day = input("Day:")
+                if day not in ["now", "M", "T", "W", "R", "F", "S"]:
+                    print("invalid day")
+                    continue
+                time = 0
+                if day != "now":
+                    time = input("Time:")
+                    if not time.isnumeric():
+                        print("Time must be a number")
+                        continue
+                    time = int(time)
+                    if not 0 <= time < 2359:
+                        print("Time must be 0000-2400")
+                        continue
+                else:
+                    days = ["M", "T", "W", "R", "F", "S", "S"]
+                    current_datetime = datetime.now()
+                    day = days[current_datetime.weekday()]
+                    time = int(
+                        f"{str(current_datetime)[11:13]}{str(current_datetime)[14:16]}"
+                    )
+                for crn in allCourses:
+                    course: Course = allCourses[crn]
+                    if course.isattime(day, time):
+                        print(course.fullDetail())
+            case 5:
                 break
             case _:
                 print("invalid choice")
