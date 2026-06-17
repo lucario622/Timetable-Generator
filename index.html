@@ -1,0 +1,3723 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Tracker</title>
+  <style>
+    /* -----------------------------------------------------------------------
+       Styles — keeping it simple and readable, no external dependencies
+    ----------------------------------------------------------------------- */
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0f0f0f;  /* YouTube-ish dark background */
+      color: #e8e8e8;
+      line-height: 1.5;
+      padding: 2rem 1rem;
+    }
+
+    .container { max-width: 960px; margin: 0 auto; }
+
+    h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
+    h2 { font-size: 1.2rem; margin-bottom: 1rem; color: #aaa; font-weight: 400; }
+    h3 { font-size: 1.1rem; margin-bottom: 0.75rem; }
+
+    /* The big total duration display */
+    .total-duration {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1.5rem 2rem;
+      margin: 1.5rem 0;
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+    }
+    .total-duration .label { color: #aaa; font-size: 0.9rem; }
+    .total-duration .value { font-size: 2.5rem; font-weight: 700; color: #ff4444; font-variant-numeric: tabular-nums; }
+    .total-duration .count { color: #666; font-size: 0.85rem; margin-left: auto; }
+
+    /* Two-column layout */
+    .layout { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; }
+    @media (max-width: 680px) { .layout { display: flex; flex-direction: column; } .videos-panel { order: 1; } .sidebar { order: 2; } }
+
+    /* Panels */
+    .panel {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+
+    /* ---- Cutoff date panel ---- */
+    .cutoff-panel {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .cutoff-panel label { font-size: 0.8rem; color: #aaa; white-space: nowrap; }
+    .cutoff-panel input[type="date"] {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e8e8e8;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.9rem;
+      flex: 1;
+      min-width: 140px;
+    }
+    .cutoff-panel input:focus { outline: none; border-color: #ff4444; }
+    .cutoff-display {
+      font-size: 0.8rem;
+      color: #888;
+      margin-left: auto;
+      white-space: nowrap;
+    }
+    .cutoff-display span { color: #e8e8e8; }
+
+    /* Add channel form */
+    .form-group { margin-bottom: 0.75rem; }
+    label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 0.3rem; }
+    input[type="text"] {
+      width: 100%;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 4px;
+      color: #e8e8e8;
+      padding: 0.5rem 0.6rem;
+      font-size: 0.9rem;
+    }
+    input:focus { outline: none; border-color: #ff4444; }
+
+    button[type="submit"] {
+      width: 100%;
+      background: #ff4444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.6rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-top: 0.25rem;
+    }
+    button[type="submit"]:hover { background: #e03333; }
+
+    /* Channel list */
+    .channel-list-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .channel-list-header h3 { margin-bottom: 0; }
+
+    .sort-btn {
+      background: none;
+      border: 1px solid #333;
+      color: #888;
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.72rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .sort-btn:hover { border-color: #555; color: #ccc; }
+    .sort-btn.active { border-color: #ff4444; color: #ff4444; }
+
+    .channel-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #2a2a2a;
+      font-size: 0.9rem;
+    }
+    .channel-item:last-child { border-bottom: none; }
+    .channel-name { font-weight: 500; }
+    .channel-cutoff { font-size: 0.75rem; color: #666; margin-top: 0.1rem; }
+
+    /* Remove button (inline form) */
+    .remove-btn {
+      background: none;
+      border: 1px solid #444;
+      color: #888;
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .remove-btn:hover { border-color: #ff4444; color: #ff4444; }
+
+    /* Video table */
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+
+    th {
+      text-align: left;
+      color: #666;
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0 0.75rem 0.6rem;
+      border-bottom: 1px solid #2a2a2a;
+      white-space: nowrap;
+    }
+
+    /* Sortable column headers */
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+    th.sortable:hover { color: #aaa; }
+    th.sort-asc  { color: #ff4444; }
+    th.sort-desc { color: #ff4444; }
+    th.sort-asc::after  { content: " ↑"; }
+    th.sort-desc::after { content: " ↓"; }
+
+    td { padding: 0.65rem 0.75rem; border-bottom: 1px solid #1e1e1e; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #1f1f1f; }
+
+    .video-title a { color: #e8e8e8; text-decoration: none; }
+    .video-title a:hover { color: #ff4444; }
+    .channel-tag {
+      font-size: 0.75rem;
+      color: #888;
+      background: #222;
+      border-radius: 3px;
+      padding: 0.1rem 0.4rem;
+      display: inline-block;
+      margin-top: 0.2rem;
+    }
+    .duration { font-variant-numeric: tabular-nums; color: #aaa; white-space: nowrap; }
+    .date-col { color: #666; white-space: normal; font-size: 0.8rem; }
+
+    /* Empty states */
+    .empty { color: #555; font-size: 0.875rem; padding: 1rem 0; text-align: center; }
+
+    /* Help text */
+    .help { font-size: 0.75rem; color: #555; margin-top: 0.4rem; }
+
+    /* Confirmation dialog overlay */
+    .overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .overlay.visible { display: flex; }
+    .dialog {
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 1.75rem 2rem;
+      max-width: 420px;
+      width: 90%;
+    }
+    .dialog h3 { margin-bottom: 0.75rem; }
+    .dialog p  { color: #aaa; font-size: 0.9rem; margin-bottom: 1.25rem; line-height: 1.6; }
+    .dialog-btns { display: flex; gap: 0.75rem; }
+    .dialog-btns .btn { flex: 1; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>📺 YouTube Tracker</h1>
+  <h2>Combined duration of tracked videos</h2>
+
+  <!-- =====================================================================
+       Total duration banner
+       format_duration() is the Python function we registered in app.py.
+       Jinja calls it just like you would in Python: 
+  ===================================================================== -->
+  <div class="total-duration">
+    <span class="label">Total watched time</span>
+    <span class="value">85:29:31</span>
+    <span class="count">150 videos</span>
+  </div>
+
+  <div class="layout">
+
+    <!-- =================================================================
+         Left column: channel management
+    ================================================================= -->
+    <div class="sidebar">
+
+      <!-- Global cutoff -->
+      <div class="panel" style="margin-bottom: 1rem;">
+        <h3>Cutoff date</h3>
+        <form id="cutoff_form" action="/settings/cutoff" method="post">
+          <div class="form-row">
+            <div class="form-group">
+              <input type="date" name="cutoff_date" id="cutoff_input" value="2026-06-06">
+            </div>
+            <button type="submit" class="btn">Apply</button>
+          </div>
+        </form>
+      </div>
+      <!-- Add channel form -->
+      <div class="panel" style="margin-bottom: 1rem;">
+        <h3>Add a channel</h3>
+
+        <!--
+          action="/channels/add" and method="post" make this form submit to
+          our /channels/add route in app.py. Flask's request.form will then
+          contain "channel_id" and "cutoff_date".
+        -->
+        <form action="/channels/add" method="post" id="add_channel_form">
+          <!-- Hidden field that JS fills in from the cutoff panel above -->
+          <input type="hidden" name="cutoff_date" id="cutoff_hidden">
+          <div class="form-group">
+            <label for="channel_id">Channel ID</label>
+            <input type="text" id="channel_id" name="channel_id" placeholder="UCxxxxxxxxxxxxxxxxxxxxxx" required="">
+            <p class="help">
+              Find it on YouTube: go to the channel page → About →
+              Share → Copy channel ID. Starts with "UC".
+            </p>
+          </div>
+          <button type="submit">Add channel</button>
+        </form>
+      </div>
+
+      <!-- Channel list -->
+      <div class="panel">
+        <div class="channel-list-header">
+          <h3>Tracked channels</h3>
+          <!-- Sort toggle: clicking cycles between Name A→Z and Date Added -->
+          <button class="sort-btn active" id="channel_sort_btn" onclick="toggleChannelSort()">
+            <span id="channel_sort_label">Date Added</span>
+          </button>
+        </div>
+
+        
+        <div id="channel_list">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+        <div class="channel-item" data-name="ciblesgd" data-added="2026-06-16T23:57:07.550675+00:00">
+            <div>
+              <div class="channel-name">CiblesGD</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC4STm5KlYBHfn_bA6bjsYjQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="wynncraft soundtrack" data-added="2026-06-16T05:11:54.568956+00:00">
+            <div>
+              <div class="channel-name">Wynncraft Soundtrack</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC8-SVyrOCkf01mZ6znKLYug">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="valefisk2" data-added="2026-06-16T05:11:46.687429+00:00">
+            <div>
+              <div class="channel-name">Valefisk2</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCaCDSWD7bF0pvSNa0rvI1LA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="valefisk" data-added="2026-06-16T05:11:18.753098+00:00">
+            <div>
+              <div class="channel-name">Valefisk</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC0eOlAEMdVgpmThPkpmR-qQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="the spiffing brit" data-added="2026-06-16T05:11:09.527989+00:00">
+            <div>
+              <div class="channel-name">The Spiffing Brit</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCRHXUZ0BxbkU2MYZgsuFgkQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="stuff made here" data-added="2026-06-16T05:10:52.195602+00:00">
+            <div>
+              <div class="channel-name">Stuff Made Here</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCj1VqrHhDte54oLgPG4xpuQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="sparklypants" data-added="2026-06-16T05:10:41.971777+00:00">
+            <div>
+              <div class="channel-name">SparklyPants</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCMCMoFQ3ym2iaH2hcY0WpaA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="sparkleshorts" data-added="2026-06-16T05:10:28.972052+00:00">
+            <div>
+              <div class="channel-name">SparkleShorts</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC6j5fwiGHN9gCkxUcfcVcKQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="smallant" data-added="2026-06-16T05:10:15.879336+00:00">
+            <div>
+              <div class="channel-name">SmallAnt</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC0VVYtw21rg2cokUystu2Dw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="slmccl" data-added="2026-06-16T05:10:05.826511+00:00">
+            <div>
+              <div class="channel-name">Slmccl</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC_tCuH9uVrUP-BqN4lSRwyg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="sindu" data-added="2026-06-16T05:09:53.755834+00:00">
+            <div>
+              <div class="channel-name">sindu</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC6XXKkNnZxCaMX4Ex1UYsuA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="shayy" data-added="2026-06-16T05:09:44.835827+00:00">
+            <div>
+              <div class="channel-name">Shayy</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCC_7o4k_DGvHKp3SUNocA-w">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="shalzlive" data-added="2026-06-16T05:09:34.308427+00:00">
+            <div>
+              <div class="channel-name">ShalzLIVE</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCD_hXmywTQdyjtpRBMzfHig">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="seanie dew" data-added="2026-06-16T05:09:23.080162+00:00">
+            <div>
+              <div class="channel-name">Seanie Dew</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC9OucCej3Rx7tS3O7df4ReA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="r4tmaid" data-added="2026-06-16T05:09:11.507335+00:00">
+            <div>
+              <div class="channel-name">r4tmaid</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCAFXIS05j5EMNdfDFnIs1-g">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="pointcrow playthroughs" data-added="2026-06-16T05:07:07.224184+00:00">
+            <div>
+              <div class="channel-name">PointCrow Playthroughs</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC9iWjbI3bRfcCrPZRtdXRMw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="notcibles" data-added="2026-06-16T05:06:47.810324+00:00">
+            <div>
+              <div class="channel-name">NotCibles</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCnom6858z5M8b8vISuXX_5w">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="mysticat" data-added="2026-06-16T05:06:40.012636+00:00">
+            <div>
+              <div class="channel-name">mysticat</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC9mvRrl9o7rG65ABsGVvDBw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="mumbo jumbo" data-added="2026-06-16T05:06:31.611527+00:00">
+            <div>
+              <div class="channel-name">Mumbo Jumbo</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UChFur_NwVSbUozOcF_F2kMg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="monty" data-added="2026-06-16T05:06:20.360379+00:00">
+            <div>
+              <div class="channel-name">Monty</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCKxy8u01KVqi28TiCKRzf8w">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="linkus7" data-added="2026-06-16T05:06:02.937888+00:00">
+            <div>
+              <div class="channel-name">Linkus7</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCAnzaHhB0ONtwDkYdc3MFCw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="let's game it out" data-added="2026-06-16T05:05:53.913749+00:00">
+            <div>
+              <div class="channel-name">Let's Game It Out</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCto7D1L-MiRoOziCXK9uT5Q">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="jordan reacts" data-added="2026-06-16T05:05:37.089346+00:00">
+            <div>
+              <div class="channel-name">Jordan Reacts</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCo8_GzFxkXAYtwN0QabhJ8A">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="itsjabo" data-added="2026-06-16T05:05:26.921550+00:00">
+            <div>
+              <div class="channel-name">ItsJabo</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCgZY9OYTjJplzsROVzp1mpw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="ish" data-added="2026-06-16T05:05:09.268409+00:00">
+            <div>
+              <div class="channel-name">ish</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCF3KMM3QLVEfnFPI8AbLUJA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="ilikecheese" data-added="2026-06-16T05:05:00.603817+00:00">
+            <div>
+              <div class="channel-name">ilikecheese</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCm696A0tCbrQUY-Ps8WJykg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="fundylive" data-added="2026-06-16T05:04:51.626348+00:00">
+            <div>
+              <div class="channel-name">FundyLIVE</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCJhTTqtsvThK99_IbNDtwSw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="fundy" data-added="2026-06-16T05:04:43.080902+00:00">
+            <div>
+              <div class="channel-name">Fundy</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCCE5NVlm0FhbunMMBT48WAw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="fireb0rn" data-added="2026-06-16T05:04:26.196802+00:00">
+            <div>
+              <div class="channel-name">fireb0rn</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCEYGHOLgKlLMDNrGCno3oJA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="fir" data-added="2026-06-16T05:04:16.863721+00:00">
+            <div>
+              <div class="channel-name">Fir</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCGxYHAR9f_leP1yXDXNNDsA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="feenix sc" data-added="2026-06-16T05:04:00.022186+00:00">
+            <div>
+              <div class="channel-name">Feenix SC</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC9T9mnA5u12DlQjeywuonpw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="failboat's dinghy" data-added="2026-06-16T05:03:23.143466+00:00">
+            <div>
+              <div class="channel-name">Failboat's Dinghy</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCGbJypG22wRZRpz4g0Hp04w">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="extra spiff" data-added="2026-06-16T05:02:12.413834+00:00">
+            <div>
+              <div class="channel-name">Extra Spiff</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCADI1ERBZZmOd_EQTzJ1PPQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="eric morino" data-added="2026-06-16T05:01:59.835769+00:00">
+            <div>
+              <div class="channel-name">Eric Morino</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCUtTwa9YbKZeW3sS6VZSE9Q">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="epicnate" data-added="2026-06-16T05:01:45.550494+00:00">
+            <div>
+              <div class="channel-name">EpicNate</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCZz1vlP2XaeKnEP3L5hmcVA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="dougdougdoug" data-added="2026-06-16T05:01:32.754661+00:00">
+            <div>
+              <div class="channel-name">DougDougDoug</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC5sc1ysFs7RfjjEFMuQ3ZQw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="dougdoug" data-added="2026-06-16T05:01:23.225011+00:00">
+            <div>
+              <div class="channel-name">DougDoug</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UClyGlKOhDUooPJFy4v_mqPg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="cjya" data-added="2026-06-16T05:01:12.140223+00:00">
+            <div>
+              <div class="channel-name">cjya</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCs9m9aozFz9NztwPhM_gpTA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="chippyscouch" data-added="2026-06-16T05:01:04.349056+00:00">
+            <div>
+              <div class="channel-name">ChippysCouch</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCkfTUab0xxTMPRTNgs9vMCQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="chippygaming" data-added="2026-06-16T05:00:57.621195+00:00">
+            <div>
+              <div class="channel-name">ChippyGaming</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCdImtrRS4UewEbPdnF8R4qw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="chemistry on creatine" data-added="2026-06-16T05:00:41.348012+00:00">
+            <div>
+              <div class="channel-name">Chemistry on Creatine</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCKcKUugNKfRhIZrQWWs7WZw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="ceave perspective" data-added="2026-06-16T04:54:57.493240+00:00">
+            <div>
+              <div class="channel-name">Ceave Perspective</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCepgG8BiC4jlGTSZfYkpHiQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="captainsparklez" data-added="2026-06-16T04:54:46.518338+00:00">
+            <div>
+              <div class="channel-name">CaptainSparklez</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCshoKvlZGZ20rVgazZp5vnQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="backseat streams" data-added="2026-06-16T04:54:21.602066+00:00">
+            <div>
+              <div class="channel-name">Backseat Streams</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCVaz2Wz1mNQ0Eun8eq0DGFw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="amethyst-szs" data-added="2026-06-16T04:54:15.055820+00:00">
+            <div>
+              <div class="channel-name">Amethyst-szs</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCXIOuzFjLiO046_0sPm5xgg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="ceave gaming" data-added="2026-06-16T04:52:50.612772+00:00">
+            <div>
+              <div class="channel-name">Ceave Gaming</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCFXc5nAao6554AIXlN9KgwQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="paddy" data-added="2026-06-16T04:52:37.986892+00:00">
+            <div>
+              <div class="channel-name">Paddy</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCcGn_Cyb-0-jI1xI_nrq7iA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="grazzy" data-added="2026-06-16T04:52:28.364428+00:00">
+            <div>
+              <div class="channel-name">Grazzy</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC19Tqf8QXE0--j8kFfcbKCg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="astralspiff" data-added="2026-06-16T04:52:14.344030+00:00">
+            <div>
+              <div class="channel-name">AstralSpiff</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC9ek8xUVjnmQ-q7f6CTwtxg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="berd" data-added="2026-06-16T04:49:33.128829+00:00">
+            <div>
+              <div class="channel-name">Berd</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCRei8TBpt4r0WPZ7MkiKmVg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="crowpoint" data-added="2026-06-16T04:49:23.054913+00:00">
+            <div>
+              <div class="channel-name">CrowPoint</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC6MnY4d56I8j2H327vZzmFg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="bill wurtz" data-added="2026-06-16T04:49:14.410904+00:00">
+            <div>
+              <div class="channel-name">bill wurtz</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCq6aw03lNILzV96UvEAASfQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="pointcrow" data-added="2026-06-16T04:49:01.365400+00:00">
+            <div>
+              <div class="channel-name">PointCrow</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCG6zBb8GZKo1XZW4eHdg-0Q">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="kilroy was here" data-added="2026-06-16T04:48:49.291491+00:00">
+            <div>
+              <div class="channel-name">Kilroy Was Here</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC6jTe1KxxmAaTgg9yrPPdww">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="gtlive" data-added="2026-06-16T04:47:59.952674+00:00">
+            <div>
+              <div class="channel-name">GTLive</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCAaegDUlb7doIKo0Rc1F08g">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="techtrixplays" data-added="2026-06-16T04:47:45.167465+00:00">
+            <div>
+              <div class="channel-name">techtrixplays</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC3Wvzaz8vbJCdqOnK_-b3uA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="astralspiff extras" data-added="2026-06-16T04:47:33.473641+00:00">
+            <div>
+              <div class="channel-name">AstralSpiff Extras</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCpeoCHNJdF0CIrHAMNrPrMw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="fir unlisted" data-added="2026-06-16T04:47:02.512443+00:00">
+            <div>
+              <div class="channel-name">Fir Unlisted</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC_ywTwn4vs5W-d6LUDYvU-Q">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="grian" data-added="2026-06-16T04:46:55.919878+00:00">
+            <div>
+              <div class="channel-name">Grian</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCR9Gcq0CMm6YgTzsDxAxjOQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="dougdoug clips" data-added="2026-06-16T04:46:07.141346+00:00">
+            <div>
+              <div class="channel-name">DougDoug Clips</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCWcCxrPCRDAte7I4uFdVsFQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="phoenix sc" data-added="2026-06-16T04:45:42.582924+00:00">
+            <div>
+              <div class="channel-name">Phoenix SC</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCj4zC1Hfj-uc90FUXzRamNw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="failboat" data-added="2026-06-16T04:45:09.255991+00:00">
+            <div>
+              <div class="channel-name">Failboat</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC9mBJdNZxwE-La5vX0Kozvg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="rin penrose ch. and snebby" data-added="2026-06-16T04:44:43.221064+00:00">
+            <div>
+              <div class="channel-name">Rin Penrose Ch. and Snebby</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCpZIbzoEC_3rZglErpQkbDg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="dejojotheawsome" data-added="2026-06-16T04:44:21.051704+00:00">
+            <div>
+              <div class="channel-name">Dejojotheawsome</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCHMaWSgPAVlLohSt1MSZ1ag">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="mossbag" data-added="2026-06-16T04:43:53.272106+00:00">
+            <div>
+              <div class="channel-name">mossbag</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCTvH45HvnOzqXvfNJqdc3xg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="jordan maron" data-added="2026-06-16T04:43:35.196163+00:00">
+            <div>
+              <div class="channel-name">Jordan Maron</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCn7MpX76Bou10j6IkgAcdjg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="daily dose of internet" data-added="2026-06-16T04:43:12.657661+00:00">
+            <div>
+              <div class="channel-name">Daily Dose Of Internet</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCdC0An4ZPNr_YiFiYoVbwaw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="shenpai" data-added="2026-06-16T04:42:53.868750+00:00">
+            <div>
+              <div class="channel-name">Shenpai</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UC_guCQk0_fmS2BNk6fHzRjw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="smooth mcgroove" data-added="2026-06-16T04:42:07.557277+00:00">
+            <div>
+              <div class="channel-name">Smooth McGroove</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCJvBEEqTaLaKclbCPgIjBSQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="linkus daily" data-added="2026-06-16T04:41:46.041965+00:00">
+            <div>
+              <div class="channel-name">Linkus Daily</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCqzES41DEZpg_UppWyaRlDQ">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="rtgame" data-added="2026-06-16T04:40:55.509900+00:00">
+            <div>
+              <div class="channel-name">RTGame</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCRC6cNamj9tYAO6h_RXd5xA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="neuro-sama" data-added="2026-06-16T04:05:57.075272+00:00">
+            <div>
+              <div class="channel-name">Neuro-sama</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCLHmLrj4pHHg3-iBJn_CqxA">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="shalz" data-added="2026-06-16T04:05:35.865110+00:00">
+            <div>
+              <div class="channel-name">Shalz</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCZX6LAAGQM1s0_UtBws270Q">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="eightsidedsquare" data-added="2026-06-16T04:04:54.604035+00:00">
+            <div>
+              <div class="channel-name">EightSidedSquare</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCm9WKMrkb005KoZki70X_7g">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="skurry" data-added="2026-06-16T04:03:34.936194+00:00">
+            <div>
+              <div class="channel-name">Skurry</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCYX2-exnYmc6gDObfooTGZg">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div><div class="channel-item" data-name="captainsparklez 2" data-added="2026-06-16T01:58:44.809083+00:00">
+            <div>
+              <div class="channel-name">CaptainSparklez 2</div>
+              <!--
+                ch.cutoff is a Python datetime. strftime formats it as a
+                readable date. %Y-%m-%d = 2024-03-15.
+              -->
+              <div class="channel-cutoff">Since 16 June 2026</div>
+            </div>
+            <!-- Inline form so each remove button only removes that channel -->
+            <form action="/channels/remove" method="post">
+              <input type="hidden" name="channel_id" value="UCAJ41d46i6mcNAsvsWRc9hw">
+              <button type="submit" class="remove-btn">Remove</button>
+            </form>
+          </div></div>
+        
+      </div>
+
+    </div><!-- end left column -->
+
+    <!-- =================================================================
+         Right column: video list
+    ================================================================= -->
+    <div class="panel videos-panel">
+      <h3>Videos</h3>
+
+      
+      <table id="video_table">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <!-- data-col tells JS which data attribute to sort by -->
+            <th class="sortable" data-col="duration" onclick="sortTable(this)">Duration</th>
+            <th class="sortable sort-asc" data-col="published" onclick="sortTable(this)">Published</th>
+          </tr>
+        </thead>
+        <tbody id="video_tbody">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+        <tr data-duration="1376" data-published="2026-06-06T00:00:35+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=9hFnDsVyacI" target="_blank" rel="noopener">This Minecraft Map Changed My Perspective On Life</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">0:22:56</td>
+            <td class="date-col local-date" data-utc="2026-06-06T00:00:35+00:00">June 5, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="31" data-published="2026-06-06T01:15:03+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=4VudDK5B_4M" target="_blank" rel="noopener">This island is fake.</a>
+              <div><span class="channel-tag">Phoenix SC</span></div>
+            </td>
+            <td class="duration">0:00:31</td>
+            <td class="date-col local-date" data-utc="2026-06-06T01:15:03+00:00">June 5, 2026<br>09:15 p.m.</td>
+          </tr><tr data-duration="3107" data-published="2026-06-06T03:11:01+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=j6sFq3aNIYg" target="_blank" rel="noopener">Saving a Minecraft Server from my Disease Mod</a>
+              <div><span class="channel-tag">EightSidedSquare</span></div>
+            </td>
+            <td class="duration">0:51:47</td>
+            <td class="date-col local-date" data-utc="2026-06-06T03:11:01+00:00">June 5, 2026<br>11:11 p.m.</td>
+          </tr><tr data-duration="60" data-published="2026-06-06T12:00:18+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=fcRZA-Jle4I" target="_blank" rel="noopener">How You Can Break Graveyard Keeper With Candles</a>
+              <div><span class="channel-tag">Seanie Dew</span></div>
+            </td>
+            <td class="duration">0:01:00</td>
+            <td class="date-col local-date" data-utc="2026-06-06T12:00:18+00:00">June 6, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="39" data-published="2026-06-06T12:00:36+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=VkxYhHtdpZ0" target="_blank" rel="noopener">Wandering trader strikes back</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">0:00:39</td>
+            <td class="date-col local-date" data-utc="2026-06-06T12:00:36+00:00">June 6, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="784" data-published="2026-06-06T13:56:54+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=iGxIUhs6ujI" target="_blank" rel="noopener">I Made a Self-Driving Car with Create!</a>
+              <div><span class="channel-tag">Shalz</span></div>
+            </td>
+            <td class="duration">0:13:04</td>
+            <td class="date-col local-date" data-utc="2026-06-06T13:56:54+00:00">June 6, 2026<br>09:56 a.m.</td>
+          </tr><tr data-duration="1446" data-published="2026-06-06T14:00:08+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=esZjSK-XbE8" target="_blank" rel="noopener">Baking With A.I. Was A Bad Idea</a>
+              <div><span class="channel-tag">Neuro-sama</span></div>
+            </td>
+            <td class="duration">0:24:06</td>
+            <td class="date-col local-date" data-utc="2026-06-06T14:00:08+00:00">June 6, 2026<br>10:00 a.m.</td>
+          </tr><tr data-duration="6337" data-published="2026-06-06T17:00:15+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=rfss7CCYvps" target="_blank" rel="noopener">I am not James Bond: Let's Play All of 007 First Light - Part 1</a>
+              <div><span class="channel-tag">RTGame</span></div>
+            </td>
+            <td class="duration">1:45:37</td>
+            <td class="date-col local-date" data-utc="2026-06-06T17:00:15+00:00">June 6, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="5084" data-published="2026-06-06T17:00:25+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=PmmkAa7B5SQ" target="_blank" rel="noopener">Minecraft: Gracefully Flying In The Scum SMP</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:24:44</td>
+            <td class="date-col local-date" data-utc="2026-06-06T17:00:25+00:00">June 6, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="28" data-published="2026-06-06T18:24:41+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=5A-3FHyAMMo" target="_blank" rel="noopener">horror games</a>
+              <div><span class="channel-tag">Berd</span></div>
+            </td>
+            <td class="duration">0:00:28</td>
+            <td class="date-col local-date" data-utc="2026-06-06T18:24:41+00:00">June 6, 2026<br>02:24 p.m.</td>
+          </tr><tr data-duration="715" data-published="2026-06-06T19:03:13+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=ufXToGipzdw" target="_blank" rel="noopener">I Need to Talk About the Switch 2</a>
+              <div><span class="channel-tag">Linkus Daily</span></div>
+            </td>
+            <td class="duration">0:11:55</td>
+            <td class="date-col local-date" data-utc="2026-06-06T19:03:13+00:00">June 6, 2026<br>03:03 p.m.</td>
+          </tr><tr data-duration="144" data-published="2026-06-06T19:08:50+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=W-w6xu12r1w" target="_blank" rel="noopener">Super Smash Bros. Melee - All-Star Rest Area Acapella</a>
+              <div><span class="channel-tag">Smooth McGroove</span></div>
+            </td>
+            <td class="duration">0:02:24</td>
+            <td class="date-col local-date" data-utc="2026-06-06T19:08:50+00:00">June 6, 2026<br>03:08 p.m.</td>
+          </tr><tr data-duration="7450" data-published="2026-06-06T19:52:30+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=5Q9wkpl5DeA" target="_blank" rel="noopener">Deltarune Chapter 3 Glitched Speedruns</a>
+              <div><span class="channel-tag">CiblesGD</span></div>
+            </td>
+            <td class="duration">2:04:10</td>
+            <td class="date-col local-date" data-utc="2026-06-06T19:52:30+00:00">June 6, 2026<br>03:52 p.m.</td>
+          </tr><tr data-duration="884" data-published="2026-06-06T20:34:34+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=nvHHYJyeiDo" target="_blank" rel="noopener">That Wasn't Meant To Happen</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:14:44</td>
+            <td class="date-col local-date" data-utc="2026-06-06T20:34:34+00:00">June 6, 2026<br>04:34 p.m.</td>
+          </tr><tr data-duration="1405" data-published="2026-06-06T22:30:39+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=qNGU6X_uJwo" target="_blank" rel="noopener">Oops We Got An Audi</a>
+              <div><span class="channel-tag">Jordan Maron</span></div>
+            </td>
+            <td class="duration">0:23:25</td>
+            <td class="date-col local-date" data-utc="2026-06-06T22:30:39+00:00">June 6, 2026<br>06:30 p.m.</td>
+          </tr><tr data-duration="4372" data-published="2026-06-07T00:00:21+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=qTx3yYgOB80" target="_blank" rel="noopener">Minecraft E2ernal Ep. 16 - The Raid</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:12:52</td>
+            <td class="date-col local-date" data-utc="2026-06-07T00:00:21+00:00">June 6, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="17706" data-published="2026-06-07T02:12:57+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=zB09SgF8a8A" target="_blank" rel="noopener">Hollow Knight Silksong but instead it's Hollow Knight (Charity Stream)</a>
+              <div><span class="channel-tag">mossbag</span></div>
+            </td>
+            <td class="duration">4:55:06</td>
+            <td class="date-col local-date" data-utc="2026-06-07T02:12:57+00:00">June 6, 2026<br>10:12 p.m.</td>
+          </tr><tr data-duration="7" data-published="2026-06-07T05:00:03+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=ALqMQPtrzZo" target="_blank" rel="noopener">I'll Have Whatever He's Having 🫧</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:00:07</td>
+            <td class="date-col local-date" data-utc="2026-06-07T05:00:03+00:00">June 7, 2026<br>01:00 a.m.</td>
+          </tr><tr data-duration="61" data-published="2026-06-07T12:00:09+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=TZAo8j2b18M" target="_blank" rel="noopener">Why This Random Upgrade is the Most Important Early Research in Graveyard Keeper</a>
+              <div><span class="channel-tag">Seanie Dew</span></div>
+            </td>
+            <td class="duration">0:01:01</td>
+            <td class="date-col local-date" data-utc="2026-06-07T12:00:09+00:00">June 7, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="21" data-published="2026-06-07T12:00:27+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=3cZ775KfnzI" target="_blank" rel="noopener">Goodbye valuable thing</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">0:00:21</td>
+            <td class="date-col local-date" data-utc="2026-06-07T12:00:27+00:00">June 7, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="33" data-published="2026-06-07T13:00:25+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=a3m426Ssu9c" target="_blank" rel="noopener">Silksong's Strongest Enemy</a>
+              <div><span class="channel-tag">Kilroy Was Here</span></div>
+            </td>
+            <td class="duration">0:00:33</td>
+            <td class="date-col local-date" data-utc="2026-06-07T13:00:25+00:00">June 7, 2026<br>09:00 a.m.</td>
+          </tr><tr data-duration="7" data-published="2026-06-07T16:00:16+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=Vi7LFmpRBUw" target="_blank" rel="noopener">Plumbers When They Discover Free Will 🐍</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:00:07</td>
+            <td class="date-col local-date" data-utc="2026-06-07T16:00:16+00:00">June 7, 2026<br>12:00 p.m.</td>
+          </tr><tr data-duration="2788" data-published="2026-06-07T16:24:45+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=1z8yeJrLLRA" target="_blank" rel="noopener">I Return to My Most Hated Horror Mod</a>
+              <div><span class="channel-tag">Dejojotheawsome</span></div>
+            </td>
+            <td class="duration">0:46:28</td>
+            <td class="date-col local-date" data-utc="2026-06-07T16:24:45+00:00">June 7, 2026<br>12:24 p.m.</td>
+          </tr><tr data-duration="2629" data-published="2026-06-07T17:00:04+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=opoXzg7ySAo" target="_blank" rel="noopener">Steve Makes Me Work In The Mine</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">0:43:49</td>
+            <td class="date-col local-date" data-utc="2026-06-07T17:00:04+00:00">June 7, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="2706" data-published="2026-06-07T18:00:20+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=HfHdWtkVshQ" target="_blank" rel="noopener">An octopus pretending to be a man plays Octodad</a>
+              <div><span class="channel-tag">Rin Penrose Ch. and Snebby</span></div>
+            </td>
+            <td class="duration">0:45:06</td>
+            <td class="date-col local-date" data-utc="2026-06-07T18:00:20+00:00">June 7, 2026<br>02:00 p.m.</td>
+          </tr><tr data-duration="5390" data-published="2026-06-07T21:41:14+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=JdoDkPr7pjg" target="_blank" rel="noopener">Undertale, but it's CHAOS CHAOS CHAOS CHAOS CHAOS CHAOS CHAOS CHAOS</a>
+              <div><span class="channel-tag">CiblesGD</span></div>
+            </td>
+            <td class="duration">1:29:50</td>
+            <td class="date-col local-date" data-utc="2026-06-07T21:41:14+00:00">June 7, 2026<br>05:41 p.m.</td>
+          </tr><tr data-duration="1895" data-published="2026-06-07T23:26:40+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=JQTLcwJCQ3s" target="_blank" rel="noopener">Kirby, but I get shaved</a>
+              <div><span class="channel-tag">Failboat</span></div>
+            </td>
+            <td class="duration">0:31:35</td>
+            <td class="date-col local-date" data-utc="2026-06-07T23:26:40+00:00">June 7, 2026<br>07:26 p.m.</td>
+          </tr><tr data-duration="5081" data-published="2026-06-08T00:00:23+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=32IV98XWLys" target="_blank" rel="noopener">Minecraft E2ernal Ep. 17 - An Unfortunate End</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:24:41</td>
+            <td class="date-col local-date" data-utc="2026-06-08T00:00:23+00:00">June 7, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="801" data-published="2026-06-08T01:35:02+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=dGlNU-VCR-Y" target="_blank" rel="noopener">Okay, the NEW Stairs Update is cursed.</a>
+              <div><span class="channel-tag">Phoenix SC</span></div>
+            </td>
+            <td class="duration">0:13:21</td>
+            <td class="date-col local-date" data-utc="2026-06-08T01:35:02+00:00">June 7, 2026<br>09:35 p.m.</td>
+          </tr><tr data-duration="16" data-published="2026-06-08T03:46:00+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=mVmO1LGNxjM" target="_blank" rel="noopener">ANGRY BIRDS IN MINECRAFT</a>
+              <div><span class="channel-tag">techtrixplays</span></div>
+            </td>
+            <td class="duration">0:00:16</td>
+            <td class="date-col local-date" data-utc="2026-06-08T03:46:00+00:00">June 7, 2026<br>11:46 p.m.</td>
+          </tr><tr data-duration="38" data-published="2026-06-08T12:00:30+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=MSzcSKi5RA8" target="_blank" rel="noopener">What Happens When You Dump Too Many Bodies in Graveyard Keeper?</a>
+              <div><span class="channel-tag">Seanie Dew</span></div>
+            </td>
+            <td class="duration">0:00:38</td>
+            <td class="date-col local-date" data-utc="2026-06-08T12:00:30+00:00">June 8, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="28" data-published="2026-06-08T14:00:15+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=M2qADRcAAPs" target="_blank" rel="noopener">AI VTuber plays Skyrim</a>
+              <div><span class="channel-tag">Neuro-sama</span></div>
+            </td>
+            <td class="duration">0:00:28</td>
+            <td class="date-col local-date" data-utc="2026-06-08T14:00:15+00:00">June 8, 2026<br>10:00 a.m.</td>
+          </tr><tr data-duration="1041" data-published="2026-06-08T15:00:26+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=5fmGfC6SQSM" target="_blank" rel="noopener">Who's viewers can conquer the entire world faster?</a>
+              <div><span class="channel-tag">DougDoug Clips</span></div>
+            </td>
+            <td class="duration">0:17:21</td>
+            <td class="date-col local-date" data-utc="2026-06-08T15:00:26+00:00">June 8, 2026<br>11:00 a.m.</td>
+          </tr><tr data-duration="1419" data-published="2026-06-08T16:00:07+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=sDrigUXaWR4" target="_blank" rel="noopener">Hermitcraft 11: Episode 18 - THE WORST DAY ON HERMITCRAFT.</a>
+              <div><span class="channel-tag">Grian</span></div>
+            </td>
+            <td class="duration">0:23:39</td>
+            <td class="date-col local-date" data-utc="2026-06-08T16:00:07+00:00">June 8, 2026<br>12:00 p.m.</td>
+          </tr><tr data-duration="37" data-published="2026-06-08T16:00:16+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=bVJ-xC2a8bA" target="_blank" rel="noopener">Octopus Figured Out How To Use His Hands 🐙</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:00:37</td>
+            <td class="date-col local-date" data-utc="2026-06-08T16:00:16+00:00">June 8, 2026<br>12:00 p.m.</td>
+          </tr><tr data-duration="71" data-published="2026-06-08T16:10:52+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=i-o3OOdUKig" target="_blank" rel="noopener">Add a tier ABOVE NETHERITE with This Mod #minecraft #createmod</a>
+              <div><span class="channel-tag">Dejojotheawsome</span></div>
+            </td>
+            <td class="duration">0:01:11</td>
+            <td class="date-col local-date" data-utc="2026-06-08T16:10:52+00:00">June 8, 2026<br>12:10 p.m.</td>
+          </tr><tr data-duration="9646" data-published="2026-06-08T17:00:21+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=3uOUECyWxP8" target="_blank" rel="noopener">Minecraft: Growing Hamsters In The Scum SMP</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">2:40:46</td>
+            <td class="date-col local-date" data-utc="2026-06-08T17:00:21+00:00">June 8, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="86" data-published="2026-06-08T17:51:55+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=-__z-hiePyk" target="_blank" rel="noopener">the cockroach incident</a>
+              <div><span class="channel-tag">CrowPoint</span></div>
+            </td>
+            <td class="duration">0:01:26</td>
+            <td class="date-col local-date" data-utc="2026-06-08T17:51:55+00:00">June 8, 2026<br>01:51 p.m.</td>
+          </tr><tr data-duration="2014" data-published="2026-06-08T19:00:33+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=Ay7lHa-IXco" target="_blank" rel="noopener">I Entered a Super Battle Golf Tournament</a>
+              <div><span class="channel-tag">Fir Unlisted</span></div>
+            </td>
+            <td class="duration">0:33:34</td>
+            <td class="date-col local-date" data-utc="2026-06-08T19:00:33+00:00">June 8, 2026<br>03:00 p.m.</td>
+          </tr><tr data-duration="49" data-published="2026-06-08T19:00:36+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=wgE6sGm04w8" target="_blank" rel="noopener">More Useless Facts About The Create Mod</a>
+              <div><span class="channel-tag">Dejojotheawsome</span></div>
+            </td>
+            <td class="duration">0:00:49</td>
+            <td class="date-col local-date" data-utc="2026-06-08T19:00:36+00:00">June 8, 2026<br>03:00 p.m.</td>
+          </tr><tr data-duration="29" data-published="2026-06-08T19:45:37+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=waBGhinZNY0" target="_blank" rel="noopener">WE GOT...</a>
+              <div><span class="channel-tag">techtrixplays</span></div>
+            </td>
+            <td class="duration">0:00:29</td>
+            <td class="date-col local-date" data-utc="2026-06-08T19:45:37+00:00">June 8, 2026<br>03:45 p.m.</td>
+          </tr><tr data-duration="62" data-published="2026-06-08T21:00:30+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=tJK2B35b3jg" target="_blank" rel="noopener">Trying To Find Biggest Forehead 📏</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:01:02</td>
+            <td class="date-col local-date" data-utc="2026-06-08T21:00:30+00:00">June 8, 2026<br>05:00 p.m.</td>
+          </tr><tr data-duration="1463" data-published="2026-06-08T21:21:24+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=AlNuTKVqFO8" target="_blank" rel="noopener">Spiff TRIES to unbox a Subnautica 2 package</a>
+              <div><span class="channel-tag">AstralSpiff Extras</span></div>
+            </td>
+            <td class="duration">0:24:23</td>
+            <td class="date-col local-date" data-utc="2026-06-08T21:21:24+00:00">June 8, 2026<br>05:21 p.m.</td>
+          </tr><tr data-duration="62" data-published="2026-06-08T22:30:23+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=6zbh0L0gz2s" target="_blank" rel="noopener">I Added MAGNET POWER To Create Mod #minecraft #createmod</a>
+              <div><span class="channel-tag">Dejojotheawsome</span></div>
+            </td>
+            <td class="duration">0:01:02</td>
+            <td class="date-col local-date" data-utc="2026-06-08T22:30:23+00:00">June 8, 2026<br>06:30 p.m.</td>
+          </tr><tr data-duration="9407" data-published="2026-06-08T22:44:36+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=neQKfdsJfRg" target="_blank" rel="noopener">YOU Can Ruin My Create Aeronautics Battle Bot</a>
+              <div><span class="channel-tag">techtrixplays</span></div>
+            </td>
+            <td class="duration">2:36:47</td>
+            <td class="date-col local-date" data-utc="2026-06-08T22:44:36+00:00">June 8, 2026<br>06:44 p.m.</td>
+          </tr><tr data-duration="9254" data-published="2026-06-08T22:49:31+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=526P-amSZYA" target="_blank" rel="noopener">🔴Learning to Breathe &amp; Read | Yoshi &amp; The Mysterious Book</a>
+              <div><span class="channel-tag">GTLive</span></div>
+            </td>
+            <td class="duration">2:34:14</td>
+            <td class="date-col local-date" data-utc="2026-06-08T22:49:31+00:00">June 8, 2026<br>06:49 p.m.</td>
+          </tr><tr data-duration="8261" data-published="2026-06-09T00:00:32+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=ACFFa18pw4c" target="_blank" rel="noopener">Minecraft E2ernal Ep. 17.5 - The Occult</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">2:17:41</td>
+            <td class="date-col local-date" data-utc="2026-06-09T00:00:32+00:00">June 8, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="34" data-published="2026-06-09T02:35:10+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=S_ofr5V-ktQ" target="_blank" rel="noopener">Arrow trap in a Geyser.</a>
+              <div><span class="channel-tag">Phoenix SC</span></div>
+            </td>
+            <td class="duration">0:00:34</td>
+            <td class="date-col local-date" data-utc="2026-06-09T02:35:10+00:00">June 8, 2026<br>10:35 p.m.</td>
+          </tr><tr data-duration="59" data-published="2026-06-09T12:30:08+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=LbzO2fjqQ8s" target="_blank" rel="noopener">I Added NEW Furniture To CreateMod #minecraft #createmod</a>
+              <div><span class="channel-tag">Dejojotheawsome</span></div>
+            </td>
+            <td class="duration">0:00:59</td>
+            <td class="date-col local-date" data-utc="2026-06-09T12:30:08+00:00">June 9, 2026<br>08:30 a.m.</td>
+          </tr><tr data-duration="963" data-published="2026-06-09T13:00:13+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=X_bA_1Rs0QA" target="_blank" rel="noopener">Breaking and Glitching Slay The Spire 2 With Just 5 Relics</a>
+              <div><span class="channel-tag">Kilroy Was Here</span></div>
+            </td>
+            <td class="duration">0:16:03</td>
+            <td class="date-col local-date" data-utc="2026-06-09T13:00:13+00:00">June 9, 2026<br>09:00 a.m.</td>
+          </tr><tr data-duration="52" data-published="2026-06-09T15:09:01+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=DoJmD0pMkL0" target="_blank" rel="noopener">Deltarune Chapter 5 TRAILER REACTION</a>
+              <div><span class="channel-tag">CiblesGD</span></div>
+            </td>
+            <td class="duration">0:00:52</td>
+            <td class="date-col local-date" data-utc="2026-06-09T15:09:01+00:00">June 9, 2026<br>11:09 a.m.</td>
+          </tr><tr data-duration="4442" data-published="2026-06-09T15:59:29+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=bZEfqc-Szb4" target="_blank" rel="noopener">Deltarune... Today? - Nintendo Direct Reaction</a>
+              <div><span class="channel-tag">CiblesGD</span></div>
+            </td>
+            <td class="duration">1:14:02</td>
+            <td class="date-col local-date" data-utc="2026-06-09T15:59:29+00:00">June 9, 2026<br>11:59 a.m.</td>
+          </tr><tr data-duration="6662" data-published="2026-06-09T16:03:11+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=xuuQxOv_LLU" target="_blank" rel="noopener">Watching Nintendo's Huge Game Announcements</a>
+              <div><span class="channel-tag">PointCrow</span></div>
+            </td>
+            <td class="duration">1:51:02</td>
+            <td class="date-col local-date" data-utc="2026-06-09T16:03:11+00:00">June 9, 2026<br>12:03 p.m.</td>
+          </tr><tr data-duration="6459" data-published="2026-06-09T17:00:06+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=5qwtFiEAgjs" target="_blank" rel="noopener">I am not James Bond: Let's Play All of 007 First Light - Part 2</a>
+              <div><span class="channel-tag">RTGame</span></div>
+            </td>
+            <td class="duration">1:47:39</td>
+            <td class="date-col local-date" data-utc="2026-06-09T17:00:06+00:00">June 9, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="1594" data-published="2026-06-09T17:00:38+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=POwLMzUMhKk" target="_blank" rel="noopener">Crappy Design #7</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">0:26:34</td>
+            <td class="date-col local-date" data-utc="2026-06-09T17:00:38+00:00">June 9, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="67" data-published="2026-06-09T17:46:22+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=DLHkwhQJdFU" target="_blank" rel="noopener">First Reaction to Ocarina of Time Remake Announcement!</a>
+              <div><span class="channel-tag">Linkus7</span></div>
+            </td>
+            <td class="duration">0:01:07</td>
+            <td class="date-col local-date" data-utc="2026-06-09T17:46:22+00:00">June 9, 2026<br>01:46 p.m.</td>
+          </tr><tr data-duration="487" data-published="2026-06-09T18:20:03+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=b8WxMHm0EK4" target="_blank" rel="noopener">Hardcore Minecraft just lost cheats.</a>
+              <div><span class="channel-tag">Phoenix SC</span></div>
+            </td>
+            <td class="duration">0:08:07</td>
+            <td class="date-col local-date" data-utc="2026-06-09T18:20:03+00:00">June 9, 2026<br>02:20 p.m.</td>
+          </tr><tr data-duration="92" data-published="2026-06-09T18:40:07+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=mO8pKHJcoAc" target="_blank" rel="noopener">nametags,  for nameless people</a>
+              <div><span class="channel-tag">bill wurtz</span></div>
+            </td>
+            <td class="duration">0:01:32</td>
+            <td class="date-col local-date" data-utc="2026-06-09T18:40:07+00:00">June 9, 2026<br>02:40 p.m.</td>
+          </tr><tr data-duration="48" data-published="2026-06-09T20:00:20+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=cFX1IKwesYE" target="_blank" rel="noopener">USELESS FACTS About The CreateMod #minecraft #createmod</a>
+              <div><span class="channel-tag">Dejojotheawsome</span></div>
+            </td>
+            <td class="duration">0:00:48</td>
+            <td class="date-col local-date" data-utc="2026-06-09T20:00:20+00:00">June 9, 2026<br>04:00 p.m.</td>
+          </tr><tr data-duration="890" data-published="2026-06-09T20:56:18+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=RlFQBmOaOzk" target="_blank" rel="noopener">He Thought It Was His Time</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:14:50</td>
+            <td class="date-col local-date" data-utc="2026-06-09T20:56:18+00:00">June 9, 2026<br>04:56 p.m.</td>
+          </tr><tr data-duration="1347" data-published="2026-06-09T21:42:09+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=bth1U740lFU" target="_blank" rel="noopener">pointcrow reacts to the new nintendo direct</a>
+              <div><span class="channel-tag">CrowPoint</span></div>
+            </td>
+            <td class="duration">0:22:27</td>
+            <td class="date-col local-date" data-utc="2026-06-09T21:42:09+00:00">June 9, 2026<br>05:42 p.m.</td>
+          </tr><tr data-duration="114" data-published="2026-06-09T22:03:31+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=ZEBYrtNXfaM" target="_blank" rel="noopener">Who Hired the Dark Brotherhood Against You in Skyrim?</a>
+              <div><span class="channel-tag">EpicNate</span></div>
+            </td>
+            <td class="duration">0:01:54</td>
+            <td class="date-col local-date" data-utc="2026-06-09T22:03:31+00:00">June 9, 2026<br>06:03 p.m.</td>
+          </tr><tr data-duration="134" data-published="2026-06-09T22:19:51+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=Wy6csbVuZiI" target="_blank" rel="noopener">I didn't expect this, and neither did you??</a>
+              <div><span class="channel-tag">PointCrow</span></div>
+            </td>
+            <td class="duration">0:02:14</td>
+            <td class="date-col local-date" data-utc="2026-06-09T22:19:51+00:00">June 9, 2026<br>06:19 p.m.</td>
+          </tr><tr data-duration="913" data-published="2026-06-09T23:19:04+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=FAZdG6D20SM" target="_blank" rel="noopener">The doohickeys are evolving</a>
+              <div><span class="channel-tag">Berd</span></div>
+            </td>
+            <td class="duration">0:15:13</td>
+            <td class="date-col local-date" data-utc="2026-06-09T23:19:04+00:00">June 9, 2026<br>07:19 p.m.</td>
+          </tr><tr data-duration="4354" data-published="2026-06-10T00:00:03+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=MAnkzoYy-PM" target="_blank" rel="noopener">Minecraft E2ernal Ep. 18 - Eye Quest</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:12:34</td>
+            <td class="date-col local-date" data-utc="2026-06-10T00:00:03+00:00">June 9, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="19" data-published="2026-06-10T12:00:07+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=_IXB-hFgijE" target="_blank" rel="noopener">How could X33N do this</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">0:00:19</td>
+            <td class="date-col local-date" data-utc="2026-06-10T12:00:07+00:00">June 10, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="70" data-published="2026-06-10T12:00:34+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=mkx4Syr7Zfg" target="_blank" rel="noopener">Inscryption's Fastest Run Ever Uses its WORST Deck</a>
+              <div><span class="channel-tag">Seanie Dew</span></div>
+            </td>
+            <td class="duration">0:01:10</td>
+            <td class="date-col local-date" data-utc="2026-06-10T12:00:34+00:00">June 10, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="27" data-published="2026-06-10T14:00:00+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=Dlwdih4aevE" target="_blank" rel="noopener">Ellie Minibot &amp; Neuro Largebot chatting</a>
+              <div><span class="channel-tag">Neuro-sama</span></div>
+            </td>
+            <td class="duration">0:00:27</td>
+            <td class="date-col local-date" data-utc="2026-06-10T14:00:00+00:00">June 10, 2026<br>10:00 a.m.</td>
+          </tr><tr data-duration="28" data-published="2026-06-10T14:00:28+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=lP4mmLXq-Pg" target="_blank" rel="noopener">HARDCORE DELTARUNE</a>
+              <div><span class="channel-tag">CiblesGD</span></div>
+            </td>
+            <td class="duration">0:00:28</td>
+            <td class="date-col local-date" data-utc="2026-06-10T14:00:28+00:00">June 10, 2026<br>10:00 a.m.</td>
+          </tr><tr data-duration="300" data-published="2026-06-10T15:00:16+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=ozHF7_62mG4" target="_blank" rel="noopener">If you lose, you get burned at the stake</a>
+              <div><span class="channel-tag">DougDoug Clips</span></div>
+            </td>
+            <td class="duration">0:05:00</td>
+            <td class="date-col local-date" data-utc="2026-06-10T15:00:16+00:00">June 10, 2026<br>11:00 a.m.</td>
+          </tr><tr data-duration="40" data-published="2026-06-10T16:00:33+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=ZFNmn-laVm0" target="_blank" rel="noopener">The most NICHE Useless Create Mod Fact #minecraft #createmod</a>
+              <div><span class="channel-tag">Dejojotheawsome</span></div>
+            </td>
+            <td class="duration">0:00:40</td>
+            <td class="date-col local-date" data-utc="2026-06-10T16:00:33+00:00">June 10, 2026<br>12:00 p.m.</td>
+          </tr><tr data-duration="9316" data-published="2026-06-10T17:00:13+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=VsHWmx8oasA" target="_blank" rel="noopener">Minecraft: Moving Houses In The Scum SMP</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">2:35:16</td>
+            <td class="date-col local-date" data-utc="2026-06-10T17:00:13+00:00">June 10, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="37" data-published="2026-06-10T19:11:39+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=sBOBnlbh4fg" target="_blank" rel="noopener">i am a professional taxi driver :)</a>
+              <div><span class="channel-tag">Berd</span></div>
+            </td>
+            <td class="duration">0:00:37</td>
+            <td class="date-col local-date" data-utc="2026-06-10T19:11:39+00:00">June 10, 2026<br>03:11 p.m.</td>
+          </tr><tr data-duration="44" data-published="2026-06-10T20:37:45+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=1c-S4oLl6NM" target="_blank" rel="noopener">jynxing myself and turning into a red mist</a>
+              <div><span class="channel-tag">Berd</span></div>
+            </td>
+            <td class="duration">0:00:44</td>
+            <td class="date-col local-date" data-utc="2026-06-10T20:37:45+00:00">June 10, 2026<br>04:37 p.m.</td>
+          </tr><tr data-duration="6998" data-published="2026-06-10T22:05:52+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=1i6PJLSKvFs" target="_blank" rel="noopener">🔴Starting My NEW Life! | Paralives</a>
+              <div><span class="channel-tag">GTLive</span></div>
+            </td>
+            <td class="duration">1:56:38</td>
+            <td class="date-col local-date" data-utc="2026-06-10T22:05:52+00:00">June 10, 2026<br>06:05 p.m.</td>
+          </tr><tr data-duration="5974" data-published="2026-06-11T00:00:20+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=bLJRv6g5TDY" target="_blank" rel="noopener">Going To Flavor Town In Codenames</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:39:34</td>
+            <td class="date-col local-date" data-utc="2026-06-11T00:00:20+00:00">June 10, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="507" data-published="2026-06-11T00:45:04+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=Vn49Zlipvwg" target="_blank" rel="noopener">Mojang, please add 16,777,216 NEW wool blocks. For the next update.</a>
+              <div><span class="channel-tag">Phoenix SC</span></div>
+            </td>
+            <td class="duration">0:08:27</td>
+            <td class="date-col local-date" data-utc="2026-06-11T00:45:04+00:00">June 10, 2026<br>08:45 p.m.</td>
+          </tr><tr data-duration="2266" data-published="2026-06-11T13:00:09+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=kAT4KcfX1Fo" target="_blank" rel="noopener">This ISN'T the Joy of Creation but it sure feels like it</a>
+              <div><span class="channel-tag">AstralSpiff</span></div>
+            </td>
+            <td class="duration">0:37:46</td>
+            <td class="date-col local-date" data-utc="2026-06-11T13:00:09+00:00">June 11, 2026<br>09:00 a.m.</td>
+          </tr><tr data-duration="46" data-published="2026-06-11T14:00:30+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=0IhqWbnC-TI" target="_blank" rel="noopener">Deltarune Chapter 5 Trailer Reaction</a>
+              <div><span class="channel-tag">CiblesGD</span></div>
+            </td>
+            <td class="duration">0:00:46</td>
+            <td class="date-col local-date" data-utc="2026-06-11T14:00:30+00:00">June 11, 2026<br>10:00 a.m.</td>
+          </tr><tr data-duration="52" data-published="2026-06-11T15:42:32+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=apCsShl1cMI" target="_blank" rel="noopener">can I knock you up real quick</a>
+              <div><span class="channel-tag">CrowPoint</span></div>
+            </td>
+            <td class="duration">0:00:52</td>
+            <td class="date-col local-date" data-utc="2026-06-11T15:42:32+00:00">June 11, 2026<br>11:42 a.m.</td>
+          </tr><tr data-duration="27" data-published="2026-06-11T16:00:28+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=xWpdZNFGDvg" target="_blank" rel="noopener">How to Add SO MANY New Features To Create</a>
+              <div><span class="channel-tag">Dejojotheawsome</span></div>
+            </td>
+            <td class="duration">0:00:27</td>
+            <td class="date-col local-date" data-utc="2026-06-11T16:00:28+00:00">June 11, 2026<br>12:00 p.m.</td>
+          </tr><tr data-duration="9548" data-published="2026-06-11T17:00:23+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=13MA1XDvFIM" target="_blank" rel="noopener">Exploiting On The Lifesteal SMP (#1)</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">2:39:08</td>
+            <td class="date-col local-date" data-utc="2026-06-11T17:00:23+00:00">June 11, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="1422" data-published="2026-06-11T18:00:19+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=UZHET8IqeyQ" target="_blank" rel="noopener">I played Fireboy &amp; Watergirl, alone, by myself</a>
+              <div><span class="channel-tag">Rin Penrose Ch. and Snebby</span></div>
+            </td>
+            <td class="duration">0:23:42</td>
+            <td class="date-col local-date" data-utc="2026-06-11T18:00:19+00:00">June 11, 2026<br>02:00 p.m.</td>
+          </tr><tr data-duration="1330" data-published="2026-06-11T18:25:58+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=-xU4PeHaNwA" target="_blank" rel="noopener">A Bunch of People Scream About the Nintendo Direct</a>
+              <div><span class="channel-tag">Shenpai</span></div>
+            </td>
+            <td class="duration">0:22:10</td>
+            <td class="date-col local-date" data-utc="2026-06-11T18:25:58+00:00">June 11, 2026<br>02:25 p.m.</td>
+          </tr><tr data-duration="34" data-published="2026-06-11T19:14:52+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=49VW7OxJUXU" target="_blank" rel="noopener">when we finally fixed THE DOOHICKEY</a>
+              <div><span class="channel-tag">Berd</span></div>
+            </td>
+            <td class="duration">0:00:34</td>
+            <td class="date-col local-date" data-utc="2026-06-11T19:14:52+00:00">June 11, 2026<br>03:14 p.m.</td>
+          </tr><tr data-duration="108" data-published="2026-06-11T19:30:48+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=JWUv9YcczcA" target="_blank" rel="noopener">launching captainsparklez like a ROCKET</a>
+              <div><span class="channel-tag">Berd</span></div>
+            </td>
+            <td class="duration">0:01:48</td>
+            <td class="date-col local-date" data-utc="2026-06-11T19:30:48+00:00">June 11, 2026<br>03:30 p.m.</td>
+          </tr><tr data-duration="904" data-published="2026-06-11T20:59:44+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=Id-V-iKGTRM" target="_blank" rel="noopener">She Met Her Match</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:15:04</td>
+            <td class="date-col local-date" data-utc="2026-06-11T20:59:44+00:00">June 11, 2026<br>04:59 p.m.</td>
+          </tr><tr data-duration="4756" data-published="2026-06-12T00:00:36+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=rC6-3HAYsjc" target="_blank" rel="noopener">Minecraft E2ernal Ep. 19 - The Catacombs</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:19:16</td>
+            <td class="date-col local-date" data-utc="2026-06-12T00:00:36+00:00">June 11, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="32" data-published="2026-06-12T03:20:03+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=XbKmJZLQ2Q0" target="_blank" rel="noopener">This video is colourful.</a>
+              <div><span class="channel-tag">Phoenix SC</span></div>
+            </td>
+            <td class="duration">0:00:32</td>
+            <td class="date-col local-date" data-utc="2026-06-12T03:20:03+00:00">June 11, 2026<br>11:20 p.m.</td>
+          </tr><tr data-duration="59" data-published="2026-06-12T12:00:29+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=zT_qOiH5P3c" target="_blank" rel="noopener">How Fast Can 2 Players Speedrun Cuphead?</a>
+              <div><span class="channel-tag">Seanie Dew</span></div>
+            </td>
+            <td class="duration">0:00:59</td>
+            <td class="date-col local-date" data-utc="2026-06-12T12:00:29+00:00">June 12, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="26" data-published="2026-06-12T14:00:12+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=V7Bcw8-G2cI" target="_blank" rel="noopener">Evil A.I. Commits Tax Fraud?? Based??</a>
+              <div><span class="channel-tag">Neuro-sama</span></div>
+            </td>
+            <td class="duration">0:00:26</td>
+            <td class="date-col local-date" data-utc="2026-06-12T14:00:12+00:00">June 12, 2026<br>10:00 a.m.</td>
+          </tr><tr data-duration="40" data-published="2026-06-12T14:00:20+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=lFTpfmUz3FM" target="_blank" rel="noopener">Undertale Repainted</a>
+              <div><span class="channel-tag">CiblesGD</span></div>
+            </td>
+            <td class="duration">0:00:40</td>
+            <td class="date-col local-date" data-utc="2026-06-12T14:00:20+00:00">June 12, 2026<br>10:00 a.m.</td>
+          </tr><tr data-duration="1236" data-published="2026-06-12T15:21:36+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=Mo2Wjn7oJqY" target="_blank" rel="noopener">Can my chat gamble on complete strangers?</a>
+              <div><span class="channel-tag">DougDoug Clips</span></div>
+            </td>
+            <td class="duration">0:20:36</td>
+            <td class="date-col local-date" data-utc="2026-06-12T15:21:36+00:00">June 12, 2026<br>11:21 a.m.</td>
+          </tr><tr data-duration="25" data-published="2026-06-12T16:00:15+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=XzeuiOzP3CY" target="_blank" rel="noopener">You NEED This Train Addon For Create Mod #createmod #minecraft</a>
+              <div><span class="channel-tag">Dejojotheawsome</span></div>
+            </td>
+            <td class="duration">0:00:25</td>
+            <td class="date-col local-date" data-utc="2026-06-12T16:00:15+00:00">June 12, 2026<br>12:00 p.m.</td>
+          </tr><tr data-duration="13" data-published="2026-06-12T16:00:22+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=fQC1jyX2HI4" target="_blank" rel="noopener">The Fated Pair 💕</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:00:13</td>
+            <td class="date-col local-date" data-utc="2026-06-12T16:00:22+00:00">June 12, 2026<br>12:00 p.m.</td>
+          </tr><tr data-duration="6887" data-published="2026-06-12T17:00:33+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=CCNXFso77Ws" target="_blank" rel="noopener">I am not James Bond: Let's Play All of 007 First Light - Part 3 (The End)</a>
+              <div><span class="channel-tag">RTGame</span></div>
+            </td>
+            <td class="duration">1:54:47</td>
+            <td class="date-col local-date" data-utc="2026-06-12T17:00:33+00:00">June 12, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="6545" data-published="2026-06-12T17:00:35+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=Lap4YK9ucU8" target="_blank" rel="noopener">Getting Nerfed On The Lifesteal SMP (#2)</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:49:05</td>
+            <td class="date-col local-date" data-utc="2026-06-12T17:00:35+00:00">June 12, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="45" data-published="2026-06-12T18:00:10+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=OFIOQ5RpVzk" target="_blank" rel="noopener">So YouTube just made a HUGE Mistake...</a>
+              <div><span class="channel-tag">Seanie Dew</span></div>
+            </td>
+            <td class="duration">0:00:45</td>
+            <td class="date-col local-date" data-utc="2026-06-12T18:00:10+00:00">June 12, 2026<br>02:00 p.m.</td>
+          </tr><tr data-duration="8" data-published="2026-06-12T18:04:38+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=3p1OedCrFpc" target="_blank" rel="noopener">Slow motion stream jump!</a>
+              <div><span class="channel-tag">Paddy</span></div>
+            </td>
+            <td class="duration">0:00:08</td>
+            <td class="date-col local-date" data-utc="2026-06-12T18:04:38+00:00">June 12, 2026<br>02:04 p.m.</td>
+          </tr><tr data-duration="7735" data-published="2026-06-12T18:39:08+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=ZeKrscziR6g" target="_blank" rel="noopener">The Skurmodachi Life Supercut</a>
+              <div><span class="channel-tag">Skurry</span></div>
+            </td>
+            <td class="duration">2:08:55</td>
+            <td class="date-col local-date" data-utc="2026-06-12T18:39:08+00:00">June 12, 2026<br>02:39 p.m.</td>
+          </tr><tr data-duration="17" data-published="2026-06-12T19:00:36+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=qadFRr0vRBY" target="_blank" rel="noopener">The Ultimate Travel Goals 🌎</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:00:17</td>
+            <td class="date-col local-date" data-utc="2026-06-12T19:00:36+00:00">June 12, 2026<br>03:00 p.m.</td>
+          </tr><tr data-duration="3977" data-published="2026-06-12T22:00:33+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=c0jfk9KJa2w" target="_blank" rel="noopener">Silksong Bosses Ranked Objectively</a>
+              <div><span class="channel-tag">mossbag</span></div>
+            </td>
+            <td class="duration">1:06:17</td>
+            <td class="date-col local-date" data-utc="2026-06-12T22:00:33+00:00">June 12, 2026<br>06:00 p.m.</td>
+          </tr><tr data-duration="6207" data-published="2026-06-13T00:00:37+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=v8GQw3rUsqA" target="_blank" rel="noopener">Minecraft: Crashing Planes In The Scum SMP</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:43:27</td>
+            <td class="date-col local-date" data-utc="2026-06-13T00:00:37+00:00">June 12, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="33" data-published="2026-06-13T03:20:09+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=dVTwMuel4yE" target="_blank" rel="noopener">Sulfur Cube mob spawners are incredible.</a>
+              <div><span class="channel-tag">Phoenix SC</span></div>
+            </td>
+            <td class="duration">0:00:33</td>
+            <td class="date-col local-date" data-utc="2026-06-13T03:20:09+00:00">June 12, 2026<br>11:20 p.m.</td>
+          </tr><tr data-duration="27" data-published="2026-06-13T12:00:36+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=KYeXX6Dfojc" target="_blank" rel="noopener">Nice poopy</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">0:00:27</td>
+            <td class="date-col local-date" data-utc="2026-06-13T12:00:36+00:00">June 13, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="27" data-published="2026-06-13T13:00:18+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=A5VoYMGTKZk" target="_blank" rel="noopener">Stealing Silksong's Cradle Map</a>
+              <div><span class="channel-tag">Kilroy Was Here</span></div>
+            </td>
+            <td class="duration">0:00:27</td>
+            <td class="date-col local-date" data-utc="2026-06-13T13:00:18+00:00">June 13, 2026<br>09:00 a.m.</td>
+          </tr><tr data-duration="1760" data-published="2026-06-13T14:00:24+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=8iLLkZ_yhdc" target="_blank" rel="noopener">This Game is PERFECT for Evil A.I.</a>
+              <div><span class="channel-tag">Neuro-sama</span></div>
+            </td>
+            <td class="duration">0:29:20</td>
+            <td class="date-col local-date" data-utc="2026-06-13T14:00:24+00:00">June 13, 2026<br>10:00 a.m.</td>
+          </tr><tr data-duration="1939" data-published="2026-06-13T16:15:34+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=iROHHoDLNv4" target="_blank" rel="noopener">The BEST Horror Mod I Have Ever Played!</a>
+              <div><span class="channel-tag">Dejojotheawsome</span></div>
+            </td>
+            <td class="duration">0:32:19</td>
+            <td class="date-col local-date" data-utc="2026-06-13T16:15:34+00:00">June 13, 2026<br>12:15 p.m.</td>
+          </tr><tr data-duration="1346" data-published="2026-06-13T17:00:19+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=j16ldOWRkCY" target="_blank" rel="noopener">How a vibrating Thwomp makes it possible to detect if Mario ate a power up in Mario Maker.</a>
+              <div><span class="channel-tag">Ceave Gaming</span></div>
+            </td>
+            <td class="duration">0:22:26</td>
+            <td class="date-col local-date" data-utc="2026-06-13T17:00:19+00:00">June 13, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="4656" data-published="2026-06-13T17:00:27+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=Oo_XJ9v2joA" target="_blank" rel="noopener">Minecraft E2ernal Ep. 19.5 - Drygmying</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:17:36</td>
+            <td class="date-col local-date" data-utc="2026-06-13T17:00:27+00:00">June 13, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="903" data-published="2026-06-13T21:00:25+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=08-qTBX4cAU" target="_blank" rel="noopener">World's Weirdest Job</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:15:03</td>
+            <td class="date-col local-date" data-utc="2026-06-13T21:00:25+00:00">June 13, 2026<br>05:00 p.m.</td>
+          </tr><tr data-duration="4996" data-published="2026-06-13T21:23:24+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=HlGGI0Yy1vI" target="_blank" rel="noopener">Deltarune SOULBLAZERS</a>
+              <div><span class="channel-tag">CiblesGD</span></div>
+            </td>
+            <td class="duration">1:23:16</td>
+            <td class="date-col local-date" data-utc="2026-06-13T21:23:24+00:00">June 13, 2026<br>05:23 p.m.</td>
+          </tr><tr data-duration="767" data-published="2026-06-13T21:44:37+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=nXpCyX9yMZQ" target="_blank" rel="noopener">lethal gnomepany</a>
+              <div><span class="channel-tag">Berd</span></div>
+            </td>
+            <td class="duration">0:12:47</td>
+            <td class="date-col local-date" data-utc="2026-06-13T21:44:37+00:00">June 13, 2026<br>05:44 p.m.</td>
+          </tr><tr data-duration="103" data-published="2026-06-13T21:47:49+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=seQ6QlsRIHw" target="_blank" rel="noopener">Fallout's Smartest Mutants (not really)</a>
+              <div><span class="channel-tag">EpicNate</span></div>
+            </td>
+            <td class="duration">0:01:43</td>
+            <td class="date-col local-date" data-utc="2026-06-13T21:47:49+00:00">June 13, 2026<br>05:47 p.m.</td>
+          </tr><tr data-duration="7888" data-published="2026-06-14T00:00:04+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=enysl-0uaW4" target="_blank" rel="noopener">Going To The Beach In GeoGuessr</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">2:11:28</td>
+            <td class="date-col local-date" data-utc="2026-06-14T00:00:04+00:00">June 13, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="637" data-published="2026-06-14T02:11:06+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=oKhc3m2X9Co" target="_blank" rel="noopener">He Ruined My Create Aeronautics Battle Bot</a>
+              <div><span class="channel-tag">techtrixplays</span></div>
+            </td>
+            <td class="duration">0:10:37</td>
+            <td class="date-col local-date" data-utc="2026-06-14T02:11:06+00:00">June 13, 2026<br>10:11 p.m.</td>
+          </tr><tr data-duration="9" data-published="2026-06-14T05:00:00+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=JyJcVVtPtfM" target="_blank" rel="noopener">100% effort, 0% impact 🏌️&zwj;♂️</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:00:09</td>
+            <td class="date-col local-date" data-utc="2026-06-14T05:00:00+00:00">June 14, 2026<br>01:00 a.m.</td>
+          </tr><tr data-duration="61" data-published="2026-06-14T12:00:31+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=U5iDjGPL8qc" target="_blank" rel="noopener">Why This TABS Unit is Absolutely Worthless</a>
+              <div><span class="channel-tag">Seanie Dew</span></div>
+            </td>
+            <td class="duration">0:01:01</td>
+            <td class="date-col local-date" data-utc="2026-06-14T12:00:31+00:00">June 14, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="12" data-published="2026-06-14T12:00:40+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=adrjWI4RkDU" target="_blank" rel="noopener">Apotheosis at home</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">0:00:12</td>
+            <td class="date-col local-date" data-utc="2026-06-14T12:00:40+00:00">June 14, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="53" data-published="2026-06-14T13:00:04+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=EqcdfSaCB7Q" target="_blank" rel="noopener">Double Your Rosaries With The Snitch Pick</a>
+              <div><span class="channel-tag">Kilroy Was Here</span></div>
+            </td>
+            <td class="duration">0:00:53</td>
+            <td class="date-col local-date" data-utc="2026-06-14T13:00:04+00:00">June 14, 2026<br>09:00 a.m.</td>
+          </tr><tr data-duration="15" data-published="2026-06-14T14:00:39+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=u1doVN4E4es" target="_blank" rel="noopener">Neuro Experiences The Average Twitch Bitrate</a>
+              <div><span class="channel-tag">Neuro-sama</span></div>
+            </td>
+            <td class="duration">0:00:15</td>
+            <td class="date-col local-date" data-utc="2026-06-14T14:00:39+00:00">June 14, 2026<br>10:00 a.m.</td>
+          </tr><tr data-duration="1562" data-published="2026-06-14T15:00:39+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=1Ihs8nEYjgo" target="_blank" rel="noopener">How Many Trees Are In Undertale?</a>
+              <div><span class="channel-tag">CiblesGD</span></div>
+            </td>
+            <td class="duration">0:26:02</td>
+            <td class="date-col local-date" data-utc="2026-06-14T15:00:39+00:00">June 14, 2026<br>11:00 a.m.</td>
+          </tr><tr data-duration="14" data-published="2026-06-14T16:00:39+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=oxsdqpqkRjc" target="_blank" rel="noopener">Free Will at the Scrapyard 🚙🛹</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:00:14</td>
+            <td class="date-col local-date" data-utc="2026-06-14T16:00:39+00:00">June 14, 2026<br>12:00 p.m.</td>
+          </tr><tr data-duration="126" data-published="2026-06-14T16:16:29+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=jBqhMvuEOII" target="_blank" rel="noopener">FLYING A PLANE THROUGH NOPEIFY'S HOUSE</a>
+              <div><span class="channel-tag">Berd</span></div>
+            </td>
+            <td class="duration">0:02:06</td>
+            <td class="date-col local-date" data-utc="2026-06-14T16:16:29+00:00">June 14, 2026<br>12:16 p.m.</td>
+          </tr><tr data-duration="9883" data-published="2026-06-14T17:00:04+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=7HtLU0Gl6Dw" target="_blank" rel="noopener">The Lifesteal SMP Scavenger Hunt (#3)</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">2:44:43</td>
+            <td class="date-col local-date" data-utc="2026-06-14T17:00:04+00:00">June 14, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="1876" data-published="2026-06-14T18:00:02+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=n5MTY74onOM" target="_blank" rel="noopener">Let's get fired from Papa's Mocharia</a>
+              <div><span class="channel-tag">Rin Penrose Ch. and Snebby</span></div>
+            </td>
+            <td class="duration">0:31:16</td>
+            <td class="date-col local-date" data-utc="2026-06-14T18:00:02+00:00">June 14, 2026<br>02:00 p.m.</td>
+          </tr><tr data-duration="12" data-published="2026-06-14T18:36:49+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=JNTUdEn8oGw" target="_blank" rel="noopener">it's normal for it to feel like heartburn on the way out</a>
+              <div><span class="channel-tag">Berd</span></div>
+            </td>
+            <td class="duration">0:00:12</td>
+            <td class="date-col local-date" data-utc="2026-06-14T18:36:49+00:00">June 14, 2026<br>02:36 p.m.</td>
+          </tr><tr data-duration="1767" data-published="2026-06-14T22:06:27+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=UtsWfAxLttU" target="_blank" rel="noopener">Let's kill him.</a>
+              <div><span class="channel-tag">Failboat</span></div>
+            </td>
+            <td class="duration">0:29:27</td>
+            <td class="date-col local-date" data-utc="2026-06-14T22:06:27+00:00">June 14, 2026<br>06:06 p.m.</td>
+          </tr><tr data-duration="1669" data-published="2026-06-15T00:00:05+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=KiNhFvzAYqc" target="_blank" rel="noopener">Dashcams #4</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">0:27:49</td>
+            <td class="date-col local-date" data-utc="2026-06-15T00:00:05+00:00">June 14, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="577" data-published="2026-06-15T00:30:11+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=yKAFdEc87NM" target="_blank" rel="noopener">Hmmmmmmmm... 𝖘𝖕𝖔𝖓𝖌𝖊...</a>
+              <div><span class="channel-tag">Phoenix SC</span></div>
+            </td>
+            <td class="duration">0:09:37</td>
+            <td class="date-col local-date" data-utc="2026-06-15T00:30:11+00:00">June 14, 2026<br>08:30 p.m.</td>
+          </tr><tr data-duration="1364" data-published="2026-06-15T02:59:04+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=xJP67dh-wWo" target="_blank" rel="noopener">Reacting to a bunch of game trailers I'm excited for</a>
+              <div><span class="channel-tag">AstralSpiff Extras</span></div>
+            </td>
+            <td class="duration">0:22:44</td>
+            <td class="date-col local-date" data-utc="2026-06-15T02:59:04+00:00">June 14, 2026<br>10:59 p.m.</td>
+          </tr><tr data-duration="626" data-published="2026-06-15T15:00:03+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=Oz1LLsVFAXE" target="_blank" rel="noopener">I let my viewers turn my stream into Mario</a>
+              <div><span class="channel-tag">DougDoug Clips</span></div>
+            </td>
+            <td class="duration">0:10:26</td>
+            <td class="date-col local-date" data-utc="2026-06-15T15:00:03+00:00">June 15, 2026<br>11:00 a.m.</td>
+          </tr><tr data-duration="12" data-published="2026-06-15T16:00:04+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=f8aUqdu-FRU" target="_blank" rel="noopener">Soccer on Extra Hard Mode ⚽️</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:00:12</td>
+            <td class="date-col local-date" data-utc="2026-06-15T16:00:04+00:00">June 15, 2026<br>12:00 p.m.</td>
+          </tr><tr data-duration="5006" data-published="2026-06-15T17:00:13+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=TwKSL7Gtc20" target="_blank" rel="noopener">Minecraft E2ernal Ep. 20 - Rat God</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:23:26</td>
+            <td class="date-col local-date" data-utc="2026-06-15T17:00:13+00:00">June 15, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="1180" data-published="2026-06-15T17:00:26+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=FBuuJ_AZue8" target="_blank" rel="noopener">Killing Everyone in 007 First Light by Stupid Means</a>
+              <div><span class="channel-tag">RTGame</span></div>
+            </td>
+            <td class="duration">0:19:40</td>
+            <td class="date-col local-date" data-utc="2026-06-15T17:00:26+00:00">June 15, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="18" data-published="2026-06-15T19:00:37+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=JlFw0Txzuew" target="_blank" rel="noopener">This is the Flexibility Final Boss 🤸</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:00:18</td>
+            <td class="date-col local-date" data-utc="2026-06-15T19:00:37+00:00">June 15, 2026<br>03:00 p.m.</td>
+          </tr><tr data-duration="7886" data-published="2026-06-15T22:25:17+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=N60u0-gZA9U" target="_blank" rel="noopener">🔴There's a NEW Papa's Game?! | Papa's Mocharia Deluxe</a>
+              <div><span class="channel-tag">GTLive</span></div>
+            </td>
+            <td class="duration">2:11:26</td>
+            <td class="date-col local-date" data-utc="2026-06-15T22:25:17+00:00">June 15, 2026<br>06:25 p.m.</td>
+          </tr><tr data-duration="1741" data-published="2026-06-16T00:00:28+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=xgtfWt4YVhs" target="_blank" rel="noopener">The Story Behind The Mr. Beast "YouTube Legends" Video</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">0:29:01</td>
+            <td class="date-col local-date" data-utc="2026-06-16T00:00:28+00:00">June 15, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="334" data-published="2026-06-16T02:22:06+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=KmzZ1lDcdqg" target="_blank" rel="noopener">We Added Ragdolls to Create Aeronautics</a>
+              <div><span class="channel-tag">techtrixplays</span></div>
+            </td>
+            <td class="duration">0:05:34</td>
+            <td class="date-col local-date" data-utc="2026-06-16T02:22:06+00:00">June 15, 2026<br>10:22 p.m.</td>
+          </tr><tr data-duration="31" data-published="2026-06-16T04:35:02+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=cFHZ4X9SmOE" target="_blank" rel="noopener">A Sulfur Cube with a Mob Spawner with a sulfur cube with a mob spawner with a sulfur cube with a...</a>
+              <div><span class="channel-tag">Phoenix SC</span></div>
+            </td>
+            <td class="duration">0:00:31</td>
+            <td class="date-col local-date" data-utc="2026-06-16T04:35:02+00:00">June 16, 2026<br>12:35 a.m.</td>
+          </tr><tr data-duration="45" data-published="2026-06-16T12:00:04+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=hsrLxopYG0k" target="_blank" rel="noopener">How This Lantern Gives You One of Grounded's Hardest Achievements</a>
+              <div><span class="channel-tag">Seanie Dew</span></div>
+            </td>
+            <td class="duration">0:00:45</td>
+            <td class="date-col local-date" data-utc="2026-06-16T12:00:04+00:00">June 16, 2026<br>08:00 a.m.</td>
+          </tr><tr data-duration="1128" data-published="2026-06-16T13:00:15+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=X1xMZkxSpaE" target="_blank" rel="noopener">10 MORE Enemy Secrets In Silksong You ᵖʳᵒᵇᵃᵇˡʸ Didn't Know</a>
+              <div><span class="channel-tag">Kilroy Was Here</span></div>
+            </td>
+            <td class="duration">0:18:48</td>
+            <td class="date-col local-date" data-utc="2026-06-16T13:00:15+00:00">June 16, 2026<br>09:00 a.m.</td>
+          </tr><tr data-duration="28" data-published="2026-06-16T14:00:05+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=RjPM18p9B0s" target="_blank" rel="noopener">L + Ratio + Bald</a>
+              <div><span class="channel-tag">Neuro-sama</span></div>
+            </td>
+            <td class="duration">0:00:28</td>
+            <td class="date-col local-date" data-utc="2026-06-16T14:00:05+00:00">June 16, 2026<br>10:00 a.m.</td>
+          </tr><tr data-duration="11372" data-published="2026-06-16T17:00:12+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=4awIvUoQeqE" target="_blank" rel="noopener">I Played 100% of Forbidden Solitaire</a>
+              <div><span class="channel-tag">Fir Unlisted</span></div>
+            </td>
+            <td class="duration">3:09:32</td>
+            <td class="date-col local-date" data-utc="2026-06-16T17:00:12+00:00">June 16, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="4511" data-published="2026-06-16T17:00:16+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=e8E1w2fCDco" target="_blank" rel="noopener">Minecraft E2ernal Ep. 21 - Getting Lasered</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:15:11</td>
+            <td class="date-col local-date" data-utc="2026-06-16T17:00:16+00:00">June 16, 2026<br>01:00 p.m.</td>
+          </tr><tr data-duration="908" data-published="2026-06-16T20:57:10+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=mA7IPf8cjW4" target="_blank" rel="noopener">Worst Way To Apply For A Job</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:15:08</td>
+            <td class="date-col local-date" data-utc="2026-06-16T20:57:10+00:00">June 16, 2026<br>04:57 p.m.</td>
+          </tr><tr data-duration="1358" data-published="2026-06-16T21:04:05+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=AGlNeGBlO-0" target="_blank" rel="noopener">Introducing Plates: the newest Twitch Meta</a>
+              <div><span class="channel-tag">DougDougDoug</span></div>
+            </td>
+            <td class="duration">0:22:38</td>
+            <td class="date-col local-date" data-utc="2026-06-16T21:04:05+00:00">June 16, 2026<br>05:04 p.m.</td>
+          </tr><tr data-duration="6322" data-published="2026-06-17T00:00:39+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=kICSBoxGj1M" target="_blank" rel="noopener">Minecraft: Flying Blimps In The Scum SMP</a>
+              <div><span class="channel-tag">CaptainSparklez 2</span></div>
+            </td>
+            <td class="duration">1:45:22</td>
+            <td class="date-col local-date" data-utc="2026-06-17T00:00:39+00:00">June 16, 2026<br>08:00 p.m.</td>
+          </tr><tr data-duration="368" data-published="2026-06-17T03:40:09+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=RkvT1KH2gq8" target="_blank" rel="noopener">Sulfur Cube + Spear Boat = DEADLY WEAPON.</a>
+              <div><span class="channel-tag">Phoenix SC</span></div>
+            </td>
+            <td class="duration">0:06:08</td>
+            <td class="date-col local-date" data-utc="2026-06-17T03:40:09+00:00">June 16, 2026<br>11:40 p.m.</td>
+          </tr><tr data-duration="29" data-published="2026-06-17T05:00:18+00:00">
+            <td class="video-title">
+              <!--
+                Link directly to the YouTube video.
+                v.video_id is the short ID like "dQw4w9WgXcQ".
+              -->
+              <a href="https://www.youtube.com/watch?v=vZPz-ODX7yg" target="_blank" rel="noopener">Juggling is a Contact Sport now 🤹</a>
+              <div><span class="channel-tag">Daily Dose Of Internet</span></div>
+            </td>
+            <td class="duration">0:00:29</td>
+            <td class="date-col local-date" data-utc="2026-06-17T05:00:18+00:00">June 17, 2026<br>01:00 a.m.</td>
+          </tr></tbody>
+      </table>
+      
+    </div>
+
+  </div>
+</div>
+
+<!-- Backfill confirmation dialog -->
+<div class="overlay" id="backfill_overlay">
+  <div class="dialog">
+    <h3>Backfill older videos?</h3>
+    <p id="backfill_msg"></p>
+    <div class="dialog-btns">
+      <button class="btn btn-secondary" onclick="cancelBackfill()">Cancel</button>
+      <form id="backfill_form" action="/settings/cutoff/confirm" method="post" style="flex:1">
+        <input type="hidden" name="cutoff_date" id="backfill_date_input">
+        <button type="submit" class="btn btn-full">Yes, backfill</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------------------
+// 1. PERSISTENT CUTOFF DATE
+//    We store the cutoff date in localStorage (browser storage that survives
+//    page reloads). When the form submits we copy it into the hidden field
+//    so Flask receives it like a normal form value.
+// ---------------------------------------------------------------------------
+
+document.getElementById('cutoff_form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  const resp = await fetch('/settings/cutoff', { method: 'POST', body: formData });
+
+  // If the server returned JSON, it means a backfill confirmation is needed
+  const contentType = resp.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    const data = await resp.json();
+    if (data.action === 'confirm_backfill') {
+      // Show the dialog with details about what will happen
+      document.getElementById('backfill_msg').textContent =
+        `Moving the cutoff from ${data.old_cutoff} to ${data.new_cutoff} will fetch ` +
+        `all videos after the new date across every tracked channel. ` +
+        `This may use significant API quota depending on how many channels you track ` +
+        `and how far back the new cutoff goes.`;
+      document.getElementById('backfill_date_input').value = data.new_cutoff;
+      document.getElementById('backfill_overlay').classList.add('visible');
+    }
+  } else {
+    // Normal redirect response — navigate to the redirected page
+    window.location.href = resp.url;
+  }
+});
+
+function cancelBackfill() {
+  document.getElementById('backfill_overlay').classList.remove('visible');
+}
+
+// Close dialog if clicking outside it
+document.getElementById('backfill_overlay').addEventListener('click', function(e) {
+  if (e.target === this) cancelBackfill();
+});
+
+// const cutoffInput   = document.getElementById('global_cutoff');
+// const cutoffHidden  = document.getElementById('cutoff_hidden');
+// const CUTOFF_KEY    = 'yt_tracker_cutoff';
+
+// // On page load, restore the saved cutoff date (if any)
+// const saved = localStorage.getItem(CUTOFF_KEY);
+// if (saved) {
+//   cutoffInput.value = saved;
+//   cutoffHidden.value = saved;
+// }
+
+// // When the user changes the date, save it and update the display
+// cutoffInput.addEventListener('change', () => {
+//   const val = cutoffInput.value;
+//   localStorage.setItem(CUTOFF_KEY, val);
+//   cutoffHidden.value = val;
+// });
+
+// // Before the form submits, make sure the hidden field is populated.
+// // Also validate that a cutoff has been set.
+// document.getElementById('add_channel_form').addEventListener('submit', e => {
+//   if (!cutoffInput.value) {
+//     e.preventDefault();
+//     alert('Please set a cutoff date before adding a channel.');
+//     cutoffInput.focus();
+//     return;
+//   }
+//   cutoffHidden.value = cutoffInput.value;
+// });
+
+// // Helper: "2024-03-15" → "15 March 2024"
+// function formatDateNice(isoDate) {
+//   // Append T00:00:00 to avoid timezone-shift issues when constructing a Date
+//   const d = new Date(isoDate + 'T00:00:00');
+//   return d.toLocaleDateString('en-CA', { day: 'numeric', month: 'long', year: 'numeric' });
+// }
+
+
+// ---------------------------------------------------------------------------
+// 2. VIDEO TABLE SORTING
+//    Each <tr> has data-duration (seconds) and data-published (ISO string).
+//    Clicking a sortable <th> sorts the tbody rows by that column.
+//    Clicking the same column again reverses the direction.
+// ---------------------------------------------------------------------------
+
+// Track current sort state: which column and which direction
+let videoSortCol = 'published';
+let videoSortDir = 'desc';  // default: newest first
+
+function sortTable(th) {
+  const col = th.dataset.col;
+
+  // If clicking the same column, flip direction; otherwise default to desc
+  if (col === videoSortCol) {
+    videoSortDir = videoSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    videoSortCol = col;
+    videoSortDir = 'desc';
+  }
+
+  // Update header styles
+  document.querySelectorAll('#video_table th.sortable').forEach(h => {
+    h.classList.remove('sort-asc', 'sort-desc');
+  });
+  th.classList.add(videoSortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+
+  // Collect rows, sort them, put them back
+  const tbody = document.getElementById('video_tbody');
+  const rows  = Array.from(tbody.querySelectorAll('tr'));
+
+  rows.sort((a, b) => {
+    let valA, valB;
+    if (col === 'duration') {
+      valA = parseInt(a.dataset.duration);
+      valB = parseInt(b.dataset.duration);
+    } else {
+      // Compare ISO strings — lexicographic order works for dates
+      valA = a.dataset.published;
+      valB = b.dataset.published;
+    }
+    if (valA < valB) return videoSortDir === 'asc' ? -1 : 1;
+    if (valA > valB) return videoSortDir === 'asc' ?  1 : -1;
+    return 0;
+  });
+
+  // Re-insert rows in sorted order
+  rows.forEach(row => tbody.appendChild(row));
+}
+
+// Apply default sort (newest first) on page load
+const publishedTh = document.querySelector('th[data-col="published"]');
+if (publishedTh) sortTable(publishedTh);
+
+
+// ---------------------------------------------------------------------------
+// 3. CHANNEL LIST SORTING
+//    The channel list alternates between Name A→Z and Date Added (oldest first).
+//    Each .channel-item has data-name (lowercased) and data-added (ISO string).
+// ---------------------------------------------------------------------------
+
+let channelSortMode = 'name';  // 'name' or 'date'
+
+function toggleChannelSort() {
+  channelSortMode = channelSortMode === 'name' ? 'date' : 'name';
+
+  const btn   = document.getElementById('channel_sort_btn');
+  const label = document.getElementById('channel_sort_label');
+
+  if (channelSortMode === 'name') {
+    label.textContent = 'Name A→Z';
+  } else {
+    label.textContent = 'Date Added';
+  }
+
+  const list  = document.getElementById('channel_list');
+  if (!list) return;
+
+  const items = Array.from(list.querySelectorAll('.channel-item'));
+  items.sort((a, b) => {
+    if (channelSortMode === 'name') {
+      return a.dataset.name.localeCompare(b.dataset.name);
+    } else {
+      // Newest first
+      return a.dataset.added > b.dataset.added ? -1 : 1;
+    }
+  });
+
+  items.forEach(item => list.appendChild(item));
+}
+
+// Apply name sort on page load
+toggleChannelSort();
+// toggleChannelSort flipped it to 'date', so flip back
+// toggleChannelSort();
+
+// Convert UTC timestamps to browser local time
+document.querySelectorAll('.local-date').forEach(el => {
+  const utc = el.dataset.utc;
+
+  const date = new Date(utc);
+
+  const datePart = date.toLocaleDateString('en-CA', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const timePart = date.toLocaleTimeString('en-CA', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  el.innerHTML = `${datePart}<br>${timePart}`;
+});
+</script>
+
+<script defer="" src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon="{&quot;version&quot;:&quot;2024.11.0&quot;,&quot;token&quot;:&quot;52992be6bc3b45e1b7abf3b1c535a2ad&quot;,&quot;r&quot;:1,&quot;server_timing&quot;:{&quot;name&quot;:{&quot;cfCacheStatus&quot;:true,&quot;cfEdge&quot;:true,&quot;cfExtPri&quot;:true,&quot;cfL4&quot;:true,&quot;cfOrigin&quot;:true,&quot;cfSpeedBrain&quot;:true},&quot;location_startswith&quot;:null}}" crossorigin="anonymous"></script>
+
+</body></html>
