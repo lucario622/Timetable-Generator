@@ -375,9 +375,9 @@ class Schedule:
             myBGColor = QColor(250,250,250)
             myLineColor = QColor(30,30,30)
         days = [
-            ["Monday", "Tuedsay", "Wednesday", "Thursday", "Friday"],
-            ["M", "T", "W", "R", "F"],
-            [1, 2, 3, 4, 5],
+            ["Monday", "Tuedsay", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+            ["M", "T", "W", "R", "F", "S", "X"],
+            [1, 2, 3, 4, 5, 6, 7],
         ]
         WIDTH = scene.width()
         HEIGHT = scene.height()
@@ -665,8 +665,8 @@ class ViewOneSchedule(QWidget):
         constructedics += "VERSION:2.0\n"
         for course in self.schedule.courses:
             for lecday in course.times.days:
-                days = ['M','T','W','R','F']
-                dayscodes = ['MO','TU','WE','TH','FR']
+                days = ['M','T','W','R','F','S','X']
+                dayscodes = ['MO','TU','WE','TH','FR','SA','SU']
                 dayindex = days.index(lecday)
                 constructedics += "BEGIN:VEVENT\n"
                 
