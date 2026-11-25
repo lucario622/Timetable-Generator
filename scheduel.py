@@ -1147,6 +1147,8 @@ def fastestAddCourses(skip=False):
             with open(coursefile, "w") as f:
                 json.dump(allCoursesJSON, f)
             # exit()
+    print(len(allCourses.keys()))
+    print(f"Finished page {len(allCourses.keys())/50}")
 
 
 def fastAddCourses():

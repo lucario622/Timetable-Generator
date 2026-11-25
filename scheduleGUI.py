@@ -816,8 +816,8 @@ class SchedulePanel(QWidget):
         shortscheds_ = []
         for e in scored_list:
             neeext = False
-            for e_ in shortscheds_:
-                if e.similar(e_): neeext = True
+            # for e_ in shortscheds_:
+            #     if e.similar(e_): neeext = True
             if neeext: continue
             shortscheds.append(e.crns)
             shortscheds_.append(e)
