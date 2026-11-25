@@ -2509,7 +2509,7 @@ def main():
             coursefile = inp
             break
         if inp == "":
-            coursefile = "Winter2025.json"
+            coursefile = "Winter2027.json"
             break
         if inp[-5:] != ".json":
             inp += ".json"
